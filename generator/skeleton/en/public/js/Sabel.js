@@ -878,7 +878,7 @@ Sabel.Dom.Selector = {
 	pattern: new RegExp("^\\s*" +
 		         "([~>+])?\\s*"+ "(\\w+|\\*)?" + "(?:#(\\w+))?" +
 		         "((?:\\.\\w+)+)?" +
-		         "((?:\\[\\w+(?:[$^!~*|]?=['\"]?\\w+['\"]?)?\\])*)?" +
+		         "((?:\\[@?\\w+(?:[$^!~*|]?=['\"]?.+['\"]?)?\\])*)?" +
 		         "((?::[\\w-]+(?:\\([^\\s]+\\))?)*)"),
 
 	handlers: {
@@ -984,8 +984,8 @@ Sabel.Dom.Selector = {
 
 		attr: function(nodes, attr) {
 			var founds = new Array(), elm, i = 0;
-			var attrPattern = new RegExp("\\[(\\w+)([$^!~*|]?=)?(?:['\"]?(\\w+)['\"]?)?\\]");
-			var attrs = attr.match(/\[[^\]]+\]/g), attrRegex = new Array(), at,a;
+			var attrPattern = /\[@?(\w+)(?:([$^!~*|]?=)(['"]?)(.+?)\3)?\]/;
+			var attrs = attr.match(/\[@?(\w+)(?:([$^!~*|]?=)(['"]?)(.+?)\3)?\]/g), attrRegex = new Array(), at,a;
 
 			for (var j = 0, len = attrs.length; j < len; ++j) {
 				buf = attrPattern.exec(attrs[j]);
@@ -1006,25 +1006,25 @@ Sabel.Dom.Selector = {
 
 					switch (at[2]) {
 						case "=":
-							if (a !== at[3]) continue checkNode;
+							if (a !== at[4]) continue checkNode;
 							break;
 						case "!=":
-							if (a === at[3]) continue checkNode;
+							if (a === at[4]) continue checkNode;
 							break;
 						case "~=":
-							if ((" "+a+" ").indexOf(" "+at[3]+" ") === -1) continue checkNode;
+							if ((" "+a+" ").indexOf(" "+at[4]+" ") === -1) continue checkNode;
 							break;
 						case "^=":
-							if ((a||"").indexOf(at[3]) !== 0) continue checkNode;
+							if ((a||"").indexOf(at[4]) !== 0) continue checkNode;
 							break;
 						case "$=":
-							if ((a||"").lastIndexOf(at[3]) !== ((a||"").length - at[3].length)) continue checkNode;
+							if ((a||"").lastIndexOf(at[4]) !== ((a||"").length - at[4].length)) continue checkNode;
 							break;
 						case "*=":
-							if ((a||"").indexOf(at[3]) === -1) continue checkNode;
+							if ((a||"").indexOf(at[4]) === -1) continue checkNode;
 							break;
 						case "|=":
-							if ((a+"-").toLowerCase().indexOf((at[3]+"-").toLowerCase()) !== 0)
+							if ((a+"-").toLowerCase().indexOf((at[4]+"-").toLowerCase()) !== 0)
 								continue checkNode;
 							break;
 						default:
@@ -1195,8 +1195,7 @@ Sabel.Dom.Selector = {
 								return !className.test(elm.getAttribute(klass));
 							});
 						} else if (mats[5] /* ATTR */) {
-							var p = new RegExp("\\[(\\w+)([$^!~*|]?=)?(?:['\"]?(\\w+)['\"]?)?\\]");
-							var b = p.exec(mats[5]);
+							var b = /\[@?(\w+)(?:([$^!~*|]?=)(['"]?)(.+?)\3)?\]/.exec(mats[5]);
 							if (b[2] == "|=" && b[1] !== "lang" && b[1] !== "hreflang") return [];
 
 							if (b[1] === 'class' && window.ActiveXObject) b[1] = 'className';
@@ -1204,19 +1203,19 @@ Sabel.Dom.Selector = {
 								a = elm.getAttribute(b[1]) || "";
 								switch (b[2]) {
 									case "=":
-										return a !== b[3];
+										return a !== b[4];
 									case "!=":
-										return a === b[3];
+										return a === b[4];
 									case "~=":
-										return (" "+a+" ").indexOf(" "+b[3]+" ") === -1;
+										return (" "+a+" ").indexOf(" "+b[4]+" ") === -1;
 									case "^=":
-										return a.indexOf(b[3]) !== 0;
+										return a.indexOf(b[4]) !== 0;
 									case "$=":
-										return a.lastIndexOf(b[3]) !== (a.length - b[3].length);
+										return a.lastIndexOf(b[4]) !== (a.length - b[4].length);
 									case "*=":
-										return a.indexOf(b[3]) === -1;
+										return a.indexOf(b[4]) === -1;
 									case "|=":
-										return (a+"-").toLowerCase().indexOf((b[3]+"-").toLowerCase()) !== 0;
+										return (a+"-").toLowerCase().indexOf((b[4]+"-").toLowerCase()) !== 0;
 									default:
 										return !a;
 								}
