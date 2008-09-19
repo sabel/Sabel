@@ -13,6 +13,11 @@ class Sabel_Aspect_RegexFactory
   
   private $types = array("before", "after", "around", "throws");
   
+  public static function create()
+  {
+    return new self();
+  }
+  
   public function build($weaverClass, $targetClass, $adviceClasses)
   {
     $this->weaver = new $weaverClass($targetClass);

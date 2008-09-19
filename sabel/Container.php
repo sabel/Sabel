@@ -327,7 +327,7 @@ class Sabel_Container
       return $resultInstance;
     }
     
-    $className = get_class($instance);
+    $className = $reflection->getName();
     $adviceClasses = array();
     
     $aspects = $this->config->getAspects();
@@ -365,8 +365,10 @@ class Sabel_Container
     }
     
     $weaverClass = $this->config->getWeaver();
-    $factory = new Sabel_Aspect_RegexFactory();
-    return $factory->build($weaverClass, $instance, $adviceClasses)->getProxy();
+    
+    return Sabel_Aspect_RegexFactory::create()
+                                       ->build($weaverClass, $instance, $adviceClasses)
+                                       ->getProxy();
   }
   
   protected function processAnnotatedAspect($instance, $reflection)
@@ -376,7 +378,12 @@ class Sabel_Container
     
     foreach ($aspects as $aspect) {
       $interfaceName = $aspect->getName();
+      
       if ($instance instanceof $interfaceName) {
+        $annotated = $aspect->getAnnotated();
+        $foundAnnotated = true;
+        break;
+      } elseif (preg_match("/$interfaceName/", $reflection->getName())) {
         $annotated = $aspect->getAnnotated();
         $foundAnnotated = true;
         break;
