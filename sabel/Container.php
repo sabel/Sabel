@@ -252,7 +252,6 @@ class Sabel_Container
     }
     
     $instance = $this->injectToSetter($reflection, $instance);
-    $instance = $this->recover($reflection, $instance);
     $instance = $this->applyAspect($instance);
     
     $this->instance[] = $instance;
@@ -314,25 +313,6 @@ class Sabel_Container
         }
       }
     }
-  }
-  
-  protected function recover($reflection, $instance)
-  {
-    $className = get_class($instance);
-    
-    if ($this->config->hasLifecycle($className)) {
-      $lifecycleConfig = $this->config->getLifecycle($className);
-      
-      if ($lifecycleConfig->isApplication()) {
-        $backend = $lifecycleConfig->getBackend("Application");
-        
-        if ($backend->isStored($className)) {
-          $backend->fetch($className, $instance, $reflection, $reflection->getProperties());
-        }
-      }
-    }
-    
-    return $instance;
   }
   
   protected function applyAspect($instance)
@@ -698,93 +678,5 @@ class Sabel_Container
     }
     
     return $values;
-  }
-}
-
-/**
- * Sabel Container Bind
- *
- * @category   Container
- * @package    org.sabel.container
- * @author     Mori Reo <mori.reo@sabel.jp>
- * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- */
-final class Sabel_Container_Bind
-{
-  private
-    $interface,
-    $setter,
-    $implementation = "";
-    
-  public function __construct($interface)
-  {
-    $this->interface = $interface;
-  }
-  
-  public function to($implementation)
-  {
-    $this->implementation = $implementation;
-    
-    return $this;
-  }
-  
-  public function setter($methodName)
-  {
-    $this->setter = trim($methodName);
-    
-    return $this;
-  }
-  
-  public function hasSetter()
-  {
-    return (!empty($this->setter));
-  }
-  
-  public function getSetter()
-  {
-    return $this->setter;
-  }
-  
-  public function getImplementation()
-  {
-    return $this->implementation;
-  }
-}
-
-/**
- * Sabel Container Construct
- *
- * @category   Container
- * @package    org.sabel.container
- * @author     Mori Reo <mori.reo@sabel.jp>
- * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- */
-class Sabel_Container_Construct
-{
-  private $constructs = array();
-  private $source = "";
-  
-  public function __construct($className)
-  {
-    $this->source = $className;
-  }
-  
-  public function with($className)
-  {
-    $this->constructs[] = $className;
-    
-    return $this;
-  }
-  
-  public function hasConstruct()
-  {
-    return (count($this->constructs) >= 1);
-  }
-  
-  public function getConstructs()
-  {
-    return $this->constructs;
   }
 }
