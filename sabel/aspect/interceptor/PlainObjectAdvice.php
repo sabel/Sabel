@@ -52,10 +52,8 @@ class Sabel_Aspect_Interceptor_PlainObjectAdvice implements Sabel_Aspect_MethodI
         $result = $advice->$beforeMethod($method, $arguments, $target);
       }
 
-      if ($result === null) {
-        if (!$hasAround) {
-          $result = $invocation->proceed();  
-        }
+      if ($result === null && !$hasAround) {
+        $result = $invocation->proceed();
       }
 
       if ($hasAround) {
