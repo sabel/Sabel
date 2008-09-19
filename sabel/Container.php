@@ -202,8 +202,6 @@ class Sabel_Container
       $config->configure();
       $this->config = $config;
     }
-    
-    register_shutdown_function(array($this, "storeLifecycle"));
   }
   
   /**
@@ -635,31 +633,6 @@ class Sabel_Container
     }
     
     return $this->reflectionCache[$className];
-  }
-  
-  public function storeLifecycle()
-  {
-    $config = $this->config;
-    
-    foreach ($this->instance as $i) {
-      $className = get_class($i);
-      
-      $reflection = $this->getReflection($className);
-      
-      if ($config->hasLifecycle($className)) {
-        $lifecycleConfig = $config->getLifecycle($className);
-        
-        if ($lifecycleConfig->isApplication()) {
-          $backend = $lifecycleConfig->getBackend("Application");
-          
-          if (!$backend->isStored($className)) {
-            $values = $this->getProperties($i, $reflection);
-            
-            $backend->store($className, $values);
-          }
-        }
-      }
-    }
   }
   
   private function getProperties($instance, $reflection)
