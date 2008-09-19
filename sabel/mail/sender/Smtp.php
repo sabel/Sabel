@@ -50,7 +50,7 @@ class Sabel_Mail_Sender_Smtp
   
   public function send(array $headers, $body, $options = array())
   {
-    $this->command("MAIL FROM:<{$headers["From"]["address"]}>", "250");
+    $this->command("MAIL FROM: {$headers["From"]["address"]}", "250");
     $this->sendRcptTo($headers);
     $this->command("DATA", "354");
     $this->sendHeaders($headers);
@@ -113,18 +113,18 @@ class Sabel_Mail_Sender_Smtp
     
     try {
       foreach ($headers["To"] as $rcpt) {
-        $this->command("RCPT TO:<{$rcpt["address"]}>", "250");
+        $this->command("RCPT TO: {$rcpt["address"]}", "250");
       }
       
       if (isset($headers["Cc"])) {
         foreach ($headers["Cc"] as $rcpt) {
-          $this->command("RCPT TO:<{$rcpt["address"]}>", "250");
+          $this->command("RCPT TO: {$rcpt["address"]}", "250");
         }
       }
       
       if (isset($headers["Bcc"])) {
         foreach ($headers["Bcc"] as $rcpt) {
-          $this->command("RCPT TO:<{$rcpt}>", "250");
+          $this->command("RCPT TO: {$rcpt}", "250");
         }
       }
     } catch (Sabel_Mail_Smtp_Exception $e) {
@@ -139,7 +139,7 @@ class Sabel_Mail_Sender_Smtp
     foreach ($headers as $name => $header) {
       if ($name === "From") {
         if ($header["name"] === "") {
-          $this->command("From: <{$header["address"]}>");
+          $this->command("From: {$header["address"]}");
         } else {
           $this->command("From: {$header["name"]} <{$header["address"]}>");
         }
@@ -147,7 +147,7 @@ class Sabel_Mail_Sender_Smtp
         $value = array();
         foreach ($header as $rcpt) {
           if ($rcpt["name"] === "") {
-            $value[] = "<{$rcpt["address"]}>";
+            $value[] = "{$rcpt["address"]}";
           } else {
             $value[] = "{$rcpt["name"]} <{$rcpt["address"]}>";
           }
