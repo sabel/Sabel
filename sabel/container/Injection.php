@@ -12,7 +12,7 @@
  */
 abstract class Sabel_Container_Injection implements Sabel_Config
 {
-  private $weaverClass = "Sabel_Aspect_StaticWeaver";
+  private $weaverClass = "Sabel_Aspect_Weaver_Static";
   
   private
     $binds,

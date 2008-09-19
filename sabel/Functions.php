@@ -137,7 +137,14 @@ function l($message, $level = SBL_LOG_INFO, $identifier = "default")
 
 function uri($uriParameter, $secure = false, $absolute = false)
 {
-  $context = Sabel_Context::getContext();
+  $context   = Sabel_Context::getContext();
+  $uriPrefix = get_uri_prefix($secure, $absolute);
+  
+  return $uriPrefix . "/" . $context->getCandidate()->uri($uriParameter);
+}
+
+function get_uri_prefix($secure = false, $absolute = false)
+{
   $uriPrefix = "";
   
   if ($secure || $absolute) {
@@ -150,7 +157,7 @@ function uri($uriParameter, $secure = false, $absolute = false)
     $uriPrefix .= "?" . NO_REWRITE_PREFIX . "=";
   }
   
-  return $uriPrefix . "/" . $context->getCandidate()->uri($uriParameter);
+  return $uriPrefix;
 }
 
 function normalize_uri($uri)
