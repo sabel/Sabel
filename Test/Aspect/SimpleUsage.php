@@ -21,7 +21,7 @@ class Test_Aspect_SimpleUsage extends SabelTestCase
   {
     $updatable = load("Sabel_Test_Aspect_SimpleUsage_Person", "test_simpleusage");
     
-    $this->assertTrue($updatable instanceof Sabel_Aspect_StaticProxy);
+    $this->assertTrue($updatable instanceof Sabel_Aspect_Proxy_Static);
     $updatable->updateState();
   }
 }

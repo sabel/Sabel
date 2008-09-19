@@ -53,7 +53,7 @@ class StaticPointcut implements Sabel_Aspect_Pointcut
   }
 }
 
-class MyStaticClassNameMatcher extends Sabel_Aspect_StaticClassNameMatcher
+class MyStaticClassNameMatcher extends Sabel_Aspect_Matcher_StaticClassName
 {
   public function matches($class)
   {
@@ -61,7 +61,7 @@ class MyStaticClassNameMatcher extends Sabel_Aspect_StaticClassNameMatcher
   }
 }
 
-class MyMethodMatcher extends Sabel_Aspect_StaticMethodMatcher
+class MyMethodMatcher extends Sabel_Aspect_Matcher_StaticMethod
 {
   public function matches($method, $class)
   {
@@ -69,12 +69,12 @@ class MyMethodMatcher extends Sabel_Aspect_StaticMethodMatcher
   }
 }
 
-class MyStaticMethodMatcherPointcutAdvisor extends Sabel_Aspect_Pointcut_StaticMethodMatcherAdvisor
+class MyStaticMethodMatcherPointcutAdvisor extends Sabel_Aspect_Advisor_StaticMethodMatcherPointcut
 {
   public function __construct()
   {
     defineClass("MyClassMatcher", '
-      class %s implements Sabel_Aspect_ClassMatcher
+      class %s implements Sabel_Aspect_Matcher_Class
       {
         public function matches($class)
         {
@@ -92,14 +92,14 @@ class MyStaticMethodMatcherPointcutAdvisor extends Sabel_Aspect_Pointcut_StaticM
   }
 }
 
-class MyRegexMethodMatcherPointcutAdvisor extends Sabel_Aspect_Pointcut_StaticMethodMatcherAdvisor
+class MyRegexMethodMatcherPointcutAdvisor extends Sabel_Aspect_Advisor_StaticMethodMatcherPointcut
 {
   private $pattern;
   
   public function __construct()
   {
     defineClass("MyClassMatcher", '
-      class %s implements Sabel_Aspect_ClassMatcher
+      class %s implements Sabel_Aspect_Matcher_Class
       {
         public function matches($class)
         {

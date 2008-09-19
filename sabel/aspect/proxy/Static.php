@@ -18,7 +18,7 @@ class Sabel_Aspect_Proxy_Static extends Sabel_Aspect_Proxy_Abstract
     $this->invocation = new Sabel_Aspect_DefaultMethodInvocation($this, $this->target);
   }
   
-  public function setAdviced($adviced)
+  public function __setAdviced($adviced)
   {
     $this->adviced = $adviced;
   }

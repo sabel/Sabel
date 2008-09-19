@@ -14,7 +14,7 @@ class Test_Aspect_StaticProxy extends Test_Aspect_Base
   
   public function setUp()
   {
-    $this->weaver = new Sabel_Aspect_StaticWeaver("Sabel_Tests_Aspect_TargetClass");
+    $this->weaver = new Sabel_Aspect_Weaver_Static("Sabel_Tests_Aspect_TargetClass");
   }
   
   public function testWeave()
@@ -25,7 +25,7 @@ class Test_Aspect_StaticProxy extends Test_Aspect_Base
     
     $advisor = new MyRegexMethodMatcherPointcutAdvisor();
     $advisor->setPattern("/fetch+/");
-    $advisor->setAdvice(new Sabel_Aspect_SimpleTraceInterceptor());
+    $advisor->setAdvice(new Sabel_Aspect_Interceptor_SimpleTrace());
     
     $weaver->addAdvisor($advisor);
     
@@ -40,17 +40,17 @@ class Test_Aspect_StaticProxy extends Test_Aspect_Base
     $weaver = $this->weaver;
     $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/get+/");
-    $advisor->addAdvice(new Sabel_Aspect_SimpleTraceInterceptor());
+    $advisor->addAdvice(new Sabel_Aspect_Interceptor_SimpleTrace());
     
     $weaver->addAdvisor($advisor);
     
     $target = $weaver->getProxy();
     
     // match
-    $this->assertEquals("Sabel_Aspect_StaticProxy", get_class($target));
+    $this->assertEquals("Sabel_Aspect_Proxy_Static", get_class($target));
   }
   
   public function testStaticWeaveNotMatch()
@@ -58,7 +58,7 @@ class Test_Aspect_StaticProxy extends Test_Aspect_Base
     $weaver = $this->weaver;
     $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/fetch+/");
     

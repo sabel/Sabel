@@ -323,6 +323,10 @@ class Sabel_Container
     
     $resultInstance = $this->processAnnotatedAspect($instance, $reflection);
     
+    if ($reflection->getName() === "Sabel_Test_Aspect_SimpleUsage_Person") {
+      // dump($resultInstance);
+    }
+    
     if ($resultInstance !== null) {
       return $resultInstance;
     }
@@ -377,6 +381,10 @@ class Sabel_Container
     $aspects = $this->config->getAspects();
     
     foreach ($aspects as $aspect) {
+      if (!$aspect->hasAnnotated()) {
+        continue;
+      }
+      
       $interfaceName = $aspect->getName();
       
       if ($instance instanceof $interfaceName) {
@@ -385,6 +393,7 @@ class Sabel_Container
         break;
       } elseif (preg_match("/$interfaceName/", $reflection->getName())) {
         $annotated = $aspect->getAnnotated();
+        
         $foundAnnotated = true;
         break;
       }

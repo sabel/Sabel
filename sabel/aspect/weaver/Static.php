@@ -48,7 +48,7 @@ class Sabel_Aspect_Weaver_Static extends Sabel_Aspect_Weaver_Abstract
     
     if ($adviced->hasAdvices()) {
       $proxy = new Sabel_Aspect_Proxy_Static($this->target);
-      $proxy->setAdviced($adviced);
+      $proxy->__setAdviced($adviced);
       
       return $proxy;
     } else {

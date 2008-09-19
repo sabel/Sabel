@@ -1,12 +1,5 @@
 <?php
 
-Sabel::fileUsing("sabel/aspect/Interfaces.php");
-Sabel::fileUsing("sabel/aspect/Matchers.php");
-Sabel::fileUsing("sabel/aspect/Pointcuts.php");
-Sabel::fileUsing("sabel/aspect/Advisors.php");
-Sabel::fileUsing("sabel/aspect/Introduction.php");
-Sabel::fileUsing("sabel/aspect/Interceptors.php");
-
 require_once ("Test/Aspect/Base.php");
 require_once ("Test/Aspect/DynamicProxy.php");
 require_once ("Test/Aspect/StaticProxy.php");

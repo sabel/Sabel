@@ -14,7 +14,7 @@ class Test_Aspect_DynamicProxy extends Test_Aspect_Base
   
   public function setUp()
   {
-    $this->weaver = new Sabel_Aspect_DynamicWeaver("Sabel_Tests_Aspect_TargetClass");
+    $this->weaver = new Sabel_Aspect_Weaver_Dynamic("Sabel_Tests_Aspect_TargetClass");
   }
   
   public function testDynamicWeaveGetClassName()
@@ -34,6 +34,6 @@ class Test_Aspect_DynamicProxy extends Test_Aspect_Base
     $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
     $target = $weaver->getProxy();
     
-    $this->assertEquals(get_class($target), "Sabel_Aspect_DefaultProxy");
+    $this->assertEquals(get_class($target), "Sabel_Aspect_Proxy_Default");
   }
 }

@@ -5,9 +5,9 @@ class Sabel_Aspect_RegexFactory
   private $weaver = null;
   private $advice = null;
   
-  private $advisorClass     = "Sabel_Aspect_Matcher_RegexPointcutAdvisor";
+  private $advisorClass     = "Sabel_Aspect_Advisor_RegexMatcherPointcut";
   private $annotatedClass   = ".+";
-  private $interceptorClass = "Sabel_Aspect_PlainObjectAdviceInterceptor";
+  private $interceptorClass = "Sabel_Aspect_Interceptor_PlainObjectAdvice";
   
   private $methodPatterns = array();
   
@@ -78,6 +78,10 @@ class Sabel_Aspect_RegexFactory
     } else {
       $advisorClass   = $this->advisorClass;
       $annotatedClass = $this->annotatedClass;
+      
+      if (!class_exists($advisorClass, true)) {
+        throw new Sabel_Exception_ClassNotFound($advisorClass);
+      }
       
       $advisor = new $advisorClass();
       $advisor->setClassMatchPattern("/{$annotatedClass}/");

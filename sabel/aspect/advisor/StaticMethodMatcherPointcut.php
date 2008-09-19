@@ -10,7 +10,7 @@
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Aspect_Advisor_StaticMethodMatcherPointcut
-    extends Sabel_Aspect_StaticMethodMatcherPointcut
+    extends Sabel_Aspect_Pointcut_StaticMethodMatcher
       implements Sabel_Aspect_Pointcut_Advisor
 {
   private $advice = null;

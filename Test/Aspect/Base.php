@@ -11,14 +11,14 @@ class Test_Aspect_Base extends SabelTestCase
   
   public function testRegexMethodMatcher()
   {
-    $matcher = new Sabel_Aspect_RegexMethodMatcher();
+    $matcher = new Sabel_Aspect_Matcher_RegexMethod();
     $matcher->setPattern("/set+/");
     $this->assertTrue($matcher->matches("setX", ""));
   }
   
   public function testRegexClassMatcher()
   {
-    $matcher = new Sabel_Aspect_RegexClassMatcher();
+    $matcher = new Sabel_Aspect_Matcher_RegexClass();
     $matcher->setPattern("/Sabel_+/");
     $this->assertTrue($matcher->matches("Sabel_Test", ""));
     
@@ -42,13 +42,13 @@ class Test_Aspect_Base extends SabelTestCase
   {
     $weaver = $this->weaver;
     
-    $interceptor = new Sabel_Aspect_DebugInterceptor();
+    $interceptor = new Sabel_Aspect_Interceptor_Debug();
     $advisor = new MyStaticMethodMatcherPointcutAdvisor();
     $advisor->setAdvice($interceptor);
     
     $weaver->addAdvisor($advisor);
     
-    $interceptor = new Sabel_Aspect_SimpleTraceInterceptor();
+    $interceptor = new Sabel_Aspect_Interceptor_SimpleTrace();
     $advisor = new MyStaticMethodMatcherPointcutAdvisor();
     $advisor->setAdvice($interceptor);
     
@@ -92,7 +92,7 @@ class Test_Aspect_Base extends SabelTestCase
     
     $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/get+/");
     
@@ -120,13 +120,13 @@ class Test_Aspect_Base extends SabelTestCase
   {
     $weaver = $this->weaver;
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/get+/");
     
     $beforeAdvice = new Sabel_Tests_Aspect_SimpleBeforeAdvice();
     $advisor->addAdvice(new Sabel_Tests_Aspect_SimpleAfterReturningAdvice());
-    $advisor->addAdvice(new Sabel_Aspect_SimpleTraceInterceptor());
+    $advisor->addAdvice(new Sabel_Aspect_Interceptor_SimpleTrace());
     $advisor->addAdvice($beforeAdvice);
     
     $weaver->addAdvisor($advisor);
@@ -143,7 +143,7 @@ class Test_Aspect_Base extends SabelTestCase
   {
     $weaver = $this->weaver;
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/get+/");
     
@@ -164,7 +164,7 @@ class Test_Aspect_Base extends SabelTestCase
   {
     $weaver = $this->weaver;
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/willThrowException/");
     
@@ -188,7 +188,7 @@ class Test_Aspect_Base extends SabelTestCase
   {
     $weaver = $this->weaver;
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/.+/");
     
@@ -218,7 +218,7 @@ class Test_Aspect_Base extends SabelTestCase
   public function testAdvices()
   {
     $advices = new Sabel_Aspect_Advices();
-    $advices->addAdvice(new Sabel_Aspect_SimpleTraceInterceptor());
+    $advices->addAdvice(new Sabel_Aspect_Interceptor_SimpleTrace());
     $advices->addAdvice(new Sabel_Tests_Aspect_SimpleBeforeAdvice());
     $advices->addAdvice(new Sabel_Tests_Aspect_SimpleAfterReturningAdvice());
     
@@ -231,16 +231,16 @@ class Test_Aspect_Base extends SabelTestCase
   {
     $weaver = $this->weaver;
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/");
     $advisor->setMethodMatchPattern("/get+/");
     
-    $throwAdvisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $throwAdvisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $throwAdvisor->setClassMatchPattern("/.+/");
     $throwAdvisor->setMethodMatchPattern("/will+/");
     
     $poAdvice = new Sabel_Tests_Aspect_PlainObject_Advice();
-    $plainObjectInterceptor = new Sabel_Aspect_PlainObjectAdviceInterceptor($poAdvice);
+    $plainObjectInterceptor = new Sabel_Aspect_Interceptor_PlainObjectAdvice($poAdvice);
     $plainObjectInterceptor->setBeforeAdviceMethod("before");
     $plainObjectInterceptor->setAfterAdviceMethod("after");
     $plainObjectInterceptor->setAroundAdviceMethod("around");
@@ -267,12 +267,12 @@ class Test_Aspect_Base extends SabelTestCase
   {
     $weaver = $this->weaver;
     
-    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
     $advisor->setClassMatchPattern("/.+/");
     $advisor->setMethodMatchPattern("/get+/");
     
     $poAdvice = new Sabel_Tests_Aspect_PlainObject_PreventBeforeAdvice();
-    $plainObjectInterceptor = new Sabel_Aspect_PlainObjectAdviceInterceptor($poAdvice);
+    $plainObjectInterceptor = new Sabel_Aspect_Interceptor_PlainObjectAdvice($poAdvice);
     $plainObjectInterceptor->setBeforeAdviceMethod("before");
     
     $advisor->addAdvice($plainObjectInterceptor);
@@ -308,8 +308,8 @@ class Test_Aspect_Base extends SabelTestCase
 /**
  * @classMatch Sabel+
  *
- * @advisor Sabel_Aspect_RegexMatcherPointcutAdvisor
- * @interceptor Sabel_Aspect_PlainObjectAdviceInterceptor
+ * @advisor Sabel_Aspect_Advisor_RegexMatcherPointcut
+ * @interceptor Sabel_Aspect_Interceptor_PlainObjectAdvice
  */
 class Sabel_Tests_Aspect_PlainObject_Advice
 {

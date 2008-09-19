@@ -14,7 +14,7 @@ class Sabel_Aspect_Weaver_Dynamic extends Sabel_Aspect_Weaver_Abstract
       }
     }
     
-    $proxy = new Sabel_Aspect_Proxy_Default$this->target);
+    $proxy = new Sabel_Aspect_Proxy_Default($this->target);
     $proxy->__setAdvisor($this->advisor);
     
     return $proxy;

@@ -9,7 +9,7 @@
  * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Aspect_Advice_MethodAfterReturningInterceptor implements Sabel_Aspect_MethodInterceptor
+class Sabel_Aspect_Interceptor_MethodAfterReturningAdvice implements Sabel_Aspect_MethodInterceptor
 {
   private $interceptor = null;
   

@@ -16,7 +16,7 @@ class Test_Aspect_Introduction extends SabelTestCase
   
   public function setUp()
   {
-    $this->weaver = new Sabel_Aspect_DynamicWeaver("Sabel_Test_Aspect_Person");
+    $this->weaver = new Sabel_Aspect_Weaver_Dynamic("Sabel_Test_Aspect_Person");
   }
   
   public function testIntroduceLockable()
@@ -70,7 +70,7 @@ interface Sabel_Test_Aspect_Lockable
   public function locked();
 }
 
-class Sabel_Test_Aspect_LockMixin extends Sabel_Aspect_DelegatingIntroductionInterceptor
+class Sabel_Test_Aspect_LockMixin extends Sabel_Aspect_Introduction_DelegatingInterceptor
   implements Sabel_Test_Aspect_Lockable
 {
   private $locked = false;
@@ -87,11 +87,17 @@ class Sabel_Test_Aspect_LockMixin extends Sabel_Aspect_DelegatingIntroductionInt
   
   public function locked()
   {
-    return ($this->locked === true);
+    return $this->locked;
   }
   
   public function invoke(Sabel_Aspect_MethodInvocation $invocation)
   {
+    $method = $invocation->getMethod()->getName();
+    
+    if (in_array($method, get_class_methods($this))) {
+      $this->$method();
+    }
+    
     if (preg_match("/set+/", $invocation->getMethod()->getName())) {
       if ($this->locked()) {
         throw new Sabel_Test_Aspect_LockedException("locked");
@@ -105,12 +111,12 @@ class Sabel_Test_Aspect_LockMixin extends Sabel_Aspect_DelegatingIntroductionInt
 class Sabel_Test_Aspect_LockedException extends Sabel_Exception_Runtime {}
 
 
-class Sabel_Test_Aspect_LockMixinAdvisor extends Sabel_Aspect_DefaultIntroductionAdvisor
+class Sabel_Test_Aspect_LockMixinAdvisor extends Sabel_Aspect_Introduction_DefaultAdvisor
 {
 }
 
 
-class TrueClassMatcher implements Sabel_Aspect_ClassMatcher
+class TrueClassMatcher implements Sabel_Aspect_Matcher_Class
 {
   public function matches($class)
   {
@@ -118,7 +124,7 @@ class TrueClassMatcher implements Sabel_Aspect_ClassMatcher
   }
 }
 
-class TrueMethodMatcher implements Sabel_Aspect_MethodMatcher
+class TrueMethodMatcher implements Sabel_Aspect_Matcher_Method
 {
   public function matches($method, $class)
   {

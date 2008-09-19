@@ -14,14 +14,14 @@ class Test_Aspect_Matcher extends SabelTestCase
   
   public function testRegexMethodMatcher()
   {
-    $matcher = new Sabel_Aspect_RegexMethodMatcher();
+    $matcher = new Sabel_Aspect_Matcher_RegexMethod();
     $matcher->setPattern("/set+/");
     $this->assertTrue($matcher->matches("setX", ""));
   }
   
   public function testRegexClassMatcher()
   {
-    $matcher = new Sabel_Aspect_RegexClassMatcher();
+    $matcher = new Sabel_Aspect_Matcher_RegexClass();
     $matcher->setPattern("/Sabel_+/");
     $this->assertTrue($matcher->matches("Sabel_Test", ""));
     
