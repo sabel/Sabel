@@ -8,6 +8,8 @@ abstract class Sabel_Aspect_Proxy_Abstract
   
   protected $invocation = null;
   
+  protected $checkTargetMethod = true;
+  
   public function __construct($targetObject)
   {
     $this->target = $targetObject;
@@ -28,6 +30,11 @@ abstract class Sabel_Aspect_Proxy_Abstract
   public function __setAdvisor($advisor)
   {
     $this->advisor = $advisor;
+  }
+  
+  public function __checkTargetMethod($check)
+  {
+    $this->checkTargetMethod = $check;
   }
   
   public function getClassName()

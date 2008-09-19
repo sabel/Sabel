@@ -18,6 +18,12 @@ class Sabel_Aspect_Proxy_Default extends Sabel_Aspect_Proxy_Abstract
   
   public function __call($method, $arg)
   {
+    $reflection = new Sabel_Reflection_Class($this->target);
+    
+    if ($this->checkTargetMethod && !$reflection->hasMethod($method)) {
+      throw new Sabel_Aspect_Exception_MethodNotFound($method . " not found");
+    }
+    
     $this->invocation->reset($method, $arg);
     
     $advices = array();

@@ -116,6 +116,33 @@ class Test_Aspect_Base extends SabelTestCase
     $this->assertEquals("adviced adviced adviced Y", $weaver->getProxy()->getY());
   }
   
+  public function testTargetMethodExistance()
+  {
+    $weaver = $this->weaver;
+    
+    $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
+    $advisor->setClassMatchPattern("/.+/U");
+    $advisor->setMethodMatchPattern("/get+/");
+    
+    $beforeAdvice = new Sabel_Tests_Aspect_SimpleBeforeAdvice();
+    $advisor->addAdvice(new Sabel_Tests_Aspect_SimpleAfterReturningAdvice());
+    $advisor->addAdvice(new Sabel_Aspect_Interceptor_SimpleTrace());
+    $advisor->addAdvice($beforeAdvice);
+    
+    $weaver->addAdvisor($advisor);
+    
+    $target = $weaver->getProxy();
+    
+    try {
+      $target->invalidMethod();
+      $this->assertTrue(false);
+    } catch (Exception $e) {
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   public function testSimpleBeforeAdvice()
   {
     $weaver = $this->weaver;

@@ -26,6 +26,7 @@ class Test_Aspect_Introduction extends SabelTestCase
     $this->weaver->addAdvisor(new Sabel_Test_Aspect_LockMixinAdvisor($mixin));
     
     $person = $this->weaver->getProxy();
+    $person->__checkTargetMethod(false);
     
     $person->lock();
     
