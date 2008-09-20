@@ -186,9 +186,7 @@ class Sabel_Db_Validator extends Sabel_Object
   {
     if ($column->nullable) return true;
     
-    if ($this->isUpdate) {
-      return ($column->value !== null);
-    } elseif ($column->value === self::OMITTED) {
+    if (!$this->isUpdate && $column->value === self::OMITTED) {
       return ($column->default !== null);
     } else {
       return ($column->value !== null);

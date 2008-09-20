@@ -61,28 +61,14 @@ class Sabel_Request_Validator extends Sabel_Object
       if (is_string($checker)) $checker = array($checker);
       
       foreach ($checker as $method) {
-        if (strpos($method, ":") !== false) {
-          list ($name, $exp) = explode(":", $method, 2);
-          switch (strtolower($name)) {
-            case "regex":
-            case "regexp":
-              if (preg_match($exp, $value) === 0) {
-                $this->failed = true;
-              }
-              break;
-            
-            default:
-              $message = __METHOD__ . "() validation by $name is not supported.";
-              throw new Sabel_Exception_Runtime($message);
-          }
-        } elseif (isset($suites[$method])) {
+        if (isset($suites[$method])) {
           foreach ($suites[$method] as $check) {
             $message = $this->$check($name, $value);
             if ($message !== null) $errors[] = $message;
           }
         } elseif (strpos($method, "(") !== false) {
           preg_match('/\((.+)\)/', $method, $matches);
-          $args = explode(",", $matches[1]);
+          $args = array_map("trim", explode(",", $matches[1]));
           array_unshift($args, $name, $value);
           $method = substr($method, 0, strlen($matches[0]));
           $message = call_user_func_array(array($this, $method), $args);
