@@ -2677,6 +2677,12 @@ Sabel.Effect.prototype = {
 		return this;
 	},
 
+	setCallback: function(callback, scope) {
+		this.callback = function() {
+			callback.apply(scope||window, arguments);
+		};
+	},
+
 	play: function(force) {
 		if (this.state === 1 && force !== true) {
 			return this;
@@ -2723,6 +2729,7 @@ Sabel.Effect.prototype = {
 	},
 
 	resume: function() {
+		this._clear();
 		this._run();
 		return this;
 	},
@@ -2794,6 +2801,49 @@ Sabel.Effect.prototype = {
 		this.timer = null;
 	}
 };
+
+Sabel.Effect.Chain = new Sabel.Class({
+	init: function(options) {
+		options = options || {};
+
+		this.effects = new Array();
+		this.current = 0;
+		this.state   = 0;
+		this.callback = options.callback || function() {}
+	},
+
+	add: function(effect) {
+		effect.setCallback(this._callback, this);
+		this.effects.push(effect);
+	},
+
+	play: function() {
+		if (this.state === 0) {
+			this.state = 1;
+			this.effects[this.current].play(true);
+		}
+	},
+
+	pause: function() {
+		this.effects[this.current].pause();
+		return this;
+	},
+
+	resume: function() {
+		this.effects[this.current].resume();
+		return this;
+	},
+
+	_callback: function() {
+		this.state = 0;
+		if (++this.current === this.effects.length) {
+			this.current = 0;
+			this.callback();
+		} else {
+			this.play();
+		}
+	}
+});
 
 Sabel.Cookie = {
 	set: function(key, value, option)
