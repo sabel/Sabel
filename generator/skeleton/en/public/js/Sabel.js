@@ -2671,8 +2671,14 @@ Sabel.Effect.prototype = {
 		this.effects = Sabel.Array();
 	},
 
-	add: function(effect , reverse) {
-		reverse = reverse || false;
+	add: function(effect) {
+		var args = arguments;
+		if (typeof effect === "string") {
+			effect  = new Sabel.Effect[effect](args[1]);
+			reverse = args[2] || false;
+		} else {
+			reverse = args[1] || false;
+		}
 		this.effects.push({func: effect, reverse: reverse});
 		return this;
 	},
@@ -2813,8 +2819,18 @@ Sabel.Effect.Chain = new Sabel.Class({
 	},
 
 	add: function(effect) {
+		if (!(effect instanceof Sabel.Effect)) {
+			effect = new Sabel.Effect().add(effect);
+		}
+		if (arguments.length > 1) {
+			for (var i = 1, len = arguments.length; i < len; ++i) {
+				effect.add(arguments[i]);
+			}
+		}
 		effect.setCallback(this._callback, this);
 		this.effects.push(effect);
+
+		return this;
 	},
 
 	play: function() {
