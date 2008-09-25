@@ -1721,6 +1721,26 @@ Sabel.Element.update = function(element, contents) {
 	return Sabel.get(newEl);
 };
 
+Sabel.Element.getXPath = function(element) {
+	var buf = new Array(), idx, tagName = element.tagName;
+
+	do {
+		if (element.getAttribute("id")) {
+			buf.unshift('id("' + element.getAttribute("id") + '")');
+			return buf.join("/");
+		} else {
+			if (document.getElementsByTagName(element.nodeName).length === 1) {
+				buf.unshift("/" + element.nodeName.toLowerCase());
+				break;
+			} else {
+				idx = Sabel.Element.getPreviousSiblings(element, element.nodeName).length + 1;
+				buf.unshift(element.nodeName.toLowerCase() + "[" + idx + "]");
+			}
+		}
+	} while ((element = element.parentNode) && element.nodeType === 1);
+	return "/" + buf.join("/");
+};
+
 if (Sabel.UserAgent.isIE) {
 	Sabel.Element.getTextContent = function(element) {
 		return element.innerText;
@@ -1827,18 +1847,26 @@ Sabel.Element.getPreviousSibling = function(element) {
 	return null;
 };
 
-Sabel.Element.getPreviousSiblings = function(element) {
+Sabel.Element.getPreviousSiblings = function(element, nodeName) {
+	nodeName = (nodeName || "").toUpperCase();
 	var buf = new Array();
 	while (element = element.previousSibling) {
-		if (element.nodeType === 1) buf[buf.length] = element;
+		if (element.nodeType === 1) {
+			if (nodeName === "" || nodeName === element.nodeName)
+				buf[buf.length] = element;
+		}
 	}
 	return buf;
 };
 
-Sabel.Element.getNextSiblings = function(element) {
+Sabel.Element.getNextSiblings = function(element, nodeName) {
+	nodeName = (nodeName || "").toUpperCase();
 	var buf = new Array();
 	while (element = element.nextSibling) {
-		if (element.nodeType === 1) buf[buf.length] = element;
+		if (element.nodeType === 1) {
+			if (nodeName === "" || nodeName === element.nodeName)
+				buf[buf.length] = element;
+		}
 	}
 	return buf;
 };
