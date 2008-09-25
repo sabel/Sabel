@@ -390,22 +390,24 @@ abstract class Sabel_Db_Model extends Sabel_Object
    */
   public function setCondition($arg1, $arg2 = null)
   {
-    if (empty($arg1)) return;
-    
-    $condition = $this->getCondition();
-    
-    if ($arg2 !== null) {
-      $condition->create($arg1, $arg2);
-    } elseif (is_model($arg1)) {
-      $joinkey = create_join_key($this, $arg1->getTableName());
-      $colName = $this->getName() . "." . $joinkey["fkey"];
-      $condition->create($colName, $arg1->$joinkey["id"]);
-    } elseif (is_object($arg1)) {
-      $condition->add($arg1);
-    } else {
-      $colName = $this->getName() . "." . $this->metadata->getPrimaryKey();
-      $condition->create($colName, $arg1);
+    if (!empty($arg1)) {
+      $condition = $this->getCondition();
+      
+      if ($arg2 !== null) {
+        $condition->create($arg1, $arg2);
+      } elseif (is_model($arg1)) {
+        $joinkey = create_join_key($this, $arg1->getTableName());
+        $colName = $this->getName() . "." . $joinkey["fkey"];
+        $condition->create($colName, $arg1->$joinkey["id"]);
+      } elseif (is_object($arg1)) {
+        $condition->add($arg1);
+      } else {
+        $colName = $this->getName() . "." . $this->metadata->getPrimaryKey();
+        $condition->create($colName, $arg1);
+      }
     }
+    
+    return $this;
   }
   
   /**
