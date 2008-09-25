@@ -316,6 +316,11 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     return $this;
   }
   
+  public function getBindValues()
+  {
+    return $this->bindValues;
+  }
+  
   public function appendBindValues(array $values)
   {
     $this->bindValues = array_merge($this->bindValues, $values);

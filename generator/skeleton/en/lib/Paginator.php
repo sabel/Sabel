@@ -61,6 +61,11 @@ class Paginator extends Sabel_Object
     $this->attributes["pageKey"] = $pageKey;
   }
   
+  public function __set($key, $value)
+  {
+    $this->attributes[$key] = $value;
+  }
+  
   public function __get($key)
   {
     if (isset($this->attributes[$key])) {
@@ -127,6 +132,10 @@ class Paginator extends Sabel_Object
     foreach ($getValues as $key => $val) {
       if ($key === $pageKey) {
         unset($getValues[$key]);
+      } elseif (is_array($val)) {
+        foreach ($val as $k => $v) {
+          $uriQuery[] = urlencode("{$key}[{$k}]") . "=" . urlencode($v);
+        }
       } else {
         $uriQuery[] = urlencode($key) . "=" . urlencode($val);
       }
