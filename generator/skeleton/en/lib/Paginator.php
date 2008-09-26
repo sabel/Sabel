@@ -75,6 +75,16 @@ class Paginator extends Sabel_Object
     }
   }
   
+  public function prev($text, $attrs = array())
+  {
+    return $this->createLink($text, $this->getUriQuery($this->viewer->getPrevious()), $attrs);
+  }
+  
+  public function next($text, $attrs = array())
+  {
+    return $this->createLink($text, $this->getUriQuery($this->viewer->getNext()), $attrs);
+  }
+  
   public function getUriQuery($page)
   {
     $pageKey = $this->attributes["pageKey"];
@@ -165,12 +175,28 @@ class Paginator extends Sabel_Object
       $attributes["results"] = $model->{$this->method}();
       
       if ($this->uri === null) {
-        $candidate = Sabel_Context::getContext()->getCandidate();
-        $attributes["uri"] = "a: " . $candidate->getDestination()->getAction();
+        $request = Sabel_Context::getContext()->getBus()->get("request");
+        $attributes["uri"] = get_uri_prefix() . "/" . $request->getUri();
       }
     }
     
     return $this;
+  }
+  
+  protected function createLink($text, $query, $attrs)
+  {
+    $_attrs = "";
+    if (is_array($attrs) && !empty($attrs)) {
+      $tmp = array();
+      foreach ($attrs as $attr => $value) {
+        $tmp[] = $attr . '="' . $value . '"';
+      }
+      
+      $_attrs = " " . implode(" ", $tmp);
+    }
+    
+    $format = '<a%s href="%s?%s">%s</a>';
+    return sprintf($format, $_attrs, $this->uri, $query, $text);
   }
   
   protected function _setOrderBy($getValues)
