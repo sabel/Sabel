@@ -222,6 +222,17 @@ function is_natural_number($num)
   }
 }
 
+function preg_match_replace($pattern, $search, $replace, $subject)
+{
+  if (preg_match_all($pattern, $subject, $matches) > 0) {
+    foreach ($matches[0] as $match) {
+      $subject = str_replace($match, str_replace($search, $replace, $match), $subject);
+    }
+  }
+  
+  return $subject;
+}
+
 /***   sabel.db functions   ***/
 
 function is_model($model)
