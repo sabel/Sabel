@@ -1806,7 +1806,7 @@ Sabel.Element.getParentNode = function(element, tagName) {
 	tagName = (tagName || "").toUpperCase();
 	element = Sabel.get(element, false);
 	while (element = element.parentNode) {
-		if (tagName === "" || tagName === elm.tagName)
+		if (tagName === "" || tagName === element.tagName)
 			return new Sabel.Element(element);
 	}
 	return null;
