@@ -72,16 +72,20 @@ class Sabel_Db_Join extends Sabel_Object
   public function setProjection(array $projections)
   {
     $this->projection = $projections;
+    
+    return $this;
   }
   
   public function setCondition($arg1, $arg2 = null)
   {
     $this->model->setCondition($arg1, $arg2);
+    
+    return $this;
   }
   
-  public function setOrderBy($orderBy)
+  public function setOrderBy($column, $mode = "asc")
   {
-    $this->model->setOrderBy($orderBy);
+    $this->model->setOrderBy($column, $mode);
     
     return $this;
   }

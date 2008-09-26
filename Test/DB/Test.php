@@ -120,7 +120,7 @@ class Test_DB_Test extends SabelTestCase
   {
     $this->insertJoinTableData();
     $join = new Sabel_Db_Join("Grandchildren");
-    $join->setOrderBy("Grandchildren.id ASC");
+    $join->setOrderBy("Grandchildren.id");
     $results = $join->add("Children")->select();
     
     $this->assertEquals(2, count($results));
@@ -133,7 +133,7 @@ class Test_DB_Test extends SabelTestCase
   public function testJoin2()
   {
     $join = new Sabel_Db_Join("Grandchildren");
-    $join->setOrderBy("Grandchildren.id ASC");
+    $join->setOrderBy("Grandchildren.id");
     $chilren = new Sabel_Db_Join_Relation("Children");
     $results = $join->add($chilren->add("Parents"))->select();
     
@@ -147,7 +147,7 @@ class Test_DB_Test extends SabelTestCase
   public function testJoin3()
   {
     $join = new Sabel_Db_Join("Grandchildren");
-    $join->setOrderBy("Grandchildren.id ASC");
+    $join->setOrderBy("Grandchildren.id");
     $children = new Sabel_Db_Join_Relation("Children");
     $parents = new Sabel_Db_Join_Relation("Parents");
     $results = $join->add($children->add($parents->add("Grandparents")))->select();
@@ -275,7 +275,7 @@ class Test_DB_Test extends SabelTestCase
     
     $st = MODEL("SchemaTest");
     $st->setCondition(Condition::create(IN, "name", array("name1", "name3", "name5")));
-    $st->setOrderBy("id ASC");
+    $st->setOrderBy("id");
     $results = $st->select();
     
     $this->assertEquals(3, count($results));
@@ -290,7 +290,7 @@ class Test_DB_Test extends SabelTestCase
     $or = new Sabel_Db_Condition_Or();
     $or->add(Condition::create(EQUAL, "sint",  200));
     $or->add(Condition::create(EQUAL, "email", "test9@example.com"));
-    $st->setOrderBy("id ASC");
+    $st->setOrderBy("id");
     $results = $st->select($or);
     
     $this->assertEquals(3, count($results));
@@ -305,7 +305,7 @@ class Test_DB_Test extends SabelTestCase
     $or = new Sabel_Db_Condition_Or();
     $or->add(Condition::create(EQUAL, "sint",  100));
     $or->add(Condition::create(BETWEEN, "dt", array("2008-01-07", "2008-01-09")));
-    $st->setOrderBy("id ASC");
+    $st->setOrderBy("id");
     $results = $st->select($or);
     
     $this->assertEquals(5, count($results));
@@ -325,7 +325,7 @@ class Test_DB_Test extends SabelTestCase
     $or2 = new Sabel_Db_Condition_Or();
     $or2->add(Condition::create(EQUAL, "sint", 300));
     $or2->add(Condition::create(EQUAL, "sint", 500));
-    $st->setOrderBy("id ASC");
+    $st->setOrderBy("id");
     
     $st->setCondition($or1);
     $st->setCondition($or2);
@@ -346,11 +346,11 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals("2008-01-01", $results[0]->dt);
     $this->assertEquals("2008-01-10", $results[9]->dt);
     
-    $results = $st->setOrderBy("dt DESC")->select();
+    $results = $st->setOrderBy("dt", "desc")->select();
     $this->assertEquals("2008-01-10", $results[0]->dt);
     $this->assertEquals("2008-01-01", $results[9]->dt);
     
-    $results = $st->setOrderBy("SchemaTest.dt DESC")->select();
+    $results = $st->setOrderBy("SchemaTest.dt", "desc")->select();
     $this->assertEquals("2008-01-10", $results[0]->dt);
     $this->assertEquals("2008-01-01", $results[9]->dt);
   }
@@ -358,19 +358,19 @@ class Test_DB_Test extends SabelTestCase
   public function testLimitation()
   {
     $st = MODEL("SchemaTest");
-    $st->setLimit(2)->setOrderBy("id DESC");
+    $st->setLimit(2)->setOrderBy("id", "desc");
     $results = $st->select();
     $this->assertEquals(2, count($results));
     $this->assertEquals("name10", $results[0]->name);
     $this->assertEquals("name_", $results[1]->name);
     
-    $st->setLimit(2)->setOffset(2)->setOrderBy("id DESC");
+    $st->setLimit(2)->setOffset(2)->setOrderBy("id", "desc");
     $results = $st->select();
     $this->assertEquals(2, count($results));
     $this->assertEquals("name8", $results[0]->name);
     $this->assertEquals("name7", $results[1]->name);
     
-    $st->setLimit(2)->setOffset(4)->setOrderBy("id DESC");
+    $st->setLimit(2)->setOffset(4)->setOrderBy("id", "desc");
     $results = $st->select();
     $this->assertEquals(2, count($results));
     $this->assertEquals("name6", $results[0]->name);
@@ -416,7 +416,7 @@ class Test_DB_Test extends SabelTestCase
   public function testBridge()
   {
     $join = new Sabel_Db_Join("StudentCourse");
-    $join->setOrderBy("StudentCourse.student_id ASC, StudentCourse.course_id ASC");
+    $join->setOrderBy("StudentCourse.student_id")->setOrderBy("StudentCourse.course_id");
     $r = $join->setParents(array("Student", "Course"))->select();
     
     $this->assertEquals(7, count($r));
@@ -439,7 +439,7 @@ class Test_DB_Test extends SabelTestCase
   public function testBridgeWithCondition()
   {
     $join = new Sabel_Db_Join("StudentCourse");
-    $join->setOrderBy("StudentCourse.student_id ASC, StudentCourse.course_id ASC");
+    $join->setOrderBy("StudentCourse.student_id")->setOrderBy("StudentCourse.course_id");
     $join->setCondition("Student.id", 1);
     $r = $join->setParents(array("Student", "Course"))->select();
     

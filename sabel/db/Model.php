@@ -411,15 +411,16 @@ abstract class Sabel_Db_Model extends Sabel_Object
   }
   
   /**
-   * @param string $orderBy
+   * @param string $column
+   * @param string $mode
    *
    * @throws Sabel_Exception_InvalidArgument
    * @return self
    */
-  public function setOrderBy($orderBy)
+  public function setOrderBy($column, $mode = "asc")
   {
-    if (is_string($orderBy)) {
-      $this->constraints["order"] = $orderBy;
+    if (is_string($column) || is_string($mode)) {
+      $this->constraints["order"][$column] = strtoupper($mode);
     } else {
       $message = __METHOD__ . "() argument must be a string.";
       throw new Sabel_Exception_InvalidArgument($message);

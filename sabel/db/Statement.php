@@ -28,7 +28,7 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   /**
    * @var const Sabel_Db_Statement
    */
-  protected $type = Sabel_Db_Statement::QUERY;
+  protected $type = self::QUERY;
   
   /**
    * @var string
@@ -103,11 +103,11 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   abstract public function createBlob($binaryData);
   
   /**
-   * @return array
+   * @return string
    */
-  public static function getExecutedQueries()
+  public function __toString()
   {
-    return self::$queries;
+    return $this->build();
   }
   
   /**
@@ -116,6 +116,14 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   public function getDriver()
   {
     return $this->driver;
+  }
+  
+  /**
+   * @return array
+   */
+  public static function getExecutedQueries()
+  {
+    return self::$queries;
   }
   
   /**
@@ -330,27 +338,27 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   
   public function isSelect()
   {
-    return ($this->type === Sabel_Db_Statement::SELECT);
+    return ($this->type === self::SELECT);
   }
   
   public function isInsert()
   {
-    return ($this->type === Sabel_Db_Statement::INSERT);
+    return ($this->type === self::INSERT);
   }
   
   public function isUpdate()
   {
-    return ($this->type === Sabel_Db_Statement::UPDATE);
+    return ($this->type === self::UPDATE);
   }
   
   public function isDelete()
   {
-    return ($this->type === Sabel_Db_Statement::DELETE);
+    return ($this->type === self::DELETE);
   }
   
   public function build()
   {
-    if ($this->metadata === null) {
+    if ($this->type !== self::QUERY && $this->metadata === null) {
       $message = __METHOD__ . "() can't build sql query. "
                . "must set the metadata with setMetadata().";
       
@@ -368,11 +376,6 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     } else {
       return $this->query;
     }
-  }
-  
-  public function __toString()
-  {
-    return $this->build();
   }
   
   protected function createSelectSql()
@@ -429,8 +432,7 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   
   protected function createDeleteSql()
   {
-    $tblName = $this->quoteIdentifier($this->table);
-    return "DELETE FROM $tblName" . $this->where;
+    return "DELETE FROM " . $this->quoteIdentifier($this->table) . $this->where;
   }
   
   protected function createConstraintSql()
@@ -439,7 +441,7 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     $c = $this->constraints;
     
     if (isset($c["order"])) {
-      $sql .= " ORDER BY " . $this->quoteIdentifierForOrderString($c["order"]);
+      $sql .= " ORDER BY " . $this->quoteIdentifierForOrderBy($c["order"]);
     }
     
     if (isset($c["offset"]) && !isset($c["limit"])) {
@@ -495,21 +497,17 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     }
   }
   
-  protected function quoteIdentifierForOrderString($orderBy)
+  protected function quoteIdentifierForOrderBy($orders)
   {
     $results = array();
-    $orders  = array_map("trim", explode(", ", $orderBy));
-    
-    foreach ($orders as $order) {
-      @list ($col, $sort) = explode(" ", $order);
-      if ($sort === null) $sort = "ASC";
-      if (($pos = strpos($col, ".")) !== false) {
-        $tbl = convert_to_tablename(substr($col, 0, $pos));
-        $results[] = $this->quoteIdentifier($tbl) . "."
-                   . $this->quoteIdentifier(substr($col, $pos + 1))
-                   . " " . $sort;
+    foreach ($orders as $column => $mode) {
+      if (($pos = strpos($column, ".")) !== false) {
+        $tblName = convert_to_tablename(substr($column, 0, $pos));
+        $results[] = $this->quoteIdentifier($tblName) . "."
+                   . $this->quoteIdentifier(substr($column, $pos + 1))
+                   . " " . $mode;
       } else {
-        $results[] = $this->quoteIdentifier($col) . " " . $sort;
+        $results[] = $this->quoteIdentifier($column) . " " . $mode;
       }
     }
     

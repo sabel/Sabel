@@ -210,13 +210,14 @@ class Paginator extends Sabel_Object
       }
     }
     
+    $model = $this->model;
     $orders = array();
     
     if (empty($orderColumns)) {
       foreach ($orderValues as $column => $order) {
         $order = strtolower($order);
         if ($order !== "asc" && $order !== "desc") $order = "asc";
-        $orders[] = $column . " " . strtoupper($order);
+        $model->setOrderBy($column, $order);
       }
     } else {
       foreach ($orderColumns as $column) {
@@ -224,12 +225,8 @@ class Paginator extends Sabel_Object
         
         $order = strtolower($orderValues[$column]);
         if ($order !== "asc" && $order !== "desc") $order = "asc";
-        $orders[] = $column . " " . strtoupper($order);
+        $model->setOrderBy($column, $order);
       }
-    }
-    
-    if (!empty($orders)) {
-      $this->model->setOrderBy(implode(", ", $orders));
     }
   }
 }

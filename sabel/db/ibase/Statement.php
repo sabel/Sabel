@@ -105,7 +105,7 @@ class Sabel_Db_Ibase_Statement extends Sabel_Db_Statement
     $c = $this->constraints;
     
     if (isset($c["order"])) {
-      $sql .= " ORDER BY " . $this->quoteIdentifierForOrderString($c["order"]);
+      $sql .= " ORDER BY " . $this->quoteIdentifierForOrderBy($c["order"]);
     }
     
     return $sql;

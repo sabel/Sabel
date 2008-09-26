@@ -103,7 +103,7 @@ class Sabel_Db_Mssql_Statement extends Sabel_Db_Statement
                . $this->metadata->getPrimaryKey() . " ASC";
       }
       
-      $orderBy = " ORDER BY " . $this->quoteIdentifierForOrderString($order);
+      $orderBy = " ORDER BY " . $this->quoteIdentifierForOrderBy($order);
       $sql = "SELECT * FROM (SELECT ROW_NUMBER() OVER({$orderBy}) AS [SBL_RN], $projection "
            . "FROM $tblName" . $this->join . $this->where . ") AS [SBL_TMP] "
            . "WHERE [SBL_RN] BETWEEN " . ($offset + 1) . " AND "
@@ -112,7 +112,7 @@ class Sabel_Db_Mssql_Statement extends Sabel_Db_Statement
       $sql = "SELECT $projection FROM $tblName" . $this->join . $this->where;
       
       if (isset($c["order"])) {
-        $sql .= " ORDER BY " . $this->quoteIdentifierForOrderString($c["order"]);
+        $sql .= " ORDER BY " . $this->quoteIdentifierForOrderBy($c["order"]);
       }
     }
     

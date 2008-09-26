@@ -129,7 +129,7 @@ class Sabel_Db_Oci_Statement extends Sabel_Db_Statement
     $c = $this->constraints;
     
     if (isset($c["order"])) {
-      $sql .= " ORDER BY " . $this->quoteIdentifierForOrderString($c["order"]);
+      $sql .= " ORDER BY " . $this->quoteIdentifierForOrderBy($c["order"]);
     }
     
     $limit  = (isset($c["limit"]))  ? $c["limit"]  : null;

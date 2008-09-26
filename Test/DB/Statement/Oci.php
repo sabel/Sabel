@@ -49,7 +49,7 @@ class Test_DB_Statement_Oci extends SabelTestCase
     $stmt = Sabel_Db::createStatement("default");
     $stmt->type(Sabel_Db_Statement::SELECT);
     $stmt->setMetadata(Sabel_Db_Metadata::getTableInfo("student"));
-    $stmt->constraints(array("order" => "id DESC"));
+    $stmt->constraints(array("order" => array("id" => "DESC")));
     $expected = 'SELECT "ID", "NAME" FROM "STUDENT" ORDER BY "ID" DESC';
     $this->assertEquals($expected, $stmt->getQuery());
   }
@@ -59,7 +59,7 @@ class Test_DB_Statement_Oci extends SabelTestCase
     $stmt = Sabel_Db::createStatement("default");
     $stmt->type(Sabel_Db_Statement::SELECT);
     $stmt->setMetadata(Sabel_Db_Metadata::getTableInfo("student"));
-    $stmt->constraints(array("order" => "id DESC, name ASC"));
+    $stmt->constraints(array("order" => array("id" => "DESC", "name" => "ASC")));
     $expected = 'SELECT "ID", "NAME" FROM "STUDENT" ORDER BY "ID" DESC, "NAME" ASC';
     $this->assertEquals($expected, $stmt->getQuery());
   }
