@@ -79,13 +79,7 @@ class Processor_View extends Sabel_Bus_Processor
     if ($bus->get("noLayout")) {
       $bus->set("result", $contents);
     } else {
-      $layout = DEFAULT_LAYOUT_NAME;
-      if ($response->isFailure()) {
-        $layout = "noColumnLayout";
-      } elseif (isset($responses["layout"])) {
-        $layout = $responses["layout"];
-      }
-      
+      $layout = (isset($responses["layout"])) ? $responses["layout"] : DEFAULT_LAYOUT_NAME;
       if ($location = $view->getValidLocation($layout)) {
         $responses["contentForLayout"] = $contents;
         $bus->set("result", $view->rendering($location, $responses));
