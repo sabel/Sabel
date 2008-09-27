@@ -50,9 +50,7 @@ class Sabel_Response_Redirector extends Sabel_Object
   public function to($uriParameter, $parameters = array())
   {
     $this->parameters = $parameters;
-    
-    $candidate = Sabel_Context::getContext()->getCandidate();
-    return $this->uri($candidate->uri($uriParameter));
+    return $this->uri(uri($uriParameter));
   }
   
   /**
