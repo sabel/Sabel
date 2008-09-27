@@ -30,6 +30,10 @@ class Sabel_Test_TestSuite extends PHPUnit_Framework_TestSuite
     $annotation = $reflection->getAnnotation("fixture");
     
     if (isset($annotation[0])) {
+      if ($method === "downFixture") {
+        $annotation[0] = array_reverse($annotation[0]);
+      }
+      
       try {
         foreach ($annotation[0] as $fixtureName) {
           Sabel::fileUsing($fixtureDir . DS . $this->getFixturePath($fixtureName), true);
