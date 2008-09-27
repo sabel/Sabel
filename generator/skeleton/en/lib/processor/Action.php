@@ -15,7 +15,6 @@ class Processor_Action extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $response   = $bus->get("response");
-    $status     = $response->getStatus();
     $controller = $bus->get("controller");
     
     if ($response->isFailure() || $response->isRedirected()) return;
@@ -32,7 +31,7 @@ class Processor_Action extends Sabel_Bus_Processor
       
       $controller->finalize();
     } catch (Exception $e) {
-      $status->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
+      $response->getStatus()->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
       Sabel_Context::getContext()->setException($e);
     }
     

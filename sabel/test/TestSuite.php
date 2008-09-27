@@ -32,7 +32,7 @@ class Sabel_Test_TestSuite extends PHPUnit_Framework_TestSuite
     if (isset($annotation[0])) {
       try {
         foreach ($annotation[0] as $fixtureName) {
-          Sabel::fileUsing($fixtureDir . DS . $fixtureName . ".php", true);
+          Sabel::fileUsing($fixtureDir . DS . $this->getFixturePath($fixtureName), true);
           $className = "Fixture_" . $fixtureName;
           $fixture = new $className();
           $fixture->$method();
@@ -45,5 +45,20 @@ class Sabel_Test_TestSuite extends PHPUnit_Framework_TestSuite
         }
       }
     }
+  }
+  
+  protected function getFixturePath($fixtureName)
+  {
+    $exp = explode("_", $fixtureName);
+    
+    if (count($exp) === 1) {
+      $path = $exp[0] . ".php";
+    } else {
+      $class = array_pop($exp);
+      $prePath = implode("/", array_map("lcfirst", $exp));
+      $path = $prePath . DIRECTORY_SEPARATOR . $class . ".php";
+    }
+    
+    return $path;
   }
 }

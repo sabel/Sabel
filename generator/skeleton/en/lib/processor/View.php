@@ -63,25 +63,33 @@ class Processor_View extends Sabel_Bus_Processor
       return $bus->set("result", $renderer->rendering($contents, $responses));
     }
     
-    if ($location = $view->getValidLocation()) {
-      $contents = $view->rendering($location, $responses);
-    } elseif (!$controller->isExecuted()) {
-      $response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
-      if ($location = $view->getValidLocation("notFound")) {
+    if ($contents === "") {
+      if ($location = $view->getValidLocation()) {
         $contents = $view->rendering($location, $responses);
-      } else {
-        $contents = "<h1>404 Not Found</h1>";
+      } elseif (!$controller->isExecuted()) {
+        $response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
+        if ($location = $view->getValidLocation("notFound")) {
+          $contents = $view->rendering($location, $responses);
+        } else {
+          $contents = "<h1>404 Not Found</h1>";
+        }
       }
     }
     
     if ($bus->get("noLayout")) {
       $bus->set("result", $contents);
     } else {
-      $layout = (isset($responses["layout"])) ? $responses["layout"] : DEFAULT_LAYOUT_NAME;
+      $layout = DEFAULT_LAYOUT_NAME;
+      if ($response->isFailure()) {
+        $layout = "noColumnLayout";
+      } elseif (isset($responses["layout"])) {
+        $layout = $responses["layout"];
+      }
+      
       if ($location = $view->getValidLocation($layout)) {
         $responses["contentForLayout"] = $contents;
         $bus->set("result", $view->rendering($location, $responses));
-      } else { // no layout.
+      } else {  // no layout.
         $bus->set("result", $contents);
       }
     }
