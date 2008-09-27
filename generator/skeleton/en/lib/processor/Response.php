@@ -73,12 +73,7 @@ class Processor_Response extends Sabel_Bus_Processor
           $to  .= $glue . $session->getName() . "=" . $session->getId();
         }
         
-        $ignored = "";
-        if (defined("URI_IGNORE")) {
-          $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
-        }
-        
-        $response->setLocation($ignored . $to, $_SERVER["SERVER_NAME"]);
+        $response->setLocation($to, $_SERVER["SERVER_NAME"]);
       }
     }
     
