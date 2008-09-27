@@ -133,7 +133,7 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
     if ($host === null) {
       $this->location = $to;
     } else {
-      $this->location = "http://" . $host . "/" . $to;
+      $this->location = "http://" . $host . "/" . ltrim($to, "/");
     }
     
     $this->status->setCode(Sabel_Response::FOUND);
