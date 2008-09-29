@@ -1364,7 +1364,7 @@ Sabel.Element.append = function(element, child, text, attributes) {
 
 	if (typeof child === "string") {
 		child = document.createElement(child);
-		if (text) child.appendChild(document.createTextNode(text));
+		if (text) child.innerHTML = text;
 		if (attributes) {
 			for (var name in attributes)
 				Sabel.Element.setAttr(child, name, attributes[name]);
