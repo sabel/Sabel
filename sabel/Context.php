@@ -67,6 +67,12 @@ class Sabel_Context extends Sabel_Object
     return ($context->bus) ? $context->bus->get("request") : null;
   }
   
+  public static function getResponse()
+  {
+    $context = self::getContext();
+    return ($context->bus) ? $context->bus->get("response") : null;
+  }
+  
   public static function getDestination()
   {
     $context = self::getContext();
@@ -85,9 +91,9 @@ class Sabel_Context extends Sabel_Object
     return ($context->bus) ? $context->bus->get("controller") : null;
   }
   
-  public static function getResponse()
+  public static function getView()
   {
     $context = self::getContext();
-    return ($context->bus) ? $context->bus->get("response") : null;
+    return ($context->bus) ? $context->bus->get("view") : null;
   }
 }
