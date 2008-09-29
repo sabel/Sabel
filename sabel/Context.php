@@ -13,10 +13,9 @@ class Sabel_Context extends Sabel_Object
 {
   protected static $context = null;
   
-  protected $bus        = null;
-  protected $candidate  = null;
-  protected $redirector = null;
-  protected $exception  = null;
+  protected $bus       = null;
+  protected $candidate = null;
+  protected $exception = null;
   
   public static function setContext($context)
   {
@@ -52,16 +51,6 @@ class Sabel_Context extends Sabel_Object
     return $this->candidate;
   }
   
-  public function setRedirector($redirector)
-  {
-    $this->redirector = $redirector;
-  }
-  
-  public function getRedirector()
-  {
-    return $this->redirector;
-  }
-  
   public function setException($exception)
   {
     $this->exception = $exception;
@@ -70,5 +59,35 @@ class Sabel_Context extends Sabel_Object
   public function getException()
   {
     return $this->exception;
+  }
+  
+  public static function getRequest()
+  {
+    $context = self::getContext();
+    return ($context->bus) ? $context->bus->get("request") : null;
+  }
+  
+  public static function getDestination()
+  {
+    $context = self::getContext();
+    return ($context->bus) ? $context->bus->get("destination") : null;
+  }
+  
+  public static function getSession()
+  {
+    $context = self::getContext();
+    return ($context->bus) ? $context->bus->get("session") : null;
+  }
+  
+  public static function getController()
+  {
+    $context = self::getContext();
+    return ($context->bus) ? $context->bus->get("controller") : null;
+  }
+  
+  public static function getResponse()
+  {
+    $context = self::getContext();
+    return ($context->bus) ? $context->bus->get("response") : null;
   }
 }

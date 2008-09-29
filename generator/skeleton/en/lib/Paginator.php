@@ -174,8 +174,7 @@ class Paginator extends Sabel_Object
       $attributes["offset"]  = $offset;
       $attributes["results"] = $model->{$this->method}();
       
-      if ($this->uri === null) {
-        $request = Sabel_Context::getContext()->getBus()->get("request");
+      if ($this->uri === null && $request = Sabel_Context::getRequest()) {
         $attributes["uri"] = get_uri_prefix() . "/" . $request->getUri();
       }
     }
