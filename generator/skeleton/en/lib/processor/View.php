@@ -23,8 +23,8 @@ class Processor_View extends Sabel_Bus_Processor
     list ($m, $c, $a) = $bus->get("destination")->toArray();
     
     $view = new Sabel_View_Object("controller", new Sabel_View_Location_File(
-      $m . DS . VIEW_DIR_NAME . DS . $c . DS)
-    );
+      $m . DS . VIEW_DIR_NAME . DS . $c . DS
+    ));
     
     $view->addLocation("module", new Sabel_View_Location_File($m . DS . VIEW_DIR_NAME . DS));
     $view->addLocation("app", new Sabel_View_Location_File(VIEW_DIR_NAME . DS));
