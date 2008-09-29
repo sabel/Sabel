@@ -82,14 +82,16 @@ class Sabel_Request_Internal extends Sabel_Object
     $request->method($this->method);
     $request->values($this->values);
     
-    $bus = new Sabel_Bus();
-    $bus->set("request",  $request);
-    $bus->set("session",  $currentBus->get("session"));
-    $bus->set("noLayout", !$this->withLayout);
+    Sabel_Context::setContext(new Sabel_Context());
     
-    $context = new Sabel_Context();
-    $context->setBus($bus);
-    Sabel_Context::setContext($context);
+    $bus = new Sabel_Bus();
+    $bus->set("request",   $request);
+    $bus->set("session",   $currentBus->get("session"));
+    $bus->set("NO_LAYOUT", !$this->withLayout);
+    
+    //$context = new Sabel_Context();
+    //$context->setBus($bus);
+    //Sabel_Context::setContext($context);
     
     if ($config === null) {
       $config = new Config_Bus();

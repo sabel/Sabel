@@ -5,7 +5,6 @@ class TestProcessor_Executer extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $response   = $bus->get("response");
-    $status     = $response->getStatus();
     $controller = $bus->get("controller");
     
     if ($response->isFailure() || $response->isRedirected()) return;
@@ -16,16 +15,18 @@ class TestProcessor_Executer extends Sabel_Bus_Processor
     try {
       $controller->initialize();
       
-      if ($response->isFailure() || $response->isRedirected()) return;
+      if ($response->isSuccess() && !$response->isRedirected()) {
+        $controller->execute();
+      }
       
-      $controller->execute();
+      $controller->finalize();
     } catch (Exception $e) {
-      $status->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
+      $response->getStatus()->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
       Sabel_Context::getContext()->setException($e);
     }
     
     if ($controller->getAttribute("layout") === false) {
-      $bus->set("noLayout", true);
+      $bus->set("NO_LAYOUT", true);
     }
   }
 }

@@ -35,7 +35,7 @@ class Test_Response_Redirector extends SabelTestCase
     $redirector = new Sabel_Response_Redirector();
     $redirector->to("a: test");
     $this->assertTrue($redirector->isRedirected());
-    $this->assertEquals("index/test", $redirector->getUri());
+    $this->assertEquals("/index/test", $redirector->getUri());
   }
   
   public function testRedirectByUrl()
@@ -52,7 +52,7 @@ class Test_Response_Redirector extends SabelTestCase
     $redirector->to("a: test", array("page" => "1"));
     $this->assertTrue($redirector->isRedirected());
     $this->assertTrue($redirector->hasParameters());
-    $this->assertEquals("index/test?page=1", $redirector->getUri());
+    $this->assertEquals("/index/test?page=1", $redirector->getUri());
   }
   
   public function testUriParameter()
@@ -61,7 +61,7 @@ class Test_Response_Redirector extends SabelTestCase
     $redirector->to("n: default");
     $this->assertTrue($redirector->isRedirected());
     //$this->assertEquals("index/index", $redirector->getUri());
-    $this->assertEquals("", $redirector->getUri());
+    $this->assertEquals("/", $redirector->getUri());
   }
   
   protected function routing($config)

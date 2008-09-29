@@ -22,14 +22,12 @@ class Processor_View extends Sabel_Bus_Processor
   {
     list ($m, $c, $a) = $bus->get("destination")->toArray();
     
-    $controller = new Sabel_View_Location_File($m . DS . VIEW_DIR_NAME . DS . $c . DS);
-    $view = new Sabel_View_Object("controller", $controller);
+    $view = new Sabel_View_Object("controller", new Sabel_View_Location_File(
+      $m . DS . VIEW_DIR_NAME . DS . $c . DS)
+    );
     
-    $module = new Sabel_View_Location_File($m . DS . VIEW_DIR_NAME . DS);
-    $view->addLocation("module", $module);
-    
-    $app = new Sabel_View_Location_File(VIEW_DIR_NAME . DS);
-    $view->addLocation("app", $app);
+    $view->addLocation("module", new Sabel_View_Location_File($m . DS . VIEW_DIR_NAME . DS));
+    $view->addLocation("app", new Sabel_View_Location_File(VIEW_DIR_NAME . DS));
     
     if ($renderer = $bus->get("renderer")) {
       $view->setRenderer($renderer);
@@ -38,7 +36,6 @@ class Processor_View extends Sabel_Bus_Processor
     }
     
     $this->view = $view;
-    
     $bus->set("view", $view);
     $bus->get("controller")->setAttribute("view", $view);
   }
@@ -55,13 +52,8 @@ class Processor_View extends Sabel_Bus_Processor
     $view = $this->getView(
       $response->getStatus(),
       $bus->get("destination")->getAction(),
-      $bus->get("isAjaxRequest") === true
+      $bus->get("IS_AJAX_REQUEST") === true
     );
-    
-    if (isset($responses["renderText"]) && $responses["renderText"]) {
-      $renderer = $view->getRenderer();
-      return $bus->set("result", $renderer->rendering($contents, $responses));
-    }
     
     if ($contents === "") {
       if ($location = $view->getValidLocation()) {
@@ -76,7 +68,7 @@ class Processor_View extends Sabel_Bus_Processor
       }
     }
     
-    if ($bus->get("noLayout")) {
+    if ($bus->get("NO_LAYOUT")) {
       $bus->set("result", $contents);
     } else {
       $layout = (isset($responses["layout"])) ? $responses["layout"] : DEFAULT_LAYOUT_NAME;

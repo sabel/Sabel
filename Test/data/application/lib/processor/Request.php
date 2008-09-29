@@ -39,8 +39,8 @@ class TestProcessor_Request extends Sabel_Bus_Processor
     }
     
     if ($request->getHttpHeader("X-Requested-With") === "XMLHttpRequest") {
-      $bus->set("noLayout",      true);
-      $bus->set("isAjaxRequest", true);
+      $bus->set("NO_LAYOUT", true);
+      $bus->set("IS_AJAX_REQUEST", true);
     }
   }
 }

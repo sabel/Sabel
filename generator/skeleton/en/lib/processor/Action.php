@@ -36,7 +36,7 @@ class Processor_Action extends Sabel_Bus_Processor
     }
     
     if ($controller->getAttribute("layout") === false) {
-      $bus->set("noLayout", true);
+      $bus->set("NO_LAYOUT", true);
     }
   }
 }
