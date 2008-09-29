@@ -13,22 +13,6 @@ if (!defined("ENVIRONMENT")) {
   exit;
 }
 
-if (strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
-  $ignore = str_replace($_SERVER["SCRIPT_NAME"], "", $_SERVER["REQUEST_URI"]);
-  $_SERVER["REQUEST_URI"] = ltrim($ignore, "/");
-  define("URI_IGNORE", $ignore);
-} elseif (isset($_GET[NO_REWRITE_PREFIX])) {
-  $_uri = substr(ltrim($_SERVER["REQUEST_URI"], "/"), strlen(NO_REWRITE_PREFIX) + 2);
-  $_SERVER["REQUEST_URI"] = $_uri;
-  $parsed = parse_url($_SERVER["REQUEST_URI"]);
-  if (isset($parsed["query"])) {
-    parse_str($parsed["query"], $_GET);
-  }
-  
-  unset($_GET[NO_REWRITE_PREFIX]);
-  define("NO_REWRITE", true);
-}
-
 if ((ENVIRONMENT & PRODUCTION) > 0) {
   Sabel::init();
   echo Sabel_Bus::create()->run(new Config_Bus());

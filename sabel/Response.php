@@ -74,7 +74,7 @@ interface Sabel_Response
   public function isFailure();     // 4xx or 5xx
   
   public function getLocation();
-  public function setLocation($to, $host = null);
+  public function setLocation($location);
   
   public function setResponse($name, $value);
   public function getResponse($name);

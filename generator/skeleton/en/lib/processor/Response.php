@@ -55,25 +55,27 @@ class Processor_Response extends Sabel_Bus_Processor
       if (($url = $redirector->getUrl()) !== "") {
         $response->setLocation($url);
       } else {
-        $session   = $bus->get("session");
         $token     = $bus->get("request")->getValueWithMethod("token");
         $hasToken  = !empty($token);
         $hasParams = $redirector->hasParameters();
+        $location  = $redirector->getUri();
         
-        if (!$hasToken) {
-          $to = $redirector->getUri();
-        } elseif ($hasParams) {
-          $to = $redirector->getUri() . "&token={$token}";
-        } else {
-          $to = $redirector->getUri() . "?token={$token}";
+        if ($hasToken) {
+          $glue = ($hasParams) ? "&" : "?";
+          $location .= $glue . "token={$token}";
         }
         
+        $session = $bus->get("session");
         if ($session->isStarted() && !$session->isCookieEnabled()) {
           $glue = ($hasToken || $hasParams) ? "&" : "?";
-          $to  .= $glue . $session->getName() . "=" . $session->getId();
+          $location .= $glue . $session->getName() . "=" . $session->getId();
         }
         
-        $response->setLocation($to, $_SERVER["SERVER_NAME"]);
+        if (function_exists("get_uri_prefix")) {
+          $location = get_uri_prefix() . "/" . ltrim($location, "/");
+        }
+        
+        $response->setLocation($location);
       }
     }
     

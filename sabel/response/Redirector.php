@@ -49,8 +49,14 @@ class Sabel_Response_Redirector extends Sabel_Object
    */
   public function to($uriParameter, $parameters = array())
   {
-    $this->parameters = $parameters;
-    return $this->uri(uri($uriParameter));
+    $context = Sabel_Context::getContext();
+    $uri = $context->getCandidate()->uri($uriParameter);
+    
+    if ($this->parameters = $parameters) {
+      $uri .= "?" . http_build_query($this->parameters, "", "&");
+    }
+    
+    return $this->uri($uri);
   }
   
   /**
@@ -79,13 +85,8 @@ class Sabel_Response_Redirector extends Sabel_Object
    */
   public function uri($uri)
   {
+    $this->uri = "/" . ltrim($uri, "/");
     $this->redirected = true;
-    
-    if ($this->hasParameters()) {
-      $this->uri = $uri . "?" . http_build_query($this->parameters, "", "&");
-    } else {
-      $this->uri = $uri;
-    }
     
     return $this->uri;
   }

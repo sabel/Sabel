@@ -135,31 +135,6 @@ function l($message, $level = SBL_LOG_INFO, $identifier = "default")
   Sabel_Logger::create()->write($message, $level, $identifier);
 }
 
-function uri($uriParameter, $secure = false, $absolute = false)
-{
-  $context   = Sabel_Context::getContext();
-  $uriPrefix = get_uri_prefix($secure, $absolute);
-  
-  return $uriPrefix . "/" . $context->getCandidate()->uri($uriParameter);
-}
-
-function get_uri_prefix($secure = false, $absolute = false)
-{
-  $uriPrefix = "";
-  
-  if ($secure || $absolute) {
-    $uriPrefix = (($secure) ? "https" : "http") . "://" . $_SERVER["SERVER_NAME"];
-  }
-  
-  if (defined("URI_IGNORE")) {
-    $uriPrefix .= $_SERVER["SCRIPT_NAME"];
-  } elseif (defined("NO_REWRITE")) {
-    $uriPrefix .= "?" . NO_REWRITE_PREFIX . "=";
-  }
-  
-  return $uriPrefix;
-}
-
 function normalize_uri($uri)
 {
   $uri = trim(preg_replace("@/{2,}@", "/", $uri), "/");

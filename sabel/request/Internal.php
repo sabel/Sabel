@@ -59,13 +59,23 @@ class Sabel_Request_Internal extends Sabel_Object
   
   public function request($uri, Sabel_Bus_Config $config = null)
   {
-    if (strpos($uri, ":")) {
-      $uri = uri($uri);
+    if ($config === null) {
+      if (class_exists("Config_Bus", false)) {
+        $config = new Config_Bus();
+      } else {
+        $message = __METHOD__ . "() class Config_Bus not found.";
+        throw new Sabel_Exception_Runtime($message);
+      }
     }
     
-    $uri = "http://localhost/{$uri}";
-    $parsedUri = parse_url($uri);
-    $request = new Sabel_Request_Object(ltrim($parsedUri["path"], "/"));
+    if (strpos($uri, ":")) {
+      $context = Sabel_Context::getContext();
+      $uri = $context->getCandidate()->uri($uri);
+    } else {
+      $uri = ltrim($uri, "/");
+    }
+    
+    $request = new Sabel_Request_Object($uri);
     
     if (isset($parsedUri["query"])) {
       parse_str($parsedUri["query"], $get);
@@ -78,7 +88,6 @@ class Sabel_Request_Internal extends Sabel_Object
     
     $currentContext = Sabel_Context::getContext();
     $currentBus = $currentContext->getBus();
-    
     $request->method($this->method);
     $request->values($this->values);
     
@@ -88,16 +97,12 @@ class Sabel_Request_Internal extends Sabel_Object
     $bus->set("request",   $request);
     $bus->set("session",   $currentBus->get("session"));
     $bus->set("NO_LAYOUT", !$this->withLayout);
-    
-    if ($config === null) {
-      $config = new Config_Bus();
-    }
-    
     $bus->run($config);
     
     $this->response["response"] = $bus->get("response");
     $this->response["result"]   = $bus->get("result");
     
+    // restore context.
     $currentContext->setBus($currentBus);
     Sabel_Context::setContext($currentContext);
     

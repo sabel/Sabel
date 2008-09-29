@@ -280,9 +280,11 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     if (empty($key)) return null;
     
     $result = null;
-    $values = array($this->fetchPostValues(),
-                    $this->fetchGetValues(),
-                    $this->fetchParameterValues());
+    $values = array(
+      $this->fetchPostValues(),
+      $this->fetchGetValues(),
+      $this->fetchParameterValues()
+    );
     
     foreach ($values as $value) {
       if (isset($value[$key])) {

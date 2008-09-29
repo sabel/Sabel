@@ -128,14 +128,9 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
     $this->setHeader("Pragma", "");
   }
   
-  public function setLocation($to, $host = null)
+  public function setLocation($location)
   {
-    if ($host === null) {
-      $this->location = $to;
-    } else {
-      $this->location = "http://" . $host . "/" . ltrim($to, "/");
-    }
-    
+    $this->location = $location;
     $this->status->setCode(Sabel_Response::FOUND);
     
     return $this;

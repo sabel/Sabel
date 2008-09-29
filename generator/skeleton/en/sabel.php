@@ -14,6 +14,7 @@ if (!defined("ENVIRONMENT")) {
 
 $_SERVER["HTTP_HOST"]   = "localhost";
 $_SERVER["SERVER_NAME"] = "localhost";
+$_SERVER["REQUEST_URI"] = "/";
 
 if (isset($_SERVER["argv"][2])) {
   $_SERVER["REQUEST_METHOD"] = strtoupper($_SERVER["argv"][2]);
@@ -32,8 +33,6 @@ if (isset($_SERVER["argv"][1])) {
       parse_str($parsed["query"], $_GET);
     }
   }
-} else {
-  $_SERVER["REQUEST_URI"] = "/";
 }
 
 if ((ENVIRONMENT & PRODUCTION) > 0) {

@@ -89,12 +89,4 @@ class Test_Response_Object extends SabelTestCase
     $status->setCode(Sabel_Response::FORBIDDEN);
     $this->assertTrue($status->isFailure());
   }
-  
-  public function testHeaderLocation()
-  {
-    $response = new Sabel_Response_Object();
-    $response->setLocation("index/index", "localhost");
-    $this->assertTrue($response->getStatus()->isRedirect());
-    $this->assertEquals("http://localhost/index/index", $response->getLocation());
-  }
 }
