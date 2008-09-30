@@ -90,6 +90,7 @@ class Sabel_Http_Request extends Sabel_Object
         $this->getValues[$key] = $value;
         break;
       case "POST":
+      case "XML-RPC":
         $this->postValues[$key] = $value;
         break;
     }
@@ -244,10 +245,20 @@ class Sabel_Http_Request extends Sabel_Object
   protected function buildBody()
   {
     $body = "";
+    $headers =& $this->headers;
     
-    if ($this->method === "GET") {
+    if ($this->method === "XML-RPC") {
+      if (isset($this->postValues["xml"])) {
+        $headers["Content-Length"] = strlen($this->postValues["xml"]);
+        return $this->postValues["xml"];
+      } else {
+        $message = __METHOD__ . "() xml value not found.";
+        throw new Sabel_Exception_Runtime($message);
+      }
+    } elseif ($this->method === "GET") {
       unset($this->headers["Content-Type"]);
       unset($this->headers["Content-Length"]);
+      
       return $body;
     }
     
@@ -279,12 +290,12 @@ class Sabel_Http_Request extends Sabel_Object
       
       $body[] = "--{$boundary}--";
       $body = implode("\r\n", $body);
-      $this->headers["Content-Type"] = "multipart/form-data; boundary=\"{$boundary}\"";
-      $this->headers["Content-Length"] = strlen($body);
+      $headers["Content-Type"] = "multipart/form-data; boundary=\"{$boundary}\"";
+      $headers["Content-Length"] = strlen($body);
     } elseif ($hasValues) {
       $body = http_build_query($this->postValues, "", "&");
-      $this->headers["Content-Type"] = "application/x-www-form-urlencoded";
-      $this->headers["Content-Length"] = strlen($body);
+      $headers["Content-Type"] = "application/x-www-form-urlencoded";
+      $headers["Content-Length"] = strlen($body);
     }
     
     return $body;
