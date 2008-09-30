@@ -85,5 +85,7 @@ class Sabel_ValueObject extends Sabel_Object
       
       throw new Sabel_Exception_InvalidArgument($message);
     }
+    
+    return $this;
   }
 }
