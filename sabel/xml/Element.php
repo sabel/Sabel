@@ -172,7 +172,7 @@ class Sabel_Xml_Element extends Sabel_Object
   
   public function select($query)
   {
-    $_exp = explode(" ", $query);
+    $_exp = explode(" ", trim($query));
     
     if ($_exp[1] === ".") {
       $target = "../" . $this->tagName;
@@ -184,7 +184,11 @@ class Sabel_Xml_Element extends Sabel_Object
     unset($_exp[1]);
     unset($_exp[2]);
     
-    return $this->xpath($target . "[" . Sabel_Xml_Query::toXpath(implode(" ", $_exp)) . "]");
+    if (empty($_exp)) {
+      return $this->xpath($target);
+    } else {
+      return $this->xpath($target . "[" . Sabel_Xml_Query::toXpath(implode(" ", $_exp)) . "]");
+    }
   }
   
   public function delete($query)
