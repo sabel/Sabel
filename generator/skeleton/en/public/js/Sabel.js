@@ -740,7 +740,8 @@ Sabel.Function.delay = function(method, delay) {
 	var args = Sabel.Array(arguments);
 	method = args.shift();
 	delay  = args.shift() || 1000;
-	setTimeout(function() { method.apply(method, args); }, delay);
+	scope  = args.shift() || method;
+	setTimeout(function() { method.apply(scope, args); }, delay);
 };
 
 Sabel.Function.curry = function() {
