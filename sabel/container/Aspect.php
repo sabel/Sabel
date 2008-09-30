@@ -39,6 +39,7 @@ final class Sabel_Container_Aspect
   public function annotate($className, array $intercepters)
   {
     $this->annotatedClasses[$className] = $intercepters;
+    return $this;
   }
   
   public function hasAnnotated()

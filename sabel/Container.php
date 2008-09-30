@@ -323,10 +323,6 @@ class Sabel_Container
     
     $resultInstance = $this->processAnnotatedAspect($instance, $reflection);
     
-    if ($reflection->getName() === "Sabel_Test_Aspect_SimpleUsage_Person") {
-      // dump($resultInstance);
-    }
-    
     if ($resultInstance !== null) {
       return $resultInstance;
     }
