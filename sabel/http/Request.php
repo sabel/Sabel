@@ -352,17 +352,17 @@ class Sabel_Http_Request extends Sabel_Object
       }
     }
     
-    $httpVer = $this->config["httpVersion"];
+    $method = strtoupper($this->method);
+    if ($method === "XML-RPC") $method = "POST";
+    
     $request = array();
+    $httpVer = $this->config["httpVersion"];
     
     if ($this->config["useProxy"]) {
-      $request[] = strtoupper($this->method)
-                 . " {$uri->scheme}://{$uri->host}:{$uri->port}{$path} "
-                 . "HTTP/{$httpVer}";
-      
+      $request[] = "{$method} {$uri->scheme}://{$uri->host}:{$uri->port}{$path} HTTP/{$httpVer}";
       $request[] = "Host: " . $uri->host;
     } else {
-      $request[] = strtoupper($this->method) . " {$path} HTTP/{$httpVer}";
+      $request[] = "{$method} {$path} HTTP/{$httpVer}";
       $request[] = "Host: " . $uri->host;
     }
     
