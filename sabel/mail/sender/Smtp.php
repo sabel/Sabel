@@ -54,8 +54,8 @@ class Sabel_Mail_Sender_Smtp
     $this->sendRcptTo($headers);
     $this->command("DATA", "354");
     $this->sendHeaders($headers);
-    $this->command($this->eol . $body);
-    $this->command($this->eol . ".", "250");
+    $this->command($this->eol . $body . $this->eol);
+    $this->command(".", "250");
   }
   
   protected function connect()
