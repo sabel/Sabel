@@ -273,6 +273,8 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     foreach (scandir($target) as $item) {
       if ($item === "." || $item === "..") continue;
       $path = $target . DS . $item;
+      if (is_link($path)) continue;
+      
       if (is_file($path)) {
         $size += filesize($path);
       } else {
