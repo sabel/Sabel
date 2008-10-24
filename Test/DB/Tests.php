@@ -64,6 +64,10 @@ class Test_DB_Tests
       $suite->addTest(Test_DB_Pgsql::suite());
     }
     
+    if (extension_loaded("pdo_mysql")) {
+      $suite->addTest(Test_DB_PdoMysql::suite());
+    }
+    
     if (extension_loaded("pdo_pgsql")) {
       $suite->addTest(Test_DB_PdoPgsql::suite());
     }
@@ -72,9 +76,9 @@ class Test_DB_Tests
       $suite->addTest(Test_DB_Ibase::suite());
     }
     
-    if (extension_loaded("mssql")) {
-      $suite->addTest(Test_DB_Mssql::suite());
-    }
+    //if (extension_loaded("mssql")) {
+    //  $suite->addTest(Test_DB_Mssql::suite());
+    //}
     
     if (extension_loaded("oci8")) {
       $suite->addTest(Test_DB_Oci::suite());
@@ -82,10 +86,6 @@ class Test_DB_Tests
     
     if (extension_loaded("pdo_sqlite")) {
       $suite->addTest(Test_DB_SQLite::suite());
-    }
-    
-    if (extension_loaded("pdo_mysql")) {
-      $suite->addTest(Test_DB_PdoMysql::suite());
     }
     
     if (extension_loaded("pdo_oci")) {

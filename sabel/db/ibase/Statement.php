@@ -19,6 +19,7 @@ class Sabel_Db_Ibase_Statement extends Sabel_Db_Statement
   public function values(array $values)
   {
     $columns = $this->metadata->getColumns();
+    
     foreach ($values as $k => &$v) {
       if (isset($columns[$k]) && $columns[$k]->isBinary()) {
         $v = $this->createBlob($v);

@@ -18,9 +18,16 @@ class Sabel_Db_Oci_Statement extends Sabel_Db_Statement
     $this->driver = $driver;
   }
   
+  public function clear()
+  {
+    $this->blobs = array();
+    return parent::clear();
+  }
+  
   public function values(array $values)
   {
     $columns = $this->metadata->getColumns();
+    
     foreach ($values as $k => &$v) {
       if (isset($columns[$k]) && $columns[$k]->isBinary()) {
         $this->blobs[$k] = $this->createBlob($v);
@@ -34,13 +41,7 @@ class Sabel_Db_Oci_Statement extends Sabel_Db_Statement
     return $this;
   }
   
-  public function clear()
-  {
-    $this->blobs = array();
-    return parent::clear();
-  }
-  
-  public function execute($bindValues = array(), $additionalParameters = array())
+  public function execute($bindValues = array(), $additionalParameters = array(), $query = null)
   {
     $query = $this->getQuery();
     $blobs = $this->blobs;
@@ -56,9 +57,8 @@ class Sabel_Db_Oci_Statement extends Sabel_Db_Statement
       $query .= " RETURNING " . implode(", ", $cols) . " INTO " . implode(", ", $hlds);
     }
     
-    $this->query = $query;
     $additionalParameters["blob"] = $blobs;
-    return parent::execute($bindValues, $additionalParameters);
+    return parent::execute($bindValues, $additionalParameters, $query);
   }
   
   public function escape(array $values)

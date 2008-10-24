@@ -11,22 +11,42 @@
  */
 class Sabel_Db_Mysql_Statement extends Sabel_Db_Statement
 {
+  protected $binaries = array();
+  
   public function __construct(Sabel_Db_Mysql_Driver $driver)
   {
     $this->driver = $driver;
   }
   
+  public function clear()
+  {
+    $this->binaries = array();
+    return parent::clear();
+  }
+  
   public function values(array $values)
   {
+    $columns = $this->metadata->getColumns();
+    
     if ($this->isInsert()) {
-      foreach ($this->metadata->getColumns() as $colName => $column) {
+      foreach ($columns as $colName => $column) {
         if (!isset($values[$colName]) && $this->isVarcharOfDefaultNull($column)) {
           $values[$colName] = null;
         }
       }
     }
     
-    return parent::values($values);
+    foreach ($values as $k => &$v) {
+      if (isset($columns[$k]) && $columns[$k]->isBinary()) {
+        $this->binaries[] = $this->createBlob($v);
+        $v = new Sabel_Db_Statement_Expression($this, "__sbl_binary" . count($this->binaries));
+      }
+    }
+    
+    $this->values = $values;
+    $this->appendBindValues($values);
+    
+    return $this;
   }
   
   public function escape(array $values)
@@ -42,6 +62,21 @@ class Sabel_Db_Mysql_Statement extends Sabel_Db_Statement
     }
     
     return $values;
+  }
+  
+  public function execute($bindValues = array(), $additionalParameters = array(), $query = null)
+  {
+    $query = $this->getQuery();
+    
+    if (!empty($this->binaries)) {
+      for ($i = 0, $c = count($this->binaries); $i < $c; $i++) {
+        $query = str_replace("__sbl_binary" . ($i + 1),
+                             $this->binaries[$i]->getData(),
+                             $query);
+      }
+    }
+    
+    return parent::execute($bindValues, $additionalParameters, $query);
   }
   
   public function createBlob($binary)

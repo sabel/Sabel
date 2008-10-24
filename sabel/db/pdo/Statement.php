@@ -19,9 +19,17 @@ abstract class Sabel_Db_Pdo_Statement extends Sabel_Db_Statement
     $this->driver = $driver;
   }
   
+  public function setBindValue($key, $val)
+  {
+    $this->bindValues[":{$key}"] = $val;
+    
+    return $this;
+  }
+  
   public function values(array $values)
   {
     $columns = $this->metadata->getColumns();
+    
     foreach ($values as $k => &$v) {
       if (isset($columns[$k]) && $columns[$k]->isBinary()) {
         $v = $this->createBlob($v);
@@ -34,23 +42,10 @@ abstract class Sabel_Db_Pdo_Statement extends Sabel_Db_Statement
     return $this;
   }
   
-  public function execute($bindValues = array(), $additionalParameters = array())
+  public function execute($bindValues = array(), $additionalParameters = array(), $query = null)
   {
-    $this->query = preg_replace('/@([a-zA-Z0-9_]+)@/', ':$1', $this->getQuery());
-    
-    if (empty($bindValues)) {
-      if (empty($this->bindValues)) {
-        $bindValues = array();
-      } else {
-        $bindValues = $this->escape($this->bindValues);
-        foreach ($bindValues as $k => $v) {
-          $bindValues[":{$k}"] = $v;
-          unset($bindValues[$k]);
-        }
-      }
-    }
-    
-    return parent::execute($bindValues, $additionalParameters);
+    $query = preg_replace('/@([a-zA-Z0-9_]+)@/', ':$1', $this->getQuery());
+    return parent::execute($bindValues, $additionalParameters, $query);
   }
   
   public function createBlob($binary)

@@ -18,8 +18,6 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   const DELETE = 0x08;
   const QUERY  = 0x10;
   
-  const BINARY_IDENTIFIER = "__SBL_BINARY";
-  
   /**
    * @var array
    */
@@ -49,11 +47,6 @@ abstract class Sabel_Db_Statement extends Sabel_Object
    * @var array
    */
   protected $bindValues = array();
-  
-  /**
-   * @var array
-   */
-  protected $binaries = array();
   
   /**
    * @var string
@@ -94,6 +87,13 @@ abstract class Sabel_Db_Statement extends Sabel_Object
    * @var boolean
    */
   protected $forUpdate = false;
+  
+  /**
+   * @param array $values
+   *
+   * @return self
+   */
+  abstract public function values(array $values);
   
   /**
    * @param string $binaryData
@@ -146,7 +146,6 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   {
     $this->query       = "";
     $this->bindValues  = array();
-    $this->binaries    = array();
     $this->projection  = array();
     $this->join        = "";
     $this->where       = "";
@@ -230,22 +229,6 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     return $this;
   }
   
-  public function values(array $values)
-  {
-    $columns = $this->metadata->getColumns();
-    foreach ($values as $k => &$v) {
-      if (isset($columns[$k]) && $columns[$k]->isBinary()) {
-        $this->binaries[] = $this->createBlob($v);
-        $v = new Sabel_Db_Statement_Expression($this, self::BINARY_IDENTIFIER . count($this->binaries));
-      }
-    }
-    
-    $this->values = $values;
-    $this->appendBindValues($values);
-    
-    return $this;
-  }
-  
   public function sequenceColumn($seqColumn)
   {
     if ($seqColumn === null) {
@@ -265,41 +248,29 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     if (is_bool($bool)) {
       $this->forUpdate = $bool;
     } else {
-      $message = __METHOD__ . "() argument must be a string.";
+      $message = __METHOD__ . "() argument must be a boolean.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
-  public function execute($bindValues = array(), $additionalParameters = array())
+  public function execute($bindValues = array(), $additionalParameters = array(), $query = null)
   {
-    $query = $this->getQuery();
-    
-    if (empty($bindValues)) {
-      if (empty($this->bindValues)) {
-        $bindValues = array();
-      } else {
-        $bindValues = $this->escape($this->bindValues);
-        foreach ($bindValues as $k => $v) {
-          $bindValues["@{$k}@"] = $v;
-          unset($bindValues[$k]);
-        }
-      }
+    if ($query === null) {
+      $query = $this->getQuery();
     }
     
-    if (!empty($this->binaries)) {
-      for ($i = 0, $c = count($this->binaries); $i < $c; $i++) {
-        $query = str_replace(self::BINARY_IDENTIFIER . ($i + 1),
-                             $this->binaries[$i]->getData(),
-                             $query);
-      }
+    if (empty($bindValues)) {
+      $bindValues = (empty($this->bindValues)) ? array() : $this->escape($this->bindValues);
     }
     
     $start  = microtime(true);
     $result = $this->driver->execute($query, $bindValues, $additionalParameters);
     
-    self::$queries[] = array("sql"   => $query,
-                             "time"  => microtime(true) - $start,
-                             "binds" => $bindValues);
+    self::$queries[] = array(
+      "sql"   => $query,
+      "time"  => microtime(true) - $start,
+      "binds" => $bindValues
+    );
     
     if ($this->isInsert()) {
       return ($this->seqColumn === null) ? null : $this->driver->getLastInsertId();
@@ -312,16 +283,15 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   
   public function setBindValue($key, $val)
   {
-    $this->bindValues[$key] = $val;
+    $this->bindValues["@{$key}@"] = $val;
     
     return $this;
   }
   
   public function setBindValues(array $values)
   {
-    $this->bindValues = $values;
-    
-    return $this;
+    $this->bindValues = array();
+    return $this->appendBindValues($values);
   }
   
   public function getBindValues()
@@ -331,7 +301,9 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   
   public function appendBindValues(array $values)
   {
-    $this->bindValues = array_merge($this->bindValues, $values);
+    foreach ($values as $key => $val) {
+      $this->setBindValue($key, $val);
+    }
     
     return $this;
   }

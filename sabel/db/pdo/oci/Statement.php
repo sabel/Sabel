@@ -35,7 +35,7 @@ class Sabel_Db_Pdo_Oci_Statement extends Sabel_Db_Pdo_Statement
     return parent::clear();
   }
   
-  public function execute($bindValues = array(), $additionalParameters = array())
+  public function execute($bindValues = array(), $additionalParameters = array(), $query = null)
   {
     $query = $this->getQuery();
     $blobs = $this->blobs;

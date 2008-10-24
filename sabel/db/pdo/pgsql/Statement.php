@@ -11,7 +11,7 @@
  */
 class Sabel_Db_Pdo_Pgsql_Statement extends Sabel_Db_Pdo_Statement
 {
-  public function execute($bindValues = array(), $additionalParameters = array())
+  public function execute($bindValues = array(), $additionalParameters = array(), $query = null)
   {
     $result = parent::execute($bindValues, $additionalParameters);
     if (!$this->isSelect() || empty($result)) return $result;
