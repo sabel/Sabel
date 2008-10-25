@@ -16,7 +16,7 @@ class Sabel_ValueObject extends Sabel_Object
   public static function fromArray(array $values)
   {
     $self = new self();
-    $self->values = $values;
+    $self->addValues($values);
     
     return $self;
   }
@@ -55,6 +55,13 @@ class Sabel_ValueObject extends Sabel_Object
     return ($this->get($key) !== null);
   }
   
+  public function addValues(array $values)
+  {
+    foreach ($values as $key => $val) {
+      $this->set($key, $val);
+    }
+  }
+  
   public function has($key)
   {
     return isset($this->values[$key]);
@@ -76,9 +83,9 @@ class Sabel_ValueObject extends Sabel_Object
   public function merge($values)
   {
     if (is_array($values)) {
-      $this->values = array_merge($this->values, $values);
+      $this->addValues($values);
     } elseif ($values instanceof self) {
-      $this->values = array_merge($this->values, $values->toArray());
+      $this->addValues($values->toArray());
     } else {
       $message = __METHOD__ . "() argument must be an array or "
                . "an instanceof Sabel_ValueObject";

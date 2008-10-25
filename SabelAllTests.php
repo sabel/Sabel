@@ -55,6 +55,7 @@ require_once ("Sabel.php");
 require_once ("Test/SabelTestCase.php");
 require_once ("Test/Application.php");
 require_once ("Test/Object.php");
+require_once ("Test/ValueObject.php");
 require_once ("Test/Console.php");
 require_once ("Test/Annotation.php");
 require_once ("Test/Aspect/Tests.php");
@@ -101,6 +102,7 @@ class SabelAllTests
     }
     
     $suite->addTest(Test_Object::suite());
+    $suite->addTest(Test_ValueObject::suite());
     $suite->addTest(Test_Console::suite());
     $suite->addTest(Test_Bus_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
