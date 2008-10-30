@@ -220,6 +220,7 @@ Sabel.UserAgent = new function() {
 				case 5.1: return "5.01";
 				case 5.6: return "6.0";
 				case 5.7: return "7.0";
+				case 5.8: return "8.0";
 				default: return @_jscript_version;
 			}
 		}
@@ -2120,8 +2121,15 @@ Sabel.Ajax.prototype = {
 		xmlhttp.onreadystatechange = Sabel.Function.bind(this.onStateChange, this);
 
 		this.setRequestHeaders();
+		if (options.timeout) {
+			if (typeof xmlhttp.timeout !== "undefined") {
+				xmlhttp.timeout   = options.timeout;
+				xmlhttp.ontimeout = Sabel.Function.bind(this.abort, this);
+			} else {
+				this.timer = setTimeout(Sabel.Function.bind(this.abort, this), options.timeout);
+			}
+		}
 		xmlhttp.send((options.method === "post") ? options.params : "");
-		if (options.timeout) this.timer = setTimeout(Sabel.Function.bind(this.abort, this), options.timeout);
 	},
 
 	abort: function() {
@@ -2254,7 +2262,11 @@ Sabel.History.prototype = {
 
 		if (hash !== "") this.callback(hash);
 
-		this.timer = setInterval(Sabel.Function.bind(this._check, this), 300);
+		if (typeof window.onhashchange === "undefined") {
+			this.timer = setInterval(Sabel.Function.bind(this._check, this), 300);
+		} else {
+			new Sabel.Event(window, "hashchange", this._check, false, this);
+		}
 	},
 
 	load: function(hash) {
@@ -2280,7 +2292,7 @@ Sabel.History.prototype = {
 	}
 };
 
-if (Sabel.UserAgent.isIE) {
+if (Sabel.UserAgent.isIE && Sabel.UserAgent.version < 8) {
 	Sabel.History.prototype.init = function(callback) {
 		this.callback = callback || function() {}
 		var hash = this._getHash(document);
