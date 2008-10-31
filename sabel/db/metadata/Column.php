@@ -26,9 +26,11 @@ class Sabel_Db_Metadata_Column extends Sabel_Object
     if ($strict) {
       return ($this->type === Sabel_Db_Type::INT);
     } else {
-      return ($this->type === Sabel_Db_Type::INT    ||
-              $this->type === Sabel_Db_Type::BIGINT ||
-              $this->type === Sabel_Db_Type::SMALLINT);
+      return (
+        $this->type === Sabel_Db_Type::INT    ||
+        $this->type === Sabel_Db_Type::BIGINT ||
+        $this->type === Sabel_Db_Type::SMALLINT
+      );
     }
   }
   
@@ -47,8 +49,10 @@ class Sabel_Db_Metadata_Column extends Sabel_Object
     if ($strict) {
       return ($this->type === Sabel_Db_Type::FLOAT);
     } else {
-      return ($this->type === Sabel_Db_Type::FLOAT ||
-              $this->type === Sabel_Db_Type::DOUBLE);
+      return (
+        $this->type === Sabel_Db_Type::FLOAT ||
+        $this->type === Sabel_Db_Type::DOUBLE
+      );
     }
   }
   
@@ -109,13 +113,10 @@ class Sabel_Db_Metadata_Column extends Sabel_Object
       case Sabel_Db_Type::INT:
         return (is_int($value)) ? $value : $this->toInteger($value, PHP_INT_MAX, -PHP_INT_MAX - 1);
       
-      case Sabel_Db_Type::SMALLINT:
-        return $this->toInteger($value, 32767, -32768);
-      
       case Sabel_Db_Type::STRING:
       case Sabel_Db_Type::TEXT:
       case Sabel_Db_Type::BIGINT:
-        return (string)$value;
+        return (is_int($value) || is_float($value)) ? (string)$value : $value;
       
       case Sabel_Db_Type::BOOL:
         if (is_string($value)) {
@@ -130,13 +131,15 @@ class Sabel_Db_Metadata_Column extends Sabel_Object
           } elseif ($value === 0) {
             return false;
           }
-        } else {
-          return $value;
         }
+        return $value;
       
       case Sabel_Db_Type::DATETIME:
         $result = strtotime($value);
         return ($result === false) ? $value : date("Y-m-d H:i:s", $result);
+      
+      case Sabel_Db_Type::SMALLINT:
+        return $this->toInteger($value, 32767, -32768);
       
       case Sabel_Db_Type::DATE:
         $result = strtotime($value);

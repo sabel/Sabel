@@ -7,8 +7,10 @@ class Config_Map extends Sabel_Map_Configurator
     $this->route("default")
            ->uri(":controller/:action")
            ->module("index")
-           ->defaults(array(":controller" => "index",
-                            ":action"     => "index"));
+           ->defaults(array(
+             ":controller" => "index",
+             ":action"     => "index")
+           );
     
     $this->route("notfound")
            ->uri("*")
