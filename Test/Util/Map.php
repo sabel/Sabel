@@ -309,9 +309,10 @@ class Test_Util_Map extends SabelTestCase
     $map->put("test1", "hoge")
         ->put("test2", null)
         ->put(new UtilMap(), "fuga");
-        
+    
     $this->assertTrue($map->has("test1"));
-    $this->assertTrue($map->has("test2"));
+    $this->assertFalse($map->has("test2"));
+    $this->assertTrue($map->exists("test2"));
     $this->assertTrue($map->has(new UtilMap()));
     
     $this->assertFalse($map->has("test4"));

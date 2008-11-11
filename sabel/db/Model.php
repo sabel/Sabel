@@ -386,11 +386,15 @@ abstract class Sabel_Db_Model extends Sabel_Object
    * @param mixed $arg1
    * @param mixed $arg2
    *
-   * @return void
+   * @return self
    */
   public function setCondition($arg1, $arg2 = null)
   {
-    if (!empty($arg1)) {
+    if (empty($arg1)) return $this;
+    
+    if ($arg1 instanceof Sabel_Db_Condition_Manager) {
+      $this->condition = $arg1;
+    } else {
       $condition = $this->getCondition();
       
       if ($arg2 !== null) {

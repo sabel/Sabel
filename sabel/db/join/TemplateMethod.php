@@ -77,7 +77,7 @@ class Sabel_Db_Join_TemplateMethod extends Sabel_Object
     $props = array();
     foreach ($this->columns as $column) {
       $hash = Sabel_Db_Join_ColumnHash::getHash("{$name}.{$column}");
-      if (isset($row[$hash])) {
+      if (array_key_exists($hash, $row)) {
         $props[$column] = $row[$hash];
         unset($row[$hash]);
       }

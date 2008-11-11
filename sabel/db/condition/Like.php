@@ -11,7 +11,8 @@
  */
 class Sabel_Db_Condition_Like extends Sabel_Db_Abstract_Condition
 {
-  const BEGINS_WITH = 1;
+  const STARTS_WITH = 1;
+  const BEGINS_WITH = 1;  // alias for STARTS_WITH
   const CONTAINS    = 2;
   const ENDS_WITH   = 3;
   

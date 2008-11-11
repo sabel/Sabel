@@ -11,12 +11,11 @@
  */
 class Sabel_Util_Map extends Sabel_Object implements Iterator
 {
-  protected
-    $array = array(),
-    $count = 0,
-    $index = 0,
-    $key   = null,
-    $value = null;
+  protected $array = array();
+  protected $count = 0;
+  protected $index = 0;
+  protected $key   = null;
+  protected $value = null;
     
   public function __construct($array = null)
   {
@@ -25,7 +24,8 @@ class Sabel_Util_Map extends Sabel_Object implements Iterator
         $this->array = $array;
         $this->count = count($array);
       } else {
-        throw new Sabel_Exception_InvalidArgument("invalid argument.");
+        $message = __METHOD__ . "() argument must be an array.";
+        throw new Sabel_Exception_InvalidArgument($message);
       }
     }
   }
@@ -81,7 +81,7 @@ class Sabel_Util_Map extends Sabel_Object implements Iterator
   {
     $key = $this->convertToString($key);
     
-    if ($this->has($key)) {
+    if (isset($this->array[$key])) {
       return $this->toObject($this->array[$key]);
     } else {
       return null;
@@ -91,7 +91,13 @@ class Sabel_Util_Map extends Sabel_Object implements Iterator
   public function has($key)
   {
     $key = $this->convertToString($key);
-    return (array_key_exists($key, $this->array));
+    return isset($this->array[$key]);
+  }
+  
+  public function exists($key)
+  {
+    $key = $this->convertToString($key);
+    return array_key_exists($key, $this->array);
   }
   
   public function keys()
@@ -260,23 +266,21 @@ class Sabel_Util_Map extends Sabel_Object implements Iterator
     reset($this->array);
   }
   
-  private function convertToString($value)
+  protected function convertToString($value)
   {
     if (is_string($value) || is_int($value)) {
       return $value;
-    } elseif ($value instanceof Sabel_Util_String) {
-      return $value->toString();
     } elseif ($value instanceof Sabel_Object) {
-      return $value->hashCode();
+      return $value->toString();
     } elseif (is_object($value) && method_exists($value, "__toString")) {
       return $value->__toString();
     } else {
-      $message = "cannot convert the given argument into the string.";
+      $message = __METHOD__ . "() cannot convert the given argument into the string.";
       throw new Sabel_Exception_Runtime($message);
     }
   }
   
-  private function toObject($value)
+  protected function toObject($value)
   {
     if (is_string($value)) {
       return new Sabel_Util_String($value);

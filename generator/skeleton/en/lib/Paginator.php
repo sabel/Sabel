@@ -106,7 +106,7 @@ class Paginator extends Sabel_Object
     return $this;
   }
   
-  public function setDefaultOrder($column, $mode)
+  public function setDefaultOrder($column, $mode = "asc")
   {
     $this->defaultOrder[$column] = $mode;
     
