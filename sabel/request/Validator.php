@@ -12,19 +12,14 @@
 class Sabel_Request_Validator extends Sabel_Object
 {
   protected $validators = array();
+  protected $displayErrors = array();
   protected $suites = array();
   protected $values = array();
-  protected $failed = false;
   protected $errors = array();
   
   public function set($name, $checker)
   {
     $this->validators[$name] = $checker;
-  }
-  
-  public function isFailed()
-  {
-    return $this->failed;
   }
   
   public function hasError()
@@ -49,6 +44,15 @@ class Sabel_Request_Validator extends Sabel_Object
     
     $errors = array();
     $suites = $this->getSuites();
+    
+    foreach ($validators as $inputName => $checkers) {
+      if (strpos($inputName, ":") !== false) {
+        $exp = explode(":", $inputName, 2);
+        $validators[$exp[0]] = $checkers;
+        $this->displayNames[$exp[0]] = $exp[1];
+        unset($validators[$inputName]);
+      }
+    }
     
     foreach (array_keys($validators) as $inputName) {
       if (!isset($values[$inputName])) $values[$inputName] = null;
@@ -81,8 +85,7 @@ class Sabel_Request_Validator extends Sabel_Object
     }
     
     $this->errors = $errors;
-    if (!empty($errors)) $this->failed = true;
     
-    return !$this->failed;
+    return empty($errors);
   }
 }
