@@ -138,20 +138,8 @@ class Paginator extends Sabel_Object
     $model = $this->model;
     $attributes =& $this->attributes;
     
-    $uriQuery = array();
-    foreach ($getValues as $key => $val) {
-      if ($key === $pageKey) {
-        unset($getValues[$key]);
-      } elseif (is_array($val)) {
-        foreach ($val as $k => $v) {
-          $uriQuery[] = urlencode("{$key}[{$k}]") . "=" . urlencode($v);
-        }
-      } else {
-        $uriQuery[] = urlencode($key) . "=" . urlencode($val);
-      }
-    }
-    
-    $attributes["uriQuery"] = implode("&", $uriQuery);
+    unset($getValues[$pageKey]);
+    $attributes["uriQuery"] = http_build_query($getValues, "", "&");
     $count = ($this->isJoin) ? $model->getCount(null, false) : $model->getCount();
     
     $attributes["count"] = $count;

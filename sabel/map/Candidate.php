@@ -69,6 +69,10 @@ class Sabel_Map_Candidate extends Sabel_Object
       throw new Sabel_Exception_InvalidArgument($message);
     }
     
+    if (strpos($param, ",") === false && strpos($param, ":") === false) {
+      return ltrim($param, "/");
+    }
+    
     $parameters = array();
     if ($param !== "") {
       foreach (explode(",", $param) as $param) {
