@@ -213,7 +213,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    *
    * @return boolean
    */
-  private function isReserved($action)
+  protected function isReserved($action)
   {
     static $reserved = array();
     
@@ -229,7 +229,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    *
    * @return boolean
    */
-  private function isHiddenAction($action)
+  protected function isHiddenAction($action)
   {
     return in_array($action, $this->hidden, true);
   }
@@ -239,7 +239,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    *
    * @return boolean
    */
-  private function isValidAction($action)
+  protected function isValidAction($action)
   {
     if (!$this->hasMethod($action)) return false;
     
