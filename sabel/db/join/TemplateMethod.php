@@ -52,6 +52,11 @@ class Sabel_Db_Join_TemplateMethod extends Sabel_Object
   
   public function setJoinKey($joinKey)
   {
+    if (isset($joinKey[0])) $joinKey["id"]   = $joinKey[0];
+    if (isset($joinKey[1])) $joinKey["fkey"] = $joinKey[1];
+    
+    unset($joinKey[0], $joinKey[1]);
+    
     $this->joinKey = $joinKey;
   }
   
