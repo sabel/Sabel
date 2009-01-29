@@ -12,11 +12,6 @@
 class Sabel_Db_Join extends Sabel_Object
 {
   /**
-   * @var string
-   */
-  protected $joinType = "INNER";
-  
-  /**
    * @var Sabel_Db_Model
    */
   protected $model = null;
@@ -53,11 +48,6 @@ class Sabel_Db_Join extends Sabel_Object
   public function getModel()
   {
     return $this->model;
-  }
-  
-  public function setJoinType($joinType)
-  {
-    $this->joinType = $joinType;
   }
   
   public function clear()
@@ -104,21 +94,25 @@ class Sabel_Db_Join extends Sabel_Object
     return $this;
   }
   
-  public function add($object, $alias = "", $joinKey = array())
+  public function add($object, $joinKey = array(), $alias = "", $type = "inner")
   {
-    if (is_string($object)) {
-      $object = new Sabel_Db_Join_Object(MODEL($object), $alias, $joinKey);
-    } elseif (is_model($object)) {
-      $object = new Sabel_Db_Join_Object($object, $alias, $joinKey);
+    if (is_string($object) || is_model($object)) {
+      $object = new Sabel_Db_Join_Object($object, $joinKey, $alias, $type);
     }
     
+    $object->setAlias($alias);
+    $object->setJoinType($type);
     $object->setChildName($this->tblName);
+    
     $this->structure->addJoinObject($this->tblName, $object);
     $this->objects[] = $object;
     
     if (empty($joinKey)) {
-      $name = $object->getModel()->getTableName();
-      $object->setJoinKey(create_join_key($this->model, $name));
+      $object->setJoinKey(create_join_key(
+        $this->model, $object->getModel()->getTableName()
+      ));
+    } else {
+      $object->setJoinKey($joinKey);
     }
     
     return $this;
@@ -133,17 +127,13 @@ class Sabel_Db_Join extends Sabel_Object
     return $this;
   }
   
-  public function getCount($joinType = null, $clearState = true)
+  public function getCount($clearState = true)
   {
-    if ($joinType === null) {
-      $joinType = $this->joinType;
-    }
-    
     $stmt = $this->model->prepareStatement(Sabel_Db_Statement::SELECT);
     
     $query = array();
     foreach ($this->objects as $object) {
-      $query[] = $object->getJoinQuery($stmt, $joinType);
+      $query[] = $object->getJoinQuery($stmt);
     }
     
     $rows = $this->execute($stmt, "COUNT(*) AS cnt", implode("", $query));
@@ -151,24 +141,20 @@ class Sabel_Db_Join extends Sabel_Object
     return (int)$rows[0]["cnt"];
   }
   
-  public function selectOne($joinType = null)
+  public function selectOne()
   {
-    $results = $this->select($joinType);
+    $results = $this->select();
     return (isset($results[0])) ? $results[0] : null;
   }
   
-  public function select($joinType = null)
+  public function select()
   {
-    if ($joinType === null) {
-      $joinType = $this->joinType;
-    }
-    
     $stmt = $this->model->prepareStatement(Sabel_Db_Statement::SELECT);
     $projection = $this->createProjection($stmt);
     
     $query = array();
     foreach ($this->objects as $object) {
-      $query[] = $object->getJoinQuery($stmt, $joinType);
+      $query[] = $object->getJoinQuery($stmt);
     }
     
     $results = array();

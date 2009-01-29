@@ -26,15 +26,15 @@ class Sabel_Db_Join_Object extends Sabel_Db_Join_TemplateMethod
     return $projection;
   }
   
-  public function getJoinQuery(Sabel_Db_Statement $stmt, $joinType)
+  public function getJoinQuery(Sabel_Db_Statement $stmt)
   {
     $name  = $stmt->quoteIdentifier($this->tblName);
     $keys  = $this->joinKey;
-    $query = array(" $joinType JOIN $name ");
+    $query = array(" {$this->joinType} JOIN $name ");
     
     if ($this->hasAlias()) {
       $name = $stmt->quoteIdentifier(strtolower($this->aliasName));
-      $query[] = $name . " ";
+      $query[] = "AS {$name} ";
     }
     
     $query[] = "ON {$name}." . $stmt->quoteIdentifier($keys["id"])

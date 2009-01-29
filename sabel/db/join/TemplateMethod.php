@@ -11,21 +11,19 @@
  */
 class Sabel_Db_Join_TemplateMethod extends Sabel_Object
 {
-  protected
-    $model     = null,
-    $columns   = array(),
-    $joinKey   = array(),
-    $tblName   = "",
-    $aliasName = "",
-    $childName = "";
-    
-  public function __construct($model, $alias = "", $joinKey = array())
+  protected $model     = null;
+  protected $columns   = array();
+  protected $joinKey   = array();
+  protected $joinType  = "inner";
+  protected $tblName   = "";
+  protected $aliasName = "";
+  protected $childName = "";
+  
+  public function __construct($model)
   {
-    $this->model     = (is_string($model)) ? MODEL($model) : $model;
-    $this->tblName   = $this->model->getTableName();
-    $this->columns   = $this->model->getColumnNames();
-    $this->aliasName = $alias;
-    $this->joinKey   = $joinKey;
+    $this->model   = (is_string($model)) ? MODEL($model) : $model;
+    $this->tblName = $this->model->getTableName();
+    $this->columns = $this->model->getColumnNames();
   }
   
   public function getModel()
@@ -42,6 +40,11 @@ class Sabel_Db_Join_TemplateMethod extends Sabel_Object
     }
   }
   
+  public function setAlias($alias)
+  {
+    $this->aliasName = $alias;
+  }
+  
   public function hasAlias()
   {
     return ($this->aliasName !== "");
@@ -50,6 +53,11 @@ class Sabel_Db_Join_TemplateMethod extends Sabel_Object
   public function setJoinKey($joinKey)
   {
     $this->joinKey = $joinKey;
+  }
+  
+  public function setJoinType($joinType)
+  {
+    $this->joinType = strtoupper($joinType);
   }
   
   public function setChildName($name)

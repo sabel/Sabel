@@ -270,6 +270,11 @@ function MODEL($mdlName, $id = null)
   }
 }
 
+function finder($mdlName)
+{
+  return new Sabel_Db_Finder($mdlName);
+}
+
 function create_join_key(Sabel_Db_Model $childModel, $parentName)
 {
   if ($fkey = $childModel->getMetadata()->getForeignKey()) {
