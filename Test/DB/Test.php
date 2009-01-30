@@ -417,7 +417,7 @@ class Test_DB_Test extends SabelTestCase
   {
     $join = new Sabel_Db_Join("StudentCourse");
     $join->setOrderBy("StudentCourse.student_id")->setOrderBy("StudentCourse.course_id");
-    $r = $join->setParents(array("Student", "Course"))->select();
+    $r = $join->add("Student")->add("Course")->select();
     
     $this->assertEquals(7, count($r));
     $this->assertEquals("yamada",      $r[0]->Student->name);
@@ -441,7 +441,7 @@ class Test_DB_Test extends SabelTestCase
     $join = new Sabel_Db_Join("StudentCourse");
     $join->setOrderBy("StudentCourse.student_id")->setOrderBy("StudentCourse.course_id");
     $join->setCondition("Student.id", 1);
-    $r = $join->setParents(array("Student", "Course"))->select();
+    $r = $join->add("Student")->add("Course")->select();
     
     $this->assertEquals(2, count($r));
     $this->assertEquals("yamada",      $r[0]->Student->name);
@@ -454,7 +454,7 @@ class Test_DB_Test extends SabelTestCase
   {
     $join = new Sabel_Db_Join("StudentCourse");
     $join->setCondition("Student.id", 3);
-    $this->assertEquals(3, $join->setParents(array("Student", "Course"))->getCount());
+    $this->assertEquals(3, $join->add("Student")->add("Course")->getCount());
   }
   
   public function testBinaryData()

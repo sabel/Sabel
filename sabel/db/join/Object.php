@@ -29,7 +29,6 @@ class Sabel_Db_Join_Object extends Sabel_Db_Join_TemplateMethod
   public function getJoinQuery(Sabel_Db_Statement $stmt)
   {
     $name  = $stmt->quoteIdentifier($this->tblName);
-    $keys  = $this->joinKey;
     $query = array(" {$this->joinType} JOIN $name ");
     
     if ($this->hasAlias()) {
@@ -37,9 +36,9 @@ class Sabel_Db_Join_Object extends Sabel_Db_Join_TemplateMethod
       $query[] = "AS {$name} ";
     }
     
-    $query[] = "ON {$name}." . $stmt->quoteIdentifier($keys["id"])
+    $query[] = "ON {$name}." . $stmt->quoteIdentifier($this->on["id"])
              . " = " . $stmt->quoteIdentifier(strtolower($this->childName))
-             . "."   . $stmt->quoteIdentifier($keys["fkey"]);
+             . "."   . $stmt->quoteIdentifier($this->on["fkey"]);
     
     return implode("", $query);
   }

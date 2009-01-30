@@ -13,26 +13,42 @@ class Sabel_Db_Join_Relation extends Sabel_Db_Join_TemplateMethod
 {
   protected $objects = array();
   
-  public function add($object, $joinKey = array(), $alias = "", $type = "inner")
+  public function innerJoin($object, $on = array(), $alias = "")
+  {
+    return $this->add($object, $on, $alias, "INNER");
+  }
+  
+  public function leftJoin($object, $on = array(), $alias = "")
+  {
+    return $this->add($object, $on, $alias, "LEFT");
+  }
+  
+  public function rightJoin($object, $on = array(), $alias = "")
+  {
+    return $this->add($object, $on, $alias, "RIGHT");
+  }
+  
+  public function add($object, $on = array(), $alias = "", $type = "")
   {
     if (is_string($object) || is_model($object)) {
       $object = new Sabel_Db_Join_Object($object);
     }
     
-    $object->setAlias($alias);
-    $object->setJoinType($type);
+    if (!empty($alias)) $object->setAlias($alias);
+    if (!empty($type))  $object->setJoinType($type);
+    
     $object->setChildName($this->getName());
     
     $structure = Sabel_Db_Join_Structure::getInstance();
     $structure->addJoinObject($this->getName(), $object);
     $this->objects[] = $object;
     
-    if (empty($joinKey)) {
-      $object->setJoinKey(create_join_key(
+    if (!empty($on)) {
+      $object->on($on);
+    } elseif ($object->getOn() === array()) {
+      $object->on(create_join_key(
         $this->model, $object->getModel()->getTableName()
       ));
-    } else {
-      $object->setJoinKey($joinKey);
     }
     
     return $this;
@@ -60,7 +76,6 @@ class Sabel_Db_Join_Relation extends Sabel_Db_Join_TemplateMethod
   public function getJoinQuery(Sabel_Db_Statement $stmt)
   {
     $name  = $stmt->quoteIdentifier($this->tblName);
-    $keys  = $this->joinKey;
     $query = array(" {$this->joinType} JOIN $name ");
     
     if ($this->hasAlias()) {
@@ -68,9 +83,9 @@ class Sabel_Db_Join_Relation extends Sabel_Db_Join_TemplateMethod
       $query[] = "AS {$name} ";
     }
     
-    $query[] = "ON {$name}." . $stmt->quoteIdentifier($keys["id"])
+    $query[] = "ON {$name}." . $stmt->quoteIdentifier($this->on["id"])
              . " = " . $stmt->quoteIdentifier(strtolower($this->childName))
-             . "."   . $stmt->quoteIdentifier($keys["fkey"]);
+             . "."   . $stmt->quoteIdentifier($this->on["fkey"]);
     
     foreach ($this->objects as $object) {
       $query[] = $object->getJoinQuery($stmt);

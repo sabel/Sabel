@@ -196,52 +196,37 @@ class Sabel_Db_Finder
     return call_user_func_array(array($this, "andWhere"), $args);
   }
   
-  public function innerJoin($mdlName, $keys = null, $alias = "")
+  public function innerJoin($mdlName, $on = array(), $alias = "")
   {
-    $this->_join($mdlName, $keys, $alias, "inner");
+    $this->_join($mdlName, $on, $alias, "INNER");
     
     return $this;
   }
   
-  public function ij($mdlName, $keys = null, $alias = "")
+  public function leftJoin($mdlName, $on = array(), $alias = "")
   {
-    return $this->innerJoin($mdlName, $keys, $alias);
-  }
-  
-  public function leftJoin($mdlName, $keys = null, $alias = "")
-  {
-    $this->_join($mdlName, $keys, $alias, "left");
+    $this->_join($mdlName, $on, $alias, "LEFT");
     
     return $this;
   }
   
-  public function lj($mdlName, $keys = null, $alias = "")
+  public function rightJoin($mdlName, $on = array(), $alias = "")
   {
-    return $this->leftJoin($mdlName, $keys, $alias);
-  }
-  
-  public function rightJoin($mdlName, $keys = null, $alias = "")
-  {
-    $this->_join($mdlName, $keys, $alias, "right");
+    $this->_join($mdlName, $on, $alias, "RIGHT");
     
     return $this;
   }
   
-  public function rj($mdlName, $keys = null, $alias = "")
-  {
-    return $this->rightJoin($mdlName, $keys, $alias);
-  }
-  
-  protected function _join($mdlName, $keys, $alias, $type)
+  protected function _join($mdlName, $on, $alias, $type)
   {
     if ($this->join === null) {
       $this->join = new Sabel_Db_Join($this->model);
     }
     
-    $this->join->add($mdlName, $keys, $alias, $type);
+    $this->join->add($mdlName, $on, $alias, $type);
   }
   
-  public function sort($column, $smode = "asc", $nulls = "last")
+  public function sort($column, $smode = "ASC", $nulls = "LAST")
   {
     $this->model->setOrderBy($column, $smode, $nulls);
     
@@ -426,4 +411,22 @@ function aw(/* args */)
 function join($mdlName)
 {
   return new Sabel_Db_Join_Relation($mdlName);
+}
+
+function innerJoin($mdlName, $on = array(), $alias = "")
+{
+  $join = new Sabel_Db_Join_Object($mdlName);
+  return $join->setAlias($alias)->setJoinKey($on)->setJoinType("INNER");
+}
+
+function leftJoin($mdlName, $on = array(), $alias = "")
+{
+  $join = new Sabel_Db_Join_Object($mdlName);
+  return $join->setAlias($alias)->setJoinKey($on)->setJoinType("LEFT");
+}
+
+function rightJoin($mdlName, $on = array(), $alias = "")
+{
+  $join = new Sabel_Db_Join_Object($mdlName);
+  return $join->setAlias($alias)->setJoinKey($on)->setJoinType("RIGHT");
 }

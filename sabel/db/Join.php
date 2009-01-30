@@ -94,34 +94,41 @@ class Sabel_Db_Join extends Sabel_Object
     return $this;
   }
   
-  public function add($object, $joinKey = array(), $alias = "", $type = "inner")
+  public function innerJoin($object, $on = array(), $alias = "")
+  {
+    return $this->add($object, $on, $alias, "INNER");
+  }
+  
+  public function leftJoin($object, $on = array(), $alias = "")
+  {
+    return $this->add($object, $on, $alias, "LEFT");
+  }
+  
+  public function rightJoin($object, $on = array(), $alias = "")
+  {
+    return $this->add($object, $on, $alias, "RIGHT");
+  }
+  
+  public function add($object, $on = array(), $alias = "", $type = "")
   {
     if (is_string($object) || is_model($object)) {
       $object = new Sabel_Db_Join_Object($object);
     }
     
-    $object->setAlias($alias);
-    $object->setJoinType($type);
+    if (!empty($alias)) $object->setAlias($alias);
+    if (!empty($type))  $object->setJoinType($type);
+    
     $object->setChildName($this->tblName);
     
     $this->structure->addJoinObject($this->tblName, $object);
     $this->objects[] = $object;
     
-    if (empty($joinKey)) {
-      $object->setJoinKey(create_join_key(
+    if (!empty($on)) {
+      $object->on($on);
+    } elseif ($object->getOn() === array()) {
+      $object->on(create_join_key(
         $this->model, $object->getModel()->getTableName()
       ));
-    } else {
-      $object->setJoinKey($joinKey);
-    }
-    
-    return $this;
-  }
-  
-  public function setParents(array $parents)
-  {
-    foreach ($parents as $parent) {
-      $this->add($parent);
     }
     
     return $this;
@@ -163,6 +170,7 @@ class Sabel_Db_Join extends Sabel_Object
     }
     
     $this->clear();
+    
     return $results;
   }
   

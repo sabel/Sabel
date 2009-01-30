@@ -13,8 +13,8 @@ class Sabel_Db_Join_TemplateMethod extends Sabel_Object
 {
   protected $model     = null;
   protected $columns   = array();
-  protected $joinKey   = array();
-  protected $joinType  = "inner";
+  protected $on        = array();
+  protected $joinType  = "INNER";
   protected $tblName   = "";
   protected $aliasName = "";
   protected $childName = "";
@@ -43,31 +43,44 @@ class Sabel_Db_Join_TemplateMethod extends Sabel_Object
   public function setAlias($alias)
   {
     $this->aliasName = $alias;
+    
+    return $this;
   }
   
   public function hasAlias()
   {
-    return ($this->aliasName !== "");
+    return !empty($this->aliasName);
   }
   
-  public function setJoinKey($joinKey)
+  public function on($on)
   {
-    if (isset($joinKey[0])) $joinKey["id"]   = $joinKey[0];
-    if (isset($joinKey[1])) $joinKey["fkey"] = $joinKey[1];
+    if (isset($on[0])) $on["id"]   = $on[0];
+    if (isset($on[1])) $on["fkey"] = $on[1];
     
-    unset($joinKey[0], $joinKey[1]);
+    unset($on[0], $on[1]);
     
-    $this->joinKey = $joinKey;
+    $this->on = $on;
+    
+    return $this;
+  }
+  
+  public function getOn()
+  {
+    return $this->on;
   }
   
   public function setJoinType($joinType)
   {
     $this->joinType = strtoupper($joinType);
+    
+    return $this;
   }
   
   public function setChildName($name)
   {
     $this->childName = $name;
+    
+    return $this;
   }
   
   public function createModel(&$row)
