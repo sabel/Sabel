@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Db_Join_TemplateMethod
+ * Sabel_Db_Join_Base
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Db_Join_TemplateMethod extends Sabel_Object
+class Sabel_Db_Join_Base extends Sabel_Object
 {
   protected $model     = null;
   protected $columns   = array();

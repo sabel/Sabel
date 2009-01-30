@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Db_Join_Object extends Sabel_Db_Join_TemplateMethod
+class Sabel_Db_Join_Object extends Sabel_Db_Join_Base
 {
   public function getProjection(Sabel_Db_Statement $stmt)
   {

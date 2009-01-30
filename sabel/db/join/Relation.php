@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Db_Join_Relation extends Sabel_Db_Join_TemplateMethod
+class Sabel_Db_Join_Relation extends Sabel_Db_Join_Base
 {
   protected $objects = array();
   
