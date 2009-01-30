@@ -133,4 +133,27 @@ class Sabel_Db_Mssql_Statement extends Sabel_Db_Statement
       throw new Sabel_Exception_InvalidArgument($message);
     }
   }
+  
+  // @todo nulls
+  protected function quoteIdentifierForOrderBy($orders)
+  {
+    $results = array();
+    foreach ($orders as $column => $order) {
+      $mode  = strtoupper($order["mode"]);
+      //$nulls = strtoupper($order["nulls"]);
+      
+      if (($pos = strpos($column, ".")) !== false) {
+        $tblName = convert_to_tablename(substr($column, 0, $pos));
+        $column  = $this->quoteIdentifier($tblName) . "."
+                 . $this->quoteIdentifier(substr($column, $pos + 1));
+      } else {
+        $column = $this->quoteIdentifier($column);
+      }
+      
+      //$_nulls    = ($nulls === "FIRST") ? "IS NOT NULL" : "IS NULL";
+      $results[] = "{$column} {$mode}";
+    }
+    
+    return implode(", ", $results);
+  }
 }

@@ -173,4 +173,26 @@ class Sabel_Db_Pdo_Oci_Statement extends Sabel_Db_Pdo_Statement
     
     return $sql;
   }
+  
+  protected function quoteIdentifierForOrderBy($orders)
+  {
+    $results = array();
+    foreach ($orders as $column => $order) {
+      $mode  = strtoupper($order["mode"]);
+      $nulls = strtoupper($order["nulls"]);
+      
+      if (($pos = strpos($column, ".")) !== false) {
+        $tblName = convert_to_tablename(substr($column, 0, $pos));
+        $column  = $this->quoteIdentifier($tblName) . "."
+                 . $this->quoteIdentifier(substr($column, $pos + 1));
+      } else {
+        $column = $this->quoteIdentifier($column);
+      }
+      
+      $_nulls    = ($nulls === "FIRST") ? "IS NOT NULL" : "IS NULL";
+      $results[] = "{$column} {$mode} NULLS {$nulls}";
+    }
+    
+    return implode(", ", $results);
+  }
 }

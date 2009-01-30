@@ -270,9 +270,9 @@ function MODEL($mdlName, $id = null)
   }
 }
 
-function finder($mdlName)
+function finder($mdlName, $projection = null)
 {
-  return new Sabel_Db_Finder($mdlName);
+  return new Sabel_Db_Finder($mdlName, $projection);
 }
 
 function create_join_key(Sabel_Db_Model $childModel, $parentName)

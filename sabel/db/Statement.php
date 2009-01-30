@@ -472,15 +472,20 @@ abstract class Sabel_Db_Statement extends Sabel_Object
   protected function quoteIdentifierForOrderBy($orders)
   {
     $results = array();
-    foreach ($orders as $column => $mode) {
+    foreach ($orders as $column => $order) {
+      $mode  = strtoupper($order["mode"]);
+      $nulls = strtoupper($order["nulls"]);
+      
       if (($pos = strpos($column, ".")) !== false) {
         $tblName = convert_to_tablename(substr($column, 0, $pos));
-        $results[] = $this->quoteIdentifier($tblName) . "."
-                   . $this->quoteIdentifier(substr($column, $pos + 1))
-                   . " " . $mode;
+        $column  = $this->quoteIdentifier($tblName) . "."
+                 . $this->quoteIdentifier(substr($column, $pos + 1));
       } else {
-        $results[] = $this->quoteIdentifier($column) . " " . $mode;
+        $column = $this->quoteIdentifier($column);
       }
+      
+      $_nulls    = ($nulls === "FIRST") ? "IS NOT NULL" : "IS NULL";
+      $results[] = "{$column} {$_nulls}, {$column} {$mode}";
     }
     
     return implode(", ", $results);

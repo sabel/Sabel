@@ -248,9 +248,9 @@ class Sabel_Db_Finder
     $this->join->add($mdlName, $keys, $alias, $type);
   }
   
-  public function sort($column, $smode = "asc")
+  public function sort($column, $smode = "asc", $nulls = "last")
   {
-    $this->model->setOrderBy($column, $smode);
+    $this->model->setOrderBy($column, $smode, $nulls);
     
     return $this;
   }

@@ -102,14 +102,9 @@ abstract class Sabel_Db_Driver extends Sabel_Object
     if (empty($bindParam)) return $sql;
     
     if (in_array(null, $bindParam, true)) {
-      foreach ($bindParam as $key => $val) {
-        $val = ($val === null) ? "NULL" : $val;
-        $sql = str_replace($key, $val, $sql);
-      }
-      
-      return $sql;
-    } else {
-      return str_replace(array_keys($bindParam), $bindParam, $sql);
+      array_walk($bindParam, create_function('&$val', 'if ($val === null) $val = "NULL";'));
     }
+    
+    return str_replace(array_keys($bindParam), $bindParam, $sql);
   }
 }

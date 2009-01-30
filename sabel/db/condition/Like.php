@@ -66,12 +66,12 @@ class Sabel_Db_Condition_Like extends Sabel_Db_Abstract_Condition
         $esc = $escapeChars{$i};
         if (strpos($value, $esc) === false) {
           $value = preg_replace("/([%_])/", $esc . '$1', $value);
-          $like  = "LIKE @param%d@ escape '{$esc}'";
+          $like  = "LIKE @__h%d@ escape '{$esc}'";
           break;
         }
       }
     } else {
-      $like = "LIKE @param%d@";
+      $like = "LIKE @__h%d@";
     }
     
     return $this->createQuery($stmt, $value, $like);
@@ -81,7 +81,7 @@ class Sabel_Db_Condition_Like extends Sabel_Db_Abstract_Condition
   {
     $value = $this->addSpecialCharacter($value);
     $num = ++self::$counter;
-    $stmt->setBindValue("param{$num}", $value);
+    $stmt->setBindValue("__h{$num}", $value);
     
     $column = $this->getQuotedColumn($stmt);
     if ($this->isNot) $column = "NOT " . $column;
