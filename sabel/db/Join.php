@@ -97,7 +97,7 @@ class Sabel_Db_Join extends Sabel_Object
   public function add($object, $joinKey = array(), $alias = "", $type = "inner")
   {
     if (is_string($object) || is_model($object)) {
-      $object = new Sabel_Db_Join_Object($object, $joinKey, $alias, $type);
+      $object = new Sabel_Db_Join_Object($object);
     }
     
     $object->setAlias($alias);

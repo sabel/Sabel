@@ -37,9 +37,23 @@ class Sabel_Db_Finder
     return $this;
   }
   
+  public function neq($column, $value)
+  {
+    $this->model->setCondition(neq($column, $value));
+    
+    return $this;
+  }
+  
   public function in($column, array $values)
   {
     $this->model->setCondition(in($column, $values));
+    
+    return $this;
+  }
+  
+  public function nin($column, array $values)
+  {
+    $this->model->setCondition(nin($column, $values));
     
     return $this;
   }
@@ -79,6 +93,23 @@ class Sabel_Db_Finder
     return $this;
   }
   
+  public function bw($column, $from, $to = null)
+  {
+    return $this->between($column, $from, $to);
+  }
+  
+  public function notBetween($column, $from, $to = null)
+  {
+    $this->model->setCondition(notBetween($column, $from, $to));
+    
+    return $this;
+  }
+  
+  public function nbw($column, $from, $to = null)
+  {
+    return $this->notBetween($column, $from, $to);
+  }
+  
   public function starts($column, $value)
   {
     $this->model->setCondition(starts($column, $value));
@@ -107,11 +138,6 @@ class Sabel_Db_Finder
     return $this;
   }
   
-  public function nl($column)
-  {
-    return $this->isNull($column);
-  }
-  
   public function isNotNull($column)
   {
     $this->model->setCondition(isNotNull($column));
@@ -119,12 +145,7 @@ class Sabel_Db_Finder
     return $this;
   }
   
-  public function nnl($column)
-  {
-    return $this->isNotNull($column);
-  }
-  
-  public function c(/* args */)
+  public function where(/* args */)
   {
     foreach (func_get_args() as $condition) {
       $this->model->setCondition($condition);
@@ -133,7 +154,13 @@ class Sabel_Db_Finder
     return $this;
   }
   
-  public function _or(/* args */)
+  public function w(/* args */)
+  {
+    $args = func_get_args();
+    return call_user_func_array(array($this, "where"), $args);
+  }
+  
+  public function orWhere(/* args */)
   {
     $or = new Sabel_Db_Condition_Or();
     foreach (func_get_args() as $condition) {
@@ -145,7 +172,13 @@ class Sabel_Db_Finder
     return $this;
   }
   
-  public function _and(/* args */)
+  public function orw(/* args */)
+  {
+    $args = func_get_args();
+    return call_user_func_array(array($this, "orWhere"), $args);
+  }
+  
+  public function andWhere(/* args */)
   {
     $and = new Sabel_Db_Condition_And();
     foreach (func_get_args() as $condition) {
@@ -155,6 +188,12 @@ class Sabel_Db_Finder
     $this->model->setCondition($and);
     
     return $this;
+  }
+  
+  public function andw(/* args */)
+  {
+    $args = func_get_args();
+    return call_user_func_array(array($this, "andWhere"), $args);
   }
   
   public function innerJoin($mdlName, $keys = null, $alias = "")
@@ -227,8 +266,6 @@ class Sabel_Db_Finder
   
   public function fetch()
   {
-    $this->model->setLimit(1);
-    
     if ($this->join === null) {
       return $this->model->selectOne();
     } else {
@@ -259,10 +296,24 @@ function eq($column, $value)
   );
 }
 
+function neq($column, $value)
+{
+  return Sabel_Db_Condition::create(
+    Sabel_Db_Condition::EQUAL, $column, $value, true
+  );
+}
+
 function in($column, array $values)
 {
   return Sabel_Db_Condition::create(
     Sabel_Db_Condition::IN, $column, $values
+  );
+}
+
+function nin($column, array $values)
+{
+  return Sabel_Db_Condition::create(
+    Sabel_Db_Condition::IN, $column, $values, true
   );
 }
 
@@ -297,19 +348,31 @@ function ge($column, $value)
 function between($column, $from, $to = null)
 {
   if ($to === null) {
-    if (isset($from["from"])) $from[0] = $from["from"];
-    if (isset($from["to"]))   $from[1] = $from["to"];
-    
-    unset($from["from"], $from["to"]);
-    
-    return Sabel_Db_Condition::create(
-      Sabel_Db_Condition::BETWEEN, $column, $from
-    );
+    return __between($column, $from, false);
   } else {
-    return Sabel_Db_Condition::create(
-      Sabel_Db_Condition::BETWEEN, $column, array($from, $to)
-    );
+    return __between($column, array($from, $to), false);
   }
+}
+
+function notBetween($column, $from, $to = null)
+{
+  if ($to === null) {
+    return __between($column, $from, true);
+  } else {
+    return __between($column, array($from, $to), true);
+  }
+}
+
+function __between($column, array $params, $not)
+{
+  if (isset($params["from"])) $params[0] = $params["from"];
+  if (isset($params["to"]))   $params[1] = $params["to"];
+  
+  unset($params["from"], $params["to"]);
+  
+  return Sabel_Db_Condition::create(
+    Sabel_Db_Condition::BETWEEN, $column, $params, $not
+  );
 }
 
 function starts($column, $value)
@@ -347,7 +410,7 @@ function isNotNull($column)
   );
 }
 
-function _or(/* args */)
+function orw(/* args */)
 {
   $or = new Sabel_Db_Condition_Or();
   foreach (func_get_args() as $condition) {
@@ -357,7 +420,7 @@ function _or(/* args */)
   return $or;
 }
 
-function _and(/* args */)
+function andw(/* args */)
 {
   $and = new Sabel_Db_Condition_And();
   foreach (func_get_args() as $condition) {
