@@ -172,7 +172,7 @@ class Sabel_Db_Finder
     return $this;
   }
   
-  public function orw(/* args */)
+  public function ow(/* args */)
   {
     $args = func_get_args();
     return call_user_func_array(array($this, "orWhere"), $args);
@@ -190,7 +190,7 @@ class Sabel_Db_Finder
     return $this;
   }
   
-  public function andw(/* args */)
+  public function aw(/* args */)
   {
     $args = func_get_args();
     return call_user_func_array(array($this, "andWhere"), $args);
@@ -230,13 +230,6 @@ class Sabel_Db_Finder
   public function rj($mdlName, $keys = null, $alias = "")
   {
     return $this->rightJoin($mdlName, $keys, $alias);
-  }
-  
-  public function join($joinObject, $keys = array(), $alias = "", $type = "inner")
-  {
-    $this->_join($joinObject, $keys, $alias, $type);
-    
-    return $this;
   }
   
   protected function _join($mdlName, $keys, $alias, $type)
@@ -410,7 +403,7 @@ function isNotNull($column)
   );
 }
 
-function orw(/* args */)
+function ow(/* args */)
 {
   $or = new Sabel_Db_Condition_Or();
   foreach (func_get_args() as $condition) {
@@ -420,7 +413,7 @@ function orw(/* args */)
   return $or;
 }
 
-function andw(/* args */)
+function aw(/* args */)
 {
   $and = new Sabel_Db_Condition_And();
   foreach (func_get_args() as $condition) {
@@ -430,7 +423,7 @@ function andw(/* args */)
   return $and;
 }
 
-function with($mdlName)
+function join($mdlName)
 {
   return new Sabel_Db_Join_Relation($mdlName);
 }
