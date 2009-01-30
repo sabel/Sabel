@@ -127,7 +127,6 @@ class Sabel_Db_Ibase_Statement extends Sabel_Db_Statement
         $column = $this->quoteIdentifier($column);
       }
       
-      $_nulls    = ($nulls === "FIRST") ? "IS NOT NULL" : "IS NULL";
       $results[] = "{$column} {$mode} NULLS {$nulls}";
     }
     
