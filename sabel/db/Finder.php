@@ -408,7 +408,7 @@ function aw(/* args */)
   return $and;
 }
 
-function join($mdlName)
+function rel($mdlName)
 {
   return new Sabel_Db_Join_Relation($mdlName);
 }
