@@ -156,6 +156,21 @@ class Sabel_Mail extends Sabel_Object
     }
   }
   
+  /**
+   * set a 'Reply-To' header to this mail.
+   *
+   * @param string $replyTo Reply-To address
+   */
+  public function setReplyTo($replyTo)
+  {
+    if (is_string($replyTo)) {
+      $this->headers["Reply-To"] = $replyTo;
+    } else {
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
+  
   public function addCc($to, $name = "")
   {
     if ($name === "") {
