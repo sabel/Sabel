@@ -2342,39 +2342,71 @@ Sabel.Form = function(form) {
 	this.form = Sabel.get(form, false);
 
 	var elms = this.form.getElementsByTagName("*");
-	var buf = {};
+	var buf = {}, elements = {};
 	Sabel.Array.each(elms, function(el) {
 		var method = Sabel.Form.Elements[el.tagName.toLowerCase()], value;
-		if (method && (value = method(el)) !== null) {
-			if (buf[el.name]) {
-				if (!Sabel.Object.isArray(buf[el.name])) {
-					buf[el.name] = [buf[el.name]];
+		if (method) {
+			if (elements[el.name]) {
+				if (!Sabel.Object.isArray(elements[el.name])) {
+					elements[el.name] = [elements[el.name]];
 				}
-				buf[el.name].push(value);
+				elements[el.name].push(el);
 			} else {
-				buf[el.name] = value;
+				elements[el.name] = el;
+			}
+
+			if ((value = method(el)) !== null) {
+				if (buf[el.name]) {
+					if (!Sabel.Object.isArray(buf[el.name])) {
+						buf[el.name] = [buf[el.name]];
+					}
+					buf[el.name].push(value);
+				} else {
+					buf[el.name] = value;
+				}
 			}
 		}
 	});
 
 	this.queryObj = new Sabel.QueryObject(buf);
+	this.elements = elements;
 };
 
 Sabel.Form.prototype = {
-	getQueryObj: function() {
-		return this.queryObj;
-	},
-
 	has: function(key) {
-		return this.queryObj.has(key);
+		return !!this.elements[key];
 	},
 
 	get: function(key) {
 		return this.queryObj.get(key);
+
+		var el = this.elements[key];
+		if (Sabel.Object.isArray(el)) {
+			var method = Sabel.Form.Elements[el[0].tagName.toLowerCase()], value;
+			for (var i = 0; i < el.length; i++) {
+				if ((value = method(el[i])) !== null) return value;
+			}
+		} else {
+			return el.value;
+		}
 	},
 
 	set: function(key, val) {
-		return this.queryObj.set(key, val);
+		this.queryObj.set(key, val);
+
+		var el = this.elements[key];
+		if (Sabel.Object.isArray(el)) {
+			if (Sabel.Object.isString(val)) val = [val];
+
+			for (var i = 0; i < el.length; i++) {
+				//el[i].checked = (el[i].value === val);
+				el[i].checked = Sabel.Array.include(val, el[i].value);
+			}
+		} else {
+			el.value = val;
+		}
+
+		return this;
 	},
 
 	serialize: function() {
