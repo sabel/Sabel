@@ -317,7 +317,7 @@ class Sabel_Xml_Element extends Sabel_Object
     }
   }
   
-  public function getPreviousSibling()
+  public function getPreviousSibling($target = null)
   {
     $element = $this->element;
     
@@ -325,7 +325,9 @@ class Sabel_Xml_Element extends Sabel_Object
       if (($element = $element->previousSibling) === null) {
         return null;
       } elseif ($element->nodeType === XML_ELEMENT_NODE) {
-        return new self($element);
+        if ($target === null || $element->tagName === $target) {
+          return new self($element);
+        }
       }
     }
   }
@@ -346,7 +348,7 @@ class Sabel_Xml_Element extends Sabel_Object
     return new Sabel_Xml_Elements($elements);
   }
   
-  public function getNextSibling()
+  public function getNextSibling($target = null)
   {
     $element = $this->element;
     
@@ -354,7 +356,9 @@ class Sabel_Xml_Element extends Sabel_Object
       if (($element = $element->nextSibling) === null) {
         return null;
       } elseif ($element->nodeType === XML_ELEMENT_NODE) {
-        return new self($element);
+        if ($target === null || $element->tagName === $target) {
+          return new self($element);
+        }
       }
     }
   }

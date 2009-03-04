@@ -6,6 +6,6 @@
 
 <? if (isset($exception_message)) : ?>
 <div style="border: solid 2px #f00; margin: 10px; padding: 10px;">
-  <?= $exception_message ?>
+  <?php echo $exception_message ?>
 </div>
 <? endif ?>

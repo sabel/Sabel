@@ -157,6 +157,6 @@ class Sabel_Map_Config_Route
       }
     }
     
-    return implode("/", $url);
+    return implode("/", array_map("urlencode", $url));
   }
 }
