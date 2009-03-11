@@ -65,9 +65,13 @@ class Sabel_Xml_Element extends Sabel_Object
     return new self($this->element->cloneNode(true));
   }
   
-  public function setNodeValue($value)
+  public function setNodeValue($value, $cdata = false)
   {
-    $this->element->nodeValue = $value;
+    if ($cdata) {
+      $this->element->nodeValue = new self($this->getRawDocument()->createCDATASection($value));
+    } else {
+      $this->element->nodeValue = $value;
+    }
   }
   
   public function getNodeValue()
