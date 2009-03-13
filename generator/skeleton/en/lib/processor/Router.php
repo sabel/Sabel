@@ -18,7 +18,7 @@ class Processor_Router extends Sabel_Bus_Processor
     $config->configure();
     
     if ($candidate = $config->getValidCandidate($request->getUri())) {
-      $request->setParameterValues($candidate->getUriParameters());
+      $request->setParameterValues(array_map("urldecode", $candidate->getUriParameters()));
       $destination = $candidate->getDestination();
       l("DESTINATION: " . $destination);
       $bus->set("destination", $destination);

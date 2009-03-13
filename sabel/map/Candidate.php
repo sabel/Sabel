@@ -42,7 +42,7 @@ class Sabel_Map_Candidate extends Sabel_Object
       }
     }
     
-    $this->uriParameters = $uriParameters;
+    $this->uriParameters = array_map("urldecode", $uriParameters);
   }
   
   public function getUriParameters()
