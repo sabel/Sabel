@@ -12,6 +12,8 @@
 class Sabel_Mail_Sender_Smtp
   extends Sabel_Object implements Sabel_Mail_Sender_Interface
 {
+  const DEFAULT_TIMEOUT = 5;
+  
   /**
    * @var array
    */
@@ -35,6 +37,10 @@ class Sabel_Mail_Sender_Smtp
     
     if (isset($config["eol"])) {
       $this->eol = $config["eol"];
+    }
+    
+    if (!isset($config["timeout"])) {
+      $config["timeout"] = self::DEFAULT_TIMEOUT;
     }
     
     $this->config = $config;
@@ -69,11 +75,11 @@ class Sabel_Mail_Sender_Smtp
       $port = ($_tmp === "ssl://" || $_tmp === "tls://") ? "465" : "25";
     }
     
-    $smtp = fsockopen($server, $port);
+    $smtp = fsockopen($server, $port, $errno, $errstr, $this->config["timeout"]);
     
     if ($smtp === false || strpos(rtrim(fgets($smtp)), "220") !== 0) {
-      $message = "can't connect to the SMTP Server. "
-               . "HOST => '{$server}, PORT => '{$port}'";
+      $message = __METHOD__ . "()" ." can't connect to the SMTP Server. "
+               . "HOST => '{$server}, PORT => '{$port}' / reason: {$errno}/{$errstr}";
       
       throw new Sabel_Mail_Smtp_Exception_ConnectionRefused($message);
     }
