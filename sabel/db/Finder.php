@@ -226,6 +226,20 @@ class Sabel_Db_Finder
     $this->join->add($mdlName, $on, $alias, $type);
   }
   
+  public function limit($limit)
+  {
+    $this->model->setLimit($limit);
+    
+    return $this;
+  }
+  
+  public function offset($offset)
+  {
+    $this->model->setOffset($offset);
+    
+    return $this;
+  }
+  
   public function sort($column, $smode = "ASC", $nulls = "LAST")
   {
     $this->model->setOrderBy($column, $smode, $nulls);
