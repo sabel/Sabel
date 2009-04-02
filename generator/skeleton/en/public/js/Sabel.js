@@ -540,10 +540,6 @@ Sabel.String = new Sabel.Class(String, {
 		return replaced;
 	},
 
-	/**
-	 *
-	 *
-	 */
 	str_pad: function(pad_length, pad_string /* = " " */, pad_type /* = 1 */) {
 		var string = this._string
 		var repeat = (pad_length - string.length);
