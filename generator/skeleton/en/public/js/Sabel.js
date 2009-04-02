@@ -528,7 +528,8 @@ Sabel.String = new Sabel.Class(String, {
 
 			if (alignment) {
 				var len = alignment - v.toString().length;
-				var t = new Sabel.String(padding.charAt(padding.length - 1) || " ").repeat(len);
+				padding = (padding) ? padding.charAt(padding.length - 1) : " ";
+				var t = new Sabel.String(padding).repeat(len);
 
 				v = (sign === "-") ? v + t : t + v;
 			}
@@ -537,6 +538,41 @@ Sabel.String = new Sabel.Class(String, {
 		});
 
 		return replaced;
+	},
+
+	/**
+	 *
+	 *
+	 */
+	str_pad: function(pad_length, pad_string /* = " " */, pad_type /* = 1 */) {
+		var string = this._string
+		var repeat = (pad_length - string.length);
+		var left = right = 0;
+		pad_string = new Sabel.String(pad_string || " ");
+
+		switch (pad_type) {
+			case 0:
+			left = repeat;
+			break;
+			case 2:
+			left = Math.floor(repeat / 2);
+			right = Math.ceil(repeat / 2);
+			break;
+			case 1:
+			default:
+			right = repeat;
+			break;
+		}
+
+		if (left > 0) {
+			string = pad_string.repeat(left).substr(0, left) + string;
+		}
+
+		if (right > 0) {
+			string += pad_string.repeat(right).substr(0, right);
+		}
+
+		return this._set(string);
 	},
 
 	trim: function() {
