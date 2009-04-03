@@ -34,6 +34,8 @@ class Sabel_Util_String extends Sabel_Object
       $this->string = $string;
     } elseif ($string instanceof self) {
       $this->string = $string->toString();
+    } elseif ($string === null) {
+      $this->string = "";
     } else {
       $message = __METHOD__ . "() argument must be a string.";
       throw new Sabel_Exception_InvalidArgument($message);
