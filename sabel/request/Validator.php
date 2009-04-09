@@ -74,7 +74,7 @@ class Sabel_Request_Validator extends Sabel_Object
           preg_match('/\((.+)\)/', $method, $matches);
           $args = array_map("trim", explode(",", $matches[1]));
           array_unshift($args, $name, $value);
-          $method = substr($method, 0, strlen($matches[0]));
+          $method = substr($method, 0, strpos($method, "("));
           $message = call_user_func_array(array($this, $method), $args);
           if ($message !== null) $errors[] = $message;
         } else {
