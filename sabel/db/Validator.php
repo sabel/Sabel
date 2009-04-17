@@ -204,7 +204,7 @@ class Sabel_Db_Validator extends Sabel_Object
      *  because the problem of the datatype occurs. (too large integer is float.)
      */
     if ($column->isInt(true) || $column->isSmallint()) {
-      return ($value > PHP_INT_MAX || is_int($value));
+      return ($value > PHP_INT_MAX || is_natural_number($value));
     } elseif ($column->isBigint()) {
       return (is_numeric($value) && $value{0} !== "0");
     } elseif ($column->isBool()) {

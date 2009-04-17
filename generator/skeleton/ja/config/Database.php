@@ -43,8 +43,8 @@ class Config_Database implements Sabel_Config
 Sabel_Db_Validate_Config::setMessages(
   array("maxlength" => "%NAME%は%MAX%文字以下で入力してください",
         "minlength" => "%NAME%は%MIN%文字以上で入力してください",
-        "maximum"   => "%NAME%は%MAX%以上を入力してください",
-        "minimum"   => "%NAME%は%MIN%以下を入力してください",
+        "maximum"   => "%NAME%は%MAX%以下で入力してください",
+        "minimum"   => "%NAME%は%MIN%以上で入力してください",
         "nullable"  => "%NAME%を入力してください",
         "numeric"   => "%NAME%は数値で入力してください",
         "type"      => "%NAME%の形式が不正です",
