@@ -22,25 +22,18 @@ function unshift_include_paths($paths, $prefix = "")
 
 function htmlescape($str, $charset = null)
 {
-  if ($charset !== null) {
+  if ($charset === null) {
+    return htmlentities($str, ENT_QUOTES);
+  } else {
     return htmlentities($str, ENT_QUOTES, $charset);
   }
-  
-  static $internalEncoding = null;
-  
-  if ($internalEncoding === null) {
-    if (extension_loaded("mbstring")) {
-      $internalEncoding = ini_get("mbstring.internal_encoding");
-      if ($internalEncoding === "") $internalEncoding = false;
-    } else {
-      $internalEncoding = false;
-    }
-  }
-  
-  if ($internalEncoding) {
-    return htmlentities($str, ENT_QUOTES, $internalEncoding);
+}
+
+function xmlescape($str, $charset = null) {
+  if ($charset === null) {
+    return str_replace("&#039;", "&apos;", htmlspecialchars($str, ENT_QUOTES));
   } else {
-    return htmlentities($str, ENT_QUOTES);
+    return str_replace("&#039;", "&apos;", htmlspecialchars($str, ENT_QUOTES, $charset));
   }
 }
 
