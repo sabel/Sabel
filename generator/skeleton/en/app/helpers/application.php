@@ -1,8 +1,13 @@
 <?php
 
-function h($string, $charset = null)
+function h($string, $charset = DEFAULT_ENCODING)
 {
   return htmlescape($string, $charset);
+}
+
+function xh($string, $charset = DEFAULT_ENCODING)
+{
+  return xmlescape($string, $charset);
 }
 
 function a($uri, $anchor, $uriQuery = "")

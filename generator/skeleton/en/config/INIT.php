@@ -38,6 +38,7 @@ define("CACHE_DIR_PATH",    RUN_BASE . DS  . "cache");
 define("COMPILED_DIR_PATH", CACHE_DIR_PATH . DS . "templates");
 
 define("DEFAULT_LAYOUT_NAME", "layout");
+define("DEFAULT_ENCODING", "UTF-8");
 
 ################# INCLUDE_PATH SETTINGS ####################
 
