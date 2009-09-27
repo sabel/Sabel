@@ -2,12 +2,12 @@
 
 class LinkedPaginator extends Paginator
 {
-  protected $maxpage = 20;
+  protected $lastPage = 20;
   protected $hasNext = false;
   
-  public function setMaxPageNumber($num)
+  public function setLastPageNumber($num)
   {
-    $this->maxpage = $num;
+    $this->lastPage = $num;
   }
   
   public function prev($text, $attrs = array())
@@ -48,7 +48,7 @@ class LinkedPaginator extends Paginator
     unset($getValues[ini_get("session.name")]);
     $attributes["uriQuery"] = http_build_query($getValues, "", "&");
     
-    $count = $this->maxpage * $limit;
+    $count = $this->lastPage * $limit;
     
     $attributes["count"]  = $count;
     $attributes["limit"]  = $limit;
@@ -76,7 +76,7 @@ class LinkedPaginator extends Paginator
         array_pop($results);
         $attributes["results"] = $results;
         
-        if ($page < $this->maxpage) {
+        if ($page < $this->lastPage) {
           $this->hasNext = true;
         }
       }
