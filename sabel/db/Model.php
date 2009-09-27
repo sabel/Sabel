@@ -344,7 +344,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
   /**
    * @return void
    */
-  public function initState()
+  public function clear()
   {
     $this->clearCondition(true);
     $this->projection = array();

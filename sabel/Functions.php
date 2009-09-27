@@ -20,20 +20,43 @@ function unshift_include_paths($paths, $prefix = "")
   set_include_path($path . get_include_path());
 }
 
-function htmlescape($str, $charset = null)
-{
-  if ($charset === null) {
-    return htmlentities($str, ENT_QUOTES);
-  } else {
-    return htmlentities($str, ENT_QUOTES, $charset);
+if (extension_loaded("mbstring")) {
+  function htmlescape($str, $charset = null)
+  {
+    static $ienc = null;
+    
+    if ($charset === null) {
+      if ($ienc === null) {
+        $ienc = mb_internal_encoding();
+      }
+      
+      $charset = $ienc;
+    }
+    
+    return htmlentities($str, ENT_QUOTES, $ienc);
   }
-}
-
-function xmlescape($str, $charset = null) {
-  if ($charset === null) {
-    return str_replace("&#039;", "&apos;", htmlspecialchars($str, ENT_QUOTES));
-  } else {
+  
+  function xmlescape($str, $charset = null) {
+    static $ienc = null;
+    
+    if ($charset === null) {
+      if ($ienc === null) {
+        $ienc = mb_internal_encoding();
+      }
+      
+      $charset = $ienc;
+    }
+    
     return str_replace("&#039;", "&apos;", htmlspecialchars($str, ENT_QUOTES, $charset));
+  }
+} else {
+  function htmlescape($str, $charset = null)
+  {
+    return htmlentities($str, ENT_QUOTES);
+  }
+  
+  function xmlescape($str, $charset = null) {
+    return str_replace("&#039;", "&apos;", htmlspecialchars($str, ENT_QUOTES));
   }
 }
 
@@ -172,6 +195,24 @@ function environment($str)
       return DEVELOPMENT;
     default:
       return null;
+  }
+}
+
+function is_ipaddr($arg)
+{
+  if (is_string($arg)) {
+    $ptn = "[0-9]{1,3}";
+    if (preg_match("/^{$ptn}\.{$ptn}\.{$ptn}\.{$ptn}$/", $arg) === 1) {
+      foreach (explode(".", $arg) as $part) {
+        if ($part > 255) return false;
+      }
+      
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
   }
 }
 

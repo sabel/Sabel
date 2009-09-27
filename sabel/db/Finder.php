@@ -12,7 +12,8 @@
 class Sabel_Db_Finder
 {
   protected $model = null;
-  protected $join = null;
+  protected $join  = null;
+  protected $projection = null;
   
   public function __construct($mdlName, $projection = null)
   {
@@ -23,9 +24,14 @@ class Sabel_Db_Finder
     }
   }
   
+  public function getRawInstance()
+  {
+    return ($this->join === null) ? $this->model : $this->join;
+  }
+  
   public function p($projection)
   {
-    $this->model->setProjection($projection);
+    $this->projection = $projection;
     
     return $this;
   }
@@ -249,35 +255,32 @@ class Sabel_Db_Finder
   
   public function fetchAll()
   {
-    if ($this->join === null) {
-      return $this->model->select();
-    } else {
-      return $this->join->select();
-    }
+    $this->setProjection();
+    
+    return $this->getRawInstance()->select();
   }
   
   public function fetch()
   {
-    if ($this->join === null) {
-      return $this->model->selectOne();
-    } else {
-      return $this->join->selectOne();
-    }
-  }
-  
-  public function all()
-  {
-    return $this->fetchAll();
-  }
-  
-  public function one()
-  {
-    return $this->fetch();
+    $this->setProjection();
+    
+    return $this->getRawInstance()->selectOne();
   }
   
   public function count()
   {
-    return $this->model->getCount();
+    $this->setProjection();
+    
+    if ($this->join === null) {
+      return $this->model->getCount();
+    } else {
+      return $this->join->getCount(false);
+    }
+  }
+  
+  protected function setProjection()
+  {
+    $this->getRawInstance()->setProjection($this->projection);
   }
 }
 

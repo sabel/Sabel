@@ -1,11 +1,11 @@
 <?php
 
-function h($string, $charset = DEFAULT_ENCODING)
+function h($string, $charset = null)
 {
   return htmlescape($string, $charset);
 }
 
-function xh($string, $charset = DEFAULT_ENCODING)
+function xh($string, $charset = null)
 {
   return xmlescape($string, $charset);
 }

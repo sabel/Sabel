@@ -37,14 +37,16 @@ class Paginator extends Sabel_Object
   protected $defaultOrder = array();
   
   /**
-   * @array
+   * @array or false
    */
-  protected $orderColumns = array();
+  protected $orderColumns = false;
   
-  public function __construct($model, $pageKey = "page")
+  public function __construct($model)
   {
     if (is_string($model)) {
       $model = MODEL($model);
+    } elseif ($model instanceof Sabel_Db_Finder) {
+      $model = $model->getRawInstance();
     }
     
     if (is_model($model)) {
@@ -58,7 +60,7 @@ class Paginator extends Sabel_Object
     }
     
     $this->model = $model;
-    $this->attributes["pageKey"] = $pageKey;
+    $this->attributes["pageKey"] = "page";
   }
   
   public function __set($key, $value)
@@ -75,14 +77,10 @@ class Paginator extends Sabel_Object
     }
   }
   
-  public function prev($text, $attrs = array())
+  public function getPageNumber()
   {
-    return $this->createLink($text, $this->getUriQuery($this->viewer->getPrevious()), $attrs);
-  }
-  
-  public function next($text, $attrs = array())
-  {
-    return $this->createLink($text, $this->getUriQuery($this->viewer->getNext()), $attrs);
+    $pageKey = $this->attributes["pageKey"];
+    return $this->$pageKey;
   }
   
   public function getUriQuery($page)
@@ -116,6 +114,8 @@ class Paginator extends Sabel_Object
   public function setOrderColumns($columns)
   {
     $this->orderColumns = $columns;
+    
+    return $this;
   }
   
   public function setMethod($method)
@@ -140,7 +140,7 @@ class Paginator extends Sabel_Object
     
     unset($getValues[$pageKey]);
     $attributes["uriQuery"] = http_build_query($getValues, "", "&");
-    $count = ($this->isJoin) ? $model->getCount(null, false) : $model->getCount();
+    $count = ($this->isJoin) ? $model->getCount(false) : $model->getCount();
     
     $attributes["count"] = $count;
     $attributes["limit"] = $limit;
@@ -153,6 +153,7 @@ class Paginator extends Sabel_Object
     if ($count === 0) {
       $attributes["offset"]  = 0;
       $attributes["results"] = array();
+      $model->clear();
     } else {
       $offset = $pager->getSqlOffset();
       $this->_setOrderBy($getValues);
@@ -161,29 +162,9 @@ class Paginator extends Sabel_Object
       
       $attributes["offset"]  = $offset;
       $attributes["results"] = $model->{$this->method}();
-      
-      if ($this->uri === null && $request = Sabel_Context::getRequest()) {
-        $attributes["uri"] = get_uri_prefix() . "/" . $request->getUri();
-      }
     }
     
     return $this;
-  }
-  
-  protected function createLink($text, $query, $attrs)
-  {
-    $_attrs = "";
-    if (is_array($attrs) && !empty($attrs)) {
-      $tmp = array();
-      foreach ($attrs as $attr => $value) {
-        $tmp[] = $attr . '="' . $value . '"';
-      }
-      
-      $_attrs = " " . implode(" ", $tmp);
-    }
-    
-    $format = '<a%s href="%s?%s">%s</a>';
-    return sprintf($format, $_attrs, $this->uri, $query, $text);
   }
   
   protected function _setOrderBy($getValues)
