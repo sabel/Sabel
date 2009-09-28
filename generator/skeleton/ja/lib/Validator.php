@@ -11,9 +11,6 @@
  */
 class Validator extends Sabel_Request_Validator
 {
-  protected $displayNames = array();
-  protected $suites = array();
-  
   public function __construct()
   {
     // $this->displayNames = array("INPUT_NAME" => "DISPLAY_NAME");
@@ -21,30 +18,50 @@ class Validator extends Sabel_Request_Validator
   
   public function required($name, $value)
   {
-    if ($value === null) {
+    if (realempty($value)) {
       return $this->getDisplayName($name) . "を入力してください";
     }
   }
   
   public function integer($name, $value)
   {
-    if ($value !== null && !ctype_digit($value)) {
+    if (!realempty($value) && !ctype_digit($value)) {
       return $this->getDisplayName($name) . "は整数で入力してください";
     }
   }
   
   public function numeric($name, $value)
   {
-    if ($value !== null && !is_numeric($value)) {
+    if (!realempty($value) && !is_numeric($value)) {
       return $this->getDisplayName($name) . "は数値で入力してください";
     }
   }
   
   public function naturalNumber($name, $value)
   {
-    if ($value !== null && !is_natural_number($value)) {
-      //return $this->getDisplayName($name) . "は自然数で入力してください";
+    if (!realempty($value) && !is_natural_number($value)) {
       return $this->getDisplayName($name) . "は整数で入力してください";
+    }
+  }
+  
+  public function maxLength($name, $value, $max)
+  {
+    if (!realempty($value) && strlen($value) > $max) {
+      return $this->getDisplayName($name) . "は{$max}文字以内で入力してください";
+    }
+  }
+  
+  public function maxWidth($name, $value, $max)
+  {
+    if (!realempty($value) && (mb_strwidth($value) / 2) > $max) {
+      return $this->getDisplayName($name) . "は全角{$max}文字以内で入力してください";
+    }
+  }
+  
+  public function alnum($name, $value)
+  {
+    if (!realempty($value) && preg_match('/^[0-9a-zA-Z]+$/', $value) === 0) {
+      return $this->getDisplayName($name) . "は半角英数字で入力してください";
     }
   }
   

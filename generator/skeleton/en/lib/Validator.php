@@ -11,9 +11,6 @@
  */
 class Validator extends Sabel_Request_Validator
 {
-  protected $displayNames = array();
-  protected $suites = array();
-  
   public function __construct()
   {
     // $this->displayNames = array("INPUT_NAME" => "DISPLAY_NAME");
@@ -44,6 +41,27 @@ class Validator extends Sabel_Request_Validator
   {
     if ($value !== null && !is_natural_number($value)) {
       return $this->getDisplayName($name) . " must be an integer.";
+    }
+  }
+  
+  public function maxLength($name, $value, $max)
+  {
+    if (!realempty($value) && strlen($value) > $max) {
+      return $this->getDisplayName($name) . " must be {$max} characters or less.";
+    }
+  }
+  
+  public function maxWidth($name, $value, $max)
+  {
+    if (!realempty($value) && (mb_strwidth($value) / 2) > $max) {
+      return $this->getDisplayName($name) . " must be {$max} characters or less.";
+    }
+  }
+  
+  public function alnum($name, $value)
+  {
+    if (!realempty($value) && preg_match('/^[0-9a-zA-Z]+$/', $value) === 0) {
+      return $this->getDisplayName($name) . " must be alphanumeric.";
     }
   }
   
