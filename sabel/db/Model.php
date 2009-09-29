@@ -531,7 +531,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       if ($afterResult !== null) $result = $afterResult;
     }
     
-    if ($this->autoReinit) $this->initState();
+    if ($this->autoReinit) $this->clear();
     
     return $result;
   }
@@ -566,7 +566,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       if ($afterResult !== null) $result = $afterResult;
     }
     
-    if ($this->autoReinit) $this->initState();
+    if ($this->autoReinit) $this->clear();
     
     return $result;
   }
@@ -596,7 +596,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       if ($afterResult !== null) $result = $afterResult;
     }
     
-    if ($this->autoReinit) $this->initState();
+    if ($this->autoReinit) $this->clear();
     
     return $result;
   }
@@ -616,7 +616,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       $result = $this->saveInsert();
     }
     
-    if ($this->autoReinit) $this->initState();
+    if ($this->autoReinit) $this->clear();
     
     return $result;
   }
@@ -752,7 +752,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       if ($afterResult !== null) $result = $afterResult;
     }
     
-    if ($this->autoReinit) $this->initState();
+    if ($this->autoReinit) $this->clear();
     
     return $result;
   }
@@ -779,7 +779,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       if ($afterResult !== null) $result = $afterResult;
     }
     
-    if ($this->autoReinit) $this->initState();
+    if ($this->autoReinit) $this->clear();
     
     return $result;
   }
@@ -826,7 +826,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       if ($afterResult !== null) $result = $afterResult;
     }
     
-    if ($this->autoReinit) $this->initState();
+    if ($this->autoReinit) $this->clear();
     
     return $result;
   }
