@@ -66,7 +66,7 @@ class Processor_Response extends Sabel_Bus_Processor
         }
         
         $session = $bus->get("session");
-        if ($session->isStarted() && !$session->isCookieEnabled()) {
+        if ($session !== null && $session->isStarted() && !$session->isCookieEnabled()) {
           $glue = ($hasToken || $hasParams) ? "&" : "?";
           $location .= $glue . $session->getName() . "=" . $session->getId();
         }

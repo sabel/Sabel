@@ -14,11 +14,8 @@ class Processor_Initializer extends Sabel_Bus_Processor
   public function execute($bus)
   {
     Sabel_Db_Config::initialize($bus->getConfig("database"));
-    //Sabel::fileUsing(RUN_BASE . DS . LIB_DIR_NAME . DS . "db" . DS . "utility.php", true);
     
-    if (!defined("SBL_BATCH")) {
-      // start session.
-      $session = $bus->get("session");
+    if (!defined("SBL_BATCH") && ($session = $bus->get("session")) !== null) {
       $session->start();
       l("START SESSION: " . $session->getName() . "=" . $session->getId());
     }
