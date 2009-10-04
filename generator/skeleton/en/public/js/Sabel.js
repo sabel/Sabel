@@ -31,6 +31,10 @@ Sabel.QueryObject.prototype = {
 		return this;
 	},
 
+	unset: function(key) {
+		delete this.data[key];
+	},
+
 	serialize: function() {
 		var data = this.data, buf = new Array();
 		for (var key in data) {
@@ -90,19 +94,21 @@ Sabel.Uri.parseQuery = function(query)
 };
 
 Sabel.Uri.prototype = {
-	has: function(key)
-	{
+	has: function(key) {
 		return this.parseQuery.has(key);
 	},
 
-	get: function(key)
-	{
+	get: function(key) {
 		return this.parseQuery.get(key);
 	},
 
-	set: function(key, value)
-	{
+	set: function(key, value)	{
 		this.parseQuery.set(key, value);
+		return this;
+	},
+
+	unset: function(key) {
+		this.parseQuery.unset(key);
 		return this;
 	},
 
