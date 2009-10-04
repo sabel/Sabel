@@ -304,7 +304,7 @@ Sabel.Object = {
 				child[prop] = (curry === true) ? Sabel.Object._tmp(parent[prop]) : parent[prop];
 			}
 		}
-		
+
 		return child;
 	},
 
@@ -827,7 +827,7 @@ Sabel.Dom = {
 	getElementsByClassName: function(className, element, ext) {
 		element = (element) ? Sabel.get(element, false) : document;
 
-		if (element.getElementsByClassNam) {
+		if (element.getElementsByClassName) {
 			return element.getElementsByClassName(className);
 		} else {
 			var elms = element.getElementsByTagName("*");
@@ -1942,7 +1942,7 @@ Sabel.Element._getOfTypeNodeIndex = function(element, reverse) {
 	var childNodes = parentNode.childNodes;
 	var propName   = (reverse === true) ? "__cachedLastOfTypeIdx"
 	                                    : "__cachedOfTypeIdx";
-	
+
 	if (parentNode.__cachedLength === childNodes.length) {
 		if (element[propName]) {
 			return element[propName];
@@ -1959,7 +1959,7 @@ Sabel.Element._getOfTypeNodeIndex = function(element, reverse) {
 			child[propName] = idx++;
 		}
 	}
-	
+
 	return element[propName];
 };
 
@@ -2137,7 +2137,7 @@ Sabel.Ajax.prototype = {
 		this.xmlhttp   = new XMLHttpRequest();
 		this.completed = false;
 	},
-	
+
 	request: function(url, options) {
 		var xmlhttp = this.xmlhttp;
 		var options = this.setOptions(options);
@@ -2613,7 +2613,7 @@ if (Sabel.UserAgent.isIE) {
 	Sabel.Event.stopPropagation = function(evt) {
 		(evt || window.event).cancelBubble = true;
 	};
-	
+
 	Sabel.Event.preventDefault = function(evt) {
 		(evt || window.event).returnValue = false;
 	};
@@ -3318,7 +3318,7 @@ Sabel.DragAndDrop.prototype = {
 		this.options.gridX = grid[0];
 		this.options.gridY = grid[1];
 	},
-	
+
 	observe: function(element, handler, func, useCapture)
 	{
 		if (this.observes[handler]) return;
@@ -3326,13 +3326,13 @@ Sabel.DragAndDrop.prototype = {
 		Sabel.Element.observe(element, handler, func);
 		this.observes[handler] = func;
 	},
-	
+
 	stopObserve: function(element, handler)
 	{
 		Sabel.Element.stopObserve(element, handler, this.observes[handler]);
 		delete this.observes[handler];
 	},
-	
+
 	mouseDown: function(e)
 	{
 		Sabel.Event.preventDefault(e);
