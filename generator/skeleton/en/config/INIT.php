@@ -41,10 +41,12 @@ define("DEFAULT_LAYOUT_NAME", "layout");
 
 ################# INCLUDE_PATH SETTINGS ####################
 
-unshift_include_paths(array(MODULES_DIR_PATH,
-                            RUN_BASE . DS . LIB_DIR_NAME,
-                            MODELS_DIR_PATH,
-                            RUN_BASE . DS . ADDON_DIR_NAME));
+unshift_include_paths(array(
+  MODULES_DIR_PATH,
+  RUN_BASE . DS . LIB_DIR_NAME,
+  MODELS_DIR_PATH,
+  RUN_BASE . DS . ADDON_DIR_NAME
+));
 
 unshift_include_path(Sabel::getPath());
 
