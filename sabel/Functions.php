@@ -160,6 +160,11 @@ function normalize_uri($uri)
 
 function realempty($value)
 {
+  return is_empty($value);
+}
+
+function is_empty($value)
+{
   return ($value === null || $value === array() || $value === "" || $value === false);
 }
 
