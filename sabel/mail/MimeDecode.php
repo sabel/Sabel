@@ -26,6 +26,12 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
   public function decode($source)
   {
     $mail = $this->toHeadersAndBody($source);
+    
+    if (empty($mail["header"])) {
+      $mail["header"] = $mail["body"];
+      $mail["body"] = "";
+    }
+    
     return $this->_decode($mail["header"], $mail["body"]);
   }
   
