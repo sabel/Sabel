@@ -85,7 +85,7 @@ class Sabel_Util_String extends Sabel_Object
   public function charAt($pos)
   {
     if ($pos >= $this->length() || $pos < 0) {
-      return null;
+      return new self("");
     } elseif (self::$isMbstringLoaded) {
       return new self(mb_substr($this->string, $pos, 1));
     } else {
@@ -191,30 +191,37 @@ class Sabel_Util_String extends Sabel_Object
   
   public function toUpperCase()
   {
-    $this->string = strtoupper($this->string);
+    if (!$this->isEmpty()) {
+      $this->string = strtoupper($this->string);
+    }
     
     return $this;
   }
   
   public function toLowerCase()
   {
-    $this->string = strtolower($this->string);
+    if (!$this->isEmpty()) {
+      $this->string = strtolower($this->string);
+    }
     
     return $this;
   }
   
   public function ucfirst()
   {
-    $this->string = ucfirst($this->string);
+    if (!$this->isEmpty()) {
+      $this->string = ucfirst($this->string);
+    }
     
     return $this;
   }
   
   public function lcfirst()
   {
-    if ($this->isEmpty()) return "";
+    if (!$this->isEmpty()) {
+      $this->string = lcfirst($this->string);
+    }
     
-    $this->string = lcfirst($this->string);
     return $this;
   }
   
@@ -255,7 +262,7 @@ class Sabel_Util_String extends Sabel_Object
   
   public function explode($separator, $limit = null)
   {
-    if ($limit === nulL) {
+    if ($limit === null) {
       return explode($separator, $this->string);
     } else {
       return explode($separator, $this->string, $limit);

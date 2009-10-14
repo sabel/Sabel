@@ -26,14 +26,14 @@ class Sabel_Http_Uri extends Sabel_ValueObject
     $this->scheme = $scheme = $parsed["scheme"];
     
     if ($scheme === "http") {
-      $this->port = (isset($parsed["port"])) ? $parsed["port"] : 80;
+      $this->port = (isset($parsed["port"])) ? $parsed["port"] : "80";
       $this->transport = "tcp";
     } elseif ($scheme === "https") {
       $this->transport = "ssl";
-      $this->port = (isset($parsed["port"])) ? $parsed["port"] : 443;
+      $this->port = (isset($parsed["port"])) ? $parsed["port"] : "443";
     } elseif ($scheme === "ftp") {
       $this->transport = "ftp";
-      $this->port = (isset($parsed["port"])) ? $parsed["port"] : 21;
+      $this->port = (isset($parsed["port"])) ? $parsed["port"] : "21";
     } else {
       // @todo
     }

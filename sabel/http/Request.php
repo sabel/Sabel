@@ -63,7 +63,7 @@ class Sabel_Http_Request extends Sabel_Object
   
   public function setMethod($method)
   {
-    $this->method = $method;
+    $this->method = strtoupper($method);
     
     return $this;
   }
@@ -75,12 +75,25 @@ class Sabel_Http_Request extends Sabel_Object
   
   public function setHeader($name, $value)
   {
+    if (strpos($value, "-") === false) {
+      $parts = array();
+      foreach (explode("-", $name) as $part) {
+        $parts[] = ucfirst($part);
+      }
+      
+      $name = implode("-", $parts);
+    } else {
+      $name = ucfirst($name);
+    }
+    
     $this->headers[$name] = $value;
   }
   
   public function setHeaders(array $headers)
   {
-    $this->headers = array_merge($this->headers, $headers);
+    foreach ($headers as $name => $value) {
+      $this->setHeader($name, $value);
+    }
   }
   
   public function value($key, $value)
@@ -110,10 +123,12 @@ class Sabel_Http_Request extends Sabel_Object
       }
     }
     
-    $this->files[] = array("name"        => $name,
-                           "formName"    => $formName,
-                           "contentType" => $contentType,
-                           "data"        => $data);
+    $this->files[] = array(
+      "name"        => $name,
+      "formName"    => $formName,
+      "contentType" => $contentType,
+      "data"        => $data,
+    );
   }
   
   public function cookie($key, $value, $expire = null, $path = "/", $domain = null, $secure = false)
@@ -392,6 +407,7 @@ class Sabel_Http_Request extends Sabel_Object
     $request = implode("\r\n", $request) . "\r\n\r\n";
     if ($body !== "") $request .= $body;
     
+    dump($request); exit;
     return $request;
   }
   
