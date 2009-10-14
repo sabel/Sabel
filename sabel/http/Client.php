@@ -176,11 +176,13 @@ class Sabel_Http_Client extends Sabel_Object
   public function setProxy($config)
   {
     if ($config === false) {
-      $this->proxyConfig = array("host"      => "",
-                                 "port"      => 8080,
-                                 "transport" => "tcp",
-                                 "user"      => "",
-                                 "password"  => "");
+      $this->proxyConfig = array(
+        "host"      => "",
+        "port"      => 8080,
+        "transport" => "tcp",
+        "user"      => "",
+        "password"  => "",
+      );
       
       $this->config["useProxy"] = false;
     } elseif (is_array($config)) {
@@ -328,6 +330,7 @@ class Sabel_Http_Client extends Sabel_Object
       }
       
       $texts = array();
+      
       while (true) {
         if (($content = fread($socket, 8192)) === "") break;
         $texts[] = $content;
@@ -407,7 +410,6 @@ class Sabel_Http_Client extends Sabel_Object
     $request = implode("\r\n", $request) . "\r\n\r\n";
     if ($body !== "") $request .= $body;
     
-    dump($request); exit;
     return $request;
   }
   

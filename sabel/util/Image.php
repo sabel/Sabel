@@ -30,13 +30,4 @@ class Sabel_Util_Image extends Sabel_Object
       return false;
     }
   }
-  
-  public static function getContentType($data)
-  {
-    if (($type = self::getType($data)) !== false) {
-      return "image/{$type}";
-    } else {
-      return "";
-    }
-  }
 }

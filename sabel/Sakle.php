@@ -8,6 +8,8 @@ if (!defined("TEST_CASE")) {
   error_reporting(E_ALL|E_STRICT);
   define("SBL_LOG_LEVEL", SBL_LOG_ALL);
   
+  define("SAKLE", true);
+  
   if (isset($_SERVER["argv"][1])) {
     Sakle::run($_SERVER["argv"][1]);
   } else {

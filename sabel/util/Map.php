@@ -16,7 +16,7 @@ class Sabel_Util_Map extends Sabel_Object implements Iterator
   protected $index = 0;
   protected $key   = null;
   protected $value = null;
-    
+  
   public function __construct($array = null)
   {
     if ($array !== null) {
