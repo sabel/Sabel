@@ -280,7 +280,9 @@ class Sabel_Db_Finder
   
   protected function setProjection()
   {
-    $this->getRawInstance()->setProjection($this->projection);
+    if ($this->projection !== null) {
+      $this->getRawInstance()->setProjection($this->projection);
+    }
   }
 }
 
