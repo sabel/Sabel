@@ -12,7 +12,7 @@
 class Install extends Sabel_Sakle_Task
 {
   /**
-   * @var Sabel_Http_Request
+   * @var Sabel_Http_Client
    */
   protected $client = null;
   
@@ -35,7 +35,7 @@ class Install extends Sabel_Sakle_Task
   
   public function initialize()
   {
-    $this->client = new Sabel_Http_Request("");
+    $this->client = new Sabel_Http_Client("");
     $this->fs = new Sabel_Util_FileSystem(RUN_BASE);
   }
   

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Http_Request
+ * Sabel_Http_Client
  *
  * @category   Mail
  * @package    org.sabel.http
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Http_Request extends Sabel_Object
+class Sabel_Http_Client extends Sabel_Object
 {
   protected $uri = "";
   protected $method = "GET";
@@ -39,7 +39,7 @@ class Sabel_Http_Request extends Sabel_Object
   );
   
   protected $headers = array(
-    "User-Agent"      => "Sabel/1.1 Sabel_Http_Request",
+    "User-Agent"      => "Sabel/1.1 Sabel_Http_Client",
     "Accept"          => "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,*/*;q=0.5",
     "Accept-Language" => "en-us,en;q=0.5",
     "Accept-Encoding" => "gzip,deflate",
