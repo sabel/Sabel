@@ -13,9 +13,14 @@ class Sabel_Http_Uri extends Sabel_ValueObject
 {
   public function __construct($uri)
   {
-    $parsed     = parse_url($uri);
+    $parsed = parse_url($uri);
     $this->host = $parsed["host"];
-    $this->path = $parsed["path"];
+    
+    if (isset($parsed["path"])) {
+      $this->path = $parsed["path"];
+    } else {
+      $this->path = "/";
+    }
     
     if (isset($parsed["query"])) {
       $this->query = $parsed["query"];

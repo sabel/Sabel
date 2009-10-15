@@ -70,7 +70,9 @@ class Sabel_Http_Client extends Sabel_Object
   
   public function setConfig(array $config)
   {
-    $this->config = array_merge($this->config, $config);
+    foreach ($config as $k => $v) {
+      $this->config[lcfirst($k)] = $v;
+    }
   }
   
   public function setHeader($name, $value)
