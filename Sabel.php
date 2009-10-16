@@ -130,6 +130,7 @@ final class Sabel
     require ($SABEL . "Bus.php");
     require ($SABEL . "Config.php");
     require ($SABEL . "Context.php");
+    require ($SABEL . "Addon.php");
     require ($SABEL . "Request.php");
     require ($SABEL . "Session.php");
     require ($SABEL . "Response.php");
