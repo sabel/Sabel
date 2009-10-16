@@ -165,7 +165,7 @@ function realempty($value)
 
 function is_empty($value)
 {
-  return ($value === null || $value === array() || $value === "" || $value === false);
+  return ($value === null || $value === "" || $value === array() || $value === false);
 }
 
 function dump()

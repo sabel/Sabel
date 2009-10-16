@@ -11,12 +11,7 @@
  */
 class Processor_View extends Sabel_Bus_Processor
 {
-  protected $beforeEvents = array("initializer" => "initViewObject");
-  
-  /**
-   * @var Sabel_View
-   */
-  private $view = null;
+  protected $afterEvents = array("controller" => "initViewObject");
   
   public function initViewObject($bus)
   {
@@ -35,12 +30,11 @@ class Processor_View extends Sabel_Bus_Processor
       $view->setRenderer(new Sabel_View_Renderer());
     }
     
-    $this->view = $view;
     $bus->set("view", $view);
     $bus->get("controller")->setAttribute("view", $view);
   }
   
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $response = $bus->get("response");
     if ($response->isRedirected()) return;
@@ -49,13 +43,14 @@ class Processor_View extends Sabel_Bus_Processor
     $responses  = $response->getResponses();
     $contents   = (isset($responses["contents"])) ? $responses["contents"] : "";
     
-    $view = $this->getView(
+    $view = $this->setTemplateName(
+      $bus->get("view"),
       $response->getStatus(),
       $bus->get("destination")->getAction(),
       $bus->get("IS_AJAX_REQUEST") === true
     );
     
-    if ($contents === "") {
+    if (is_empty($contents)) {
       if ($location = $view->getValidLocation()) {
         $contents = $view->rendering($location, $responses);
       } elseif (!$controller->isExecuted()) {
@@ -81,21 +76,21 @@ class Processor_View extends Sabel_Bus_Processor
     }
   }
   
-  protected function getView($status, $action, $isAjax = false)
+  protected function setTemplateName(Sabel_View $view, $status, $action, $isAjax = false)
   {
     if ($status->isFailure()) {
       $tplName = lcfirst(str_replace(" ", "", $status->getReason()));
-      if ($location = $this->view->getValidLocation($tplName)) {
-        $this->view->setName($tplName);
+      if ($location = $view->getValidLocation($tplName)) {
+        $view->setName($tplName);
       } elseif ($status->isClientError()) {
-        $this->view->setName("clientError");
+        $view->setName("clientError");
       } else {
-        $this->view->setName("serverError");
+        $view->setName("serverError");
       }
-    } elseif ($this->view->getName() === "") {
-      $this->view->setName(($isAjax) ? "{$action}.ajax" : $action);
+    } elseif ($view->getName() === "") {
+      $view->setName(($isAjax) ? "{$action}.ajax" : $action);
     }
     
-    return $this->view;
+    return $view;
   }
 }

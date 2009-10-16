@@ -11,7 +11,7 @@
  */
 class Processor_Addon extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $config = $bus->getConfig("addon");
     $addons = $config->configure();

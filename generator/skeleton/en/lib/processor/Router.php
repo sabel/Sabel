@@ -11,7 +11,7 @@
  */
 class Processor_Router extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $request = $bus->get("request");
     $config = $bus->getConfig("map");

@@ -32,7 +32,7 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
    */
   protected $afterEvents = array();
   
-  abstract public function execute($bus);
+  abstract public function execute(Sabel_Bus $bus);
   
   public function __construct($name)
   {
@@ -58,13 +58,16 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
     }
   }
   
-  public function extract()
+  public function extract(/* string[] args */)
   {
     $names = func_get_args();
     
     if (count($names) > 0) {
       $bus = $this->getBus();
-      if (is_array($names[0])) $names = $names[0];
+      if (is_array($names[0])) {
+        $names = $names[0];
+      }
+      
       foreach ($names as $name) {
         $this->properties[$name] = $bus->get($name);
       }
@@ -90,7 +93,7 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
    *
    * @return void
    */
-  public function shutdown($bus)
+  public function shutdown(Sabel_Bus $bus)
   {
     
   }

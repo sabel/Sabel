@@ -13,7 +13,7 @@ class Processor_Response extends Sabel_Bus_Processor
 {
   protected $afterEvents = array("action" => "afterAction");
   
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $bus->set("response", new Sabel_Response_Object());
   }
@@ -46,7 +46,7 @@ class Processor_Response extends Sabel_Bus_Processor
     }
   }
   
-  public function shutdown($bus)
+  public function shutdown(Sabel_Bus $bus)
   {
     $response = $bus->get("response");
     $redirector = $response->getRedirector();

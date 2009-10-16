@@ -12,7 +12,7 @@
  */
 class Processor_Action extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $response   = $bus->get("response");
     $controller = $bus->get("controller");

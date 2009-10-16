@@ -11,7 +11,7 @@
  */
 class Processor_Initializer extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     Sabel_Db_Config::initialize($bus->getConfig("database"));
     
@@ -21,27 +21,8 @@ class Processor_Initializer extends Sabel_Bus_Processor
     }
     
     // default page title.
-    $bus->get("response")->setResponse("pageTitle", "Sabel");
-    
-    // $request = $bus->get("request");
-    // if ($request->isPost()) $this->trim($request);
-  }
-
-  /**
-   * strip whitespace from post values.
-   */
-  private function trim($request)
-  {
-    $func = (extension_loaded("mbstring")) ? "mb_trim" : "trim";
-    
-    if ($values = $request->fetchPostValues()) {
-      foreach ($values as &$value) {
-        if ($value === null || is_array($value)) continue;
-        $result = $func($value);
-        $value  = ($result === "") ? null : $result;
-      }
-      
-      $request->setPostValues($values);
+    if ($response = $bus->get("response")) {
+      $response->setResponse("pageTitle", "Sabel");
     }
   }
 }
