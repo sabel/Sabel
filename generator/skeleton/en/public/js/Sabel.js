@@ -120,7 +120,7 @@ Sabel.Uri.prototype = {
 		var uri = this.url + this.path;
 
 		if (this.filename !== "") uri += "/" + this.filename;
-		if (query = this.parseQuery.serialize()) uri += "?" + query;
+		if ((query = this.parseQuery.serialize())) uri += "?" + query;
 		return uri;
 	}
 };
@@ -325,7 +325,6 @@ Sabel.Object = {
 
 
 Sabel.Object.Methods = {
-
 	isAtomic: function(object) {
 		switch (object.constructor) {
 		case String:
@@ -1527,7 +1526,8 @@ Sabel.Element.insertAfter = function(element, newChild, refChild) {
 	if (element.lastChild == refChild) {
 		element.appendChild(newChild);
 	} else {
-		element.insertBefore(newChild, refChild.nextSibling);
+		refChild = Sabel.get(refChild);
+		element.insertBefore(newChild, refChild.getNextSibling());
 	}
 	return element;
 };
