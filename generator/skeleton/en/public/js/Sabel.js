@@ -502,8 +502,8 @@ Sabel.String = new Sabel.Class(String, {
 
 		var i = 0, v, o;
 
-		var pattern = /(^|[^%])%(?:([0-9]+)\$)?(-)?([0]|\'.)?([0-9]*)(?:\.([0-9]+))?([bcdfFosxX])/g
-		var replaced = this.replace(pattern, function(all, pre, key, sign, padding, alignment, precision, match) {
+		var pattern = /%(?:([0-9]+)\$)?(-)?([0]|\'.)?([0-9]*)(?:\.([0-9]+))?([bcdfFosxX])/g;
+		var replaced = this.replace(pattern, function(all, key, sign, padding, alignment, precision, match) {
 			v = (key) ? args[--key] : args[i++];
 
 			if (precision) precision = parseInt(precision);
@@ -539,7 +539,7 @@ Sabel.String = new Sabel.Class(String, {
 				v = (sign === "-") ? v + t : t + v;
 			}
 
-			return pre + v;
+			return v;
 		});
 
 		return replaced;
