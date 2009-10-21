@@ -46,6 +46,7 @@ SELECT
   is_nullable, column_default, character_maximum_length
   FROM information_schema.columns
   WHERE table_schema = '{$this->schemaName}' AND table_name = '{$tblName}'
+  ORDER BY ordinal_position ASC
 SQL;
     
     $rows = $this->driver->execute($sql);
