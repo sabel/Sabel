@@ -112,4 +112,40 @@ class Sabel_Db_Join_Base extends Sabel_Object
     $model->setProperties($props);
     return $model;
   }
+  
+  private function __getJoinQuery($on)
+  {
+    return $stmt->quoteIdentifier($on["id"])
+           . " = " . $stmt->quoteIdentifier(strtolower($this->childName))
+           . "."   . $stmt->quoteIdentifier($on["fkey"]);
+  }
+  
+  protected function _getJoinQuery(Sabel_Db_Statement $stmt)
+  {
+    $name  = $stmt->quoteIdentifier($this->tblName);
+    $query = array(" {$this->joinType} JOIN $name ");
+    
+    if ($this->hasAlias()) {
+      $name = $stmt->quoteIdentifier(strtolower($this->aliasName));
+      $query[] = "AS {$name} ";
+    }
+    
+    $on = $this->on;
+    
+    $query[] = " ON ";
+    
+    if (isset($on["id"]) && isset($on["fkey"])) {
+      $query[] = $name . "." . $this->__getJoinQuery($on);
+    } else {
+      $_on = array();
+      
+      foreach ($on as $each) {
+        $_on[] = $name . "." . $this->__getJoinQuery($each);
+      }
+      
+      $query[] = implode(" AND ", $_on);
+    }
+    
+    return $query;
+  }
 }

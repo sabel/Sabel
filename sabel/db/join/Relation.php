@@ -75,17 +75,7 @@ class Sabel_Db_Join_Relation extends Sabel_Db_Join_Base
   
   public function getJoinQuery(Sabel_Db_Statement $stmt)
   {
-    $name  = $stmt->quoteIdentifier($this->tblName);
-    $query = array(" {$this->joinType} JOIN $name ");
-    
-    if ($this->hasAlias()) {
-      $name = $stmt->quoteIdentifier(strtolower($this->aliasName));
-      $query[] = "AS {$name} ";
-    }
-    
-    $query[] = "ON {$name}." . $stmt->quoteIdentifier($this->on["id"])
-             . " = " . $stmt->quoteIdentifier(strtolower($this->childName))
-             . "."   . $stmt->quoteIdentifier($this->on["fkey"]);
+    $query = $this->_getJoinQuery($stmt);
     
     foreach ($this->objects as $object) {
       $query[] = $object->getJoinQuery($stmt);
