@@ -44,7 +44,7 @@ class Processor_Request extends Sabel_Bus_Processor
     
     l("REQUEST URI: /" . $request->getUri(true));
     
-    // ajax request.
+    // Ajax request.
     if ($request->getHttpHeader("X-Requested-With") === "XMLHttpRequest") {
       $bus->set("NO_LAYOUT", true);
       $bus->set("IS_AJAX_REQUEST", true);
@@ -55,20 +55,13 @@ class Processor_Request extends Sabel_Bus_Processor
   {
     $uri = (isset($_SERVER["REQUEST_URI"])) ? $_SERVER["REQUEST_URI"] : "/";
     
-    if (isset($_SERVER["SCRIPT_NAME"]) && strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
-      $uri = substr($uri, strlen($_SERVER["SCRIPT_NAME"]));
+    if (!is_cli() && isset($_SERVER["SCRIPT_NAME"]) && $_SERVER["SCRIPT_NAME"] !== "/index.php") {
       $bus->set("NO_VIRTUAL_HOST", true);
-    }
-    
-    if (defined("NO_REWRITE_PREFIX") && isset($_GET[NO_REWRITE_PREFIX])) {
-      $uri = substr($uri, strlen(NO_REWRITE_PREFIX) + 2);
-      $parsed = parse_url($uri);
-      if (isset($parsed["query"])) {
-        parse_str($parsed["query"], $_GET);
-      }
       
-      unset($_GET[NO_REWRITE_PREFIX]);
-      $bus->set("NO_REWRITE_MODULE", true);
+      $pubdir = substr(RUN_BASE . DS . "public", strlen($_SERVER["DOCUMENT_ROOT"]));
+      define("URI_PREFIX", $pubdir);
+      
+      $uri = substr(str_replace("/index.php", "", $uri), strlen($pubdir));
     }
     
     return normalize_uri($uri);

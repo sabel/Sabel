@@ -170,7 +170,7 @@ function is_empty($value)
 
 function dump()
 {
-  if (PHP_SAPI === "cli") {
+  if (is_cli()) {
     echo PHP_EOL;
     echo "================================================" . PHP_EOL;
   } else {
@@ -182,7 +182,7 @@ function dump()
     var_dump($value);
   }
   
-  if (PHP_SAPI === "cli") {
+  if (is_cli()) {
     echo "================================================" . PHP_EOL;
   } else {
     echo '</pre>';
@@ -201,6 +201,11 @@ function environment($str)
     default:
       return null;
   }
+}
+
+function is_cli()
+{
+  return (PHP_SAPI === "cli");
 }
 
 function is_ipaddr($arg)
@@ -224,7 +229,7 @@ function is_ipaddr($arg)
 function is_natural_number($num)
 {
   if (is_int($num)) {
-    return true;
+    return ($num >= 0);
   } elseif (is_string($num)) {
     if ($num === "0") {
       return true;
@@ -234,17 +239,6 @@ function is_natural_number($num)
   } else {
     return false;
   }
-}
-
-function preg_match_replace($pattern, $search, $replace, $subject)
-{
-  if (preg_match_all($pattern, $subject, $matches) > 0) {
-    foreach ($matches[0] as $match) {
-      $subject = str_replace($match, str_replace($search, $replace, $match), $subject);
-    }
-  }
-  
-  return $subject;
 }
 
 /***   sabel.db functions   ***/

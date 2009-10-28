@@ -15,7 +15,7 @@ class Processor_Initializer extends Sabel_Bus_Processor
   {
     Sabel_Db_Config::initialize($bus->getConfig("database"));
     
-    if (!defined("SBL_BATCH") && ($session = $bus->get("session")) !== null) {
+    if (!is_cli() && ($session = $bus->get("session")) !== null) {
       $session->start();
       l("START SESSION: " . $session->getName() . "=" . $session->getId());
     }

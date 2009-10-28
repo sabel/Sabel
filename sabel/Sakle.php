@@ -1,14 +1,14 @@
 <?php
 
 if (!defined("TEST_CASE")) {
+  define("SAKLE", true);
+  
   define("RUN_BASE", getcwd());
   require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." .  DIRECTORY_SEPARATOR . "Sabel.php");
   require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "INIT.php");
   
   error_reporting(E_ALL|E_STRICT);
   define("SBL_LOG_LEVEL", SBL_LOG_ALL);
-  
-  define("SAKLE", true);
   
   if (isset($_SERVER["argv"][1])) {
     Sakle::run($_SERVER["argv"][1]);
@@ -42,21 +42,20 @@ class Sakle
       
       if (isset($args[0]) && ($args[0] === "-h" || $args[0] === "--help")) {
         $ins->usage();
-        exit;
-      }
-      
-      try {
-        if ($ins->hasMethod("initialize")) {
-          $ins->initialize();
+      } else {
+        try {
+          if ($ins->hasMethod("initialize")) {
+            $ins->initialize();
+          }
+          
+          $ins->run();
+          
+          if ($ins->hasMethod("finalize")) {
+            $ins->finalize();
+          }
+        } catch (Exception $e) {
+          Sabel_Console::error($e->getMessage());
         }
-        
-        $ins->run();
-        
-        if ($ins->hasMethod("finalize")) {
-          $ins->finalize();
-        }
-      } catch (Exception $e) {
-        Sabel_Console::error($e->getMessage());
       }
     } else {
       Sabel_Console::error("such a task doesn't exist.");

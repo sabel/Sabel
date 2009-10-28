@@ -12,9 +12,16 @@ if (!defined("ENVIRONMENT")) {
   exit;
 }
 
-$_SERVER["HTTP_HOST"]   = "localhost";
-$_SERVER["SERVER_NAME"] = "localhost";
+if (defined("SERVICE_DOMAIN")) {
+  $_SERVER["HTTP_HOST"]   = SERVICE_DOMAIN;
+  $_SERVER["SERVER_NAME"] = SERVICE_DOMAIN;
+} else {
+  $_SERVER["HTTP_HOST"]   = "localhost";
+  $_SERVER["SERVER_NAME"] = "localhost";
+}
+
 $_SERVER["REQUEST_URI"] = "/";
+$_SERVER["SCRIPT_NAME"] = "/index.php";
 
 if (isset($_SERVER["argv"][2])) {
   $_SERVER["REQUEST_METHOD"] = strtoupper($_SERVER["argv"][2]);

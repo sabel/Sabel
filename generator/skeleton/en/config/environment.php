@@ -17,3 +17,5 @@ if ((ENVIRONMENT & PRODUCTION) > 0) {
   error_reporting(E_ALL|E_STRICT);
   define("SBL_LOG_LEVEL", SBL_LOG_ALL);
 }
+
+define("SERVICE_DOMAIN", "localhost");

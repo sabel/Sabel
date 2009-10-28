@@ -72,7 +72,7 @@ class Processor_Response extends Sabel_Bus_Processor
         }
         
         if (function_exists("get_uri_prefix")) {
-          $location = get_uri_prefix() . "/" . ltrim($location, "/");
+          $location = get_uri_prefix() . $location;
         }
         
         $response->setLocation($location);
