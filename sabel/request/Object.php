@@ -190,11 +190,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function setGetValues(array $values)
   {
-    foreach ($values as $key => $value) {
-      $values[$key] = ($value === "") ? null : $value;
-    }
-    
-    $this->getValues = $values;
+    $this->getValues = $this->toNull($values);
   }
   
   public function fetchGetValues()
@@ -224,11 +220,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function setPostValues(array $values)
   {
-    foreach ($values as $key => $value) {
-      $values[$key] = ($value === "") ? null : $value;
-    }
-    
-    $this->postValues = $values;
+    $this->postValues = $this->toNull($values);
   }
   
   public function hasPostValue($name)
@@ -258,11 +250,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function setParameterValues(array $values)
   {
-    foreach ($values as $key => $value) {
-      $values[$key] = ($value === "") ? null : $value;
-    }
-    
-    $this->parameterValues = $values;
+    $this->parameterValues = $this->toNull($values);
   }
   
   public function fetchParameterValue($key)
@@ -326,5 +314,18 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     } else {
       return substr($lastPart, $pos + 1);
     }
+  }
+  
+  protected function toNull($values)
+  {
+    foreach ($values as $key => $value) {
+      if (is_array($value)) {
+        $values[$key] = $this->toNull($value);
+      } elseif ($value === "") {
+        $values[$key] = null;
+      }
+    }
+    
+    return $values;
   }
 }
