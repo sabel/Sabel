@@ -5,11 +5,6 @@ class Forms_Object extends Sabel_ValueObject
   /**
    * @var string
    */
-  protected $modelName = "";
-  
-  /**
-   * @var string
-   */
   protected $nameSpace = "";
   
   /**
@@ -31,11 +26,6 @@ class Forms_Object extends Sabel_ValueObject
    * @var array
    */
   protected $errors = array();
-  
-  public function __construct($nameSpace = null)
-  {
-    $this->nameSpace = $nameSpace;
-  }
   
   /**
    * @param string $nameSpace
@@ -178,7 +168,7 @@ class Forms_Object extends Sabel_ValueObject
     return $writer->date($yearRange, $includeBlank);
   }
   
-  public function apply(array $values, array $inputNames = array())
+  public function submit(array $values, array $inputNames = array())
   {
     if (empty($values)) {
       return $this;
@@ -235,43 +225,26 @@ class Forms_Object extends Sabel_ValueObject
   }
   
   /**
-   * @param array $ignores
-   *
    * @return boolean
    */
-  public function validate($ignores = array())
+  public function validate()
   {
-    if (is_string($ignores)) {
-      $ignores = array($ignores);
-    }
+    $validator = $this->createValidator();
+    $this->setupValidator($validator);
     
+    $validator->validate($this->values);
+    $this->errors = $validator->getErrors();
+    
+    return empty($this->errors);
+  }
+  
+  protected function createValidator()
+  {
     $validator = new Validator();
-    
-    if (!is_empty($this->modelName)) {
-      $this->setUpModelValidator($validator);
-    }
-    
-    $validators = $this->validators;
-    foreach ($this->inputNames as $inputName) {
-      if (!isset($validators[$inputName])) continue;
-      
-      $v = $validators[$inputName];
-      if (is_array($v)) {
-        foreach ($v as $_v) {
-          $validator->add($inputName, $_v);
-        }
-      } else {
-        $validator->add($name, $v);
-      }
-    }
-    
     $validator->register($this);
     $validator->setDisplayNames($this->displayNames);
     
-    $result = $validator->validate($this->values);
-    $this->errors = $validator->getErrors();
-    
-    return $result;
+    return $validator;
   }
   
   protected function isValidDateValue($values, $isDatetime = false)
@@ -319,38 +292,19 @@ class Forms_Object extends Sabel_ValueObject
     }
   }
   
-  protected function setUpModelValidator(Sabel_Validator $validator)
+  protected function setupValidator(Sabel_Validator $validator)
   {
-    $columns = MODEL($this->modelName)->getMetadata()->getColumns();
-    
     $validators = $this->validators;
     foreach ($this->inputNames as $inputName) {
-      if (!isset($columns[$inputName])) continue;
+      if (!isset($validators[$inputName])) continue;
       
-      $column = $columns[$inputName];
-      if ($column->increment) continue;
-      
-      if (!$column->nullable) {
-        $validator->add($column->name, "required");
-      }
-      
-      if ($column->isString()) {
-        $validator->add($column->name, "strwidth({$column->max})");
-      } elseif ($column->isNumeric()) {
-        $validator->add($column->name, "max({$column->max})");
-        $validator->add($column->name, "min({$column->min})");
-        
-        if ($column->isInt()) {
-          $validator->add($column->name, "integer");
-        } else {  // float, double
-          $validator->add($column->name, "numeric");
+      $v = $validators[$inputName];
+      if (is_array($v)) {
+        foreach ($v as $_v) {
+          $validator->add($inputName, $_v);
         }
-      } elseif ($column->isBoolean()) {
-        $validator->add($column->name, "boolean");
-      } elseif ($column->isDate()) {
-        $validator->add($column->name, "date");
-      } elseif ($column->isDatetime()) {
-        $validator->add($column->name, "datetime");
+      } else {
+        $validator->add($name, $v);
       }
     }
   }

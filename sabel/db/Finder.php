@@ -253,6 +253,13 @@ class Sabel_Db_Finder
     return $this;
   }
   
+  public function fetch()
+  {
+    $this->setProjection();
+    
+    return $this->getRawInstance()->selectOne();
+  }
+  
   public function fetchAll()
   {
     $this->setProjection();
@@ -260,11 +267,9 @@ class Sabel_Db_Finder
     return $this->getRawInstance()->select();
   }
   
-  public function fetch()
+  public function fetchAsArray()
   {
-    $this->setProjection();
-    
-    return $this->getRawInstance()->selectOne();
+    // @todo
   }
   
   public function count()

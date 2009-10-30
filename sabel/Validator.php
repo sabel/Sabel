@@ -48,7 +48,7 @@ class Sabel_Validator extends Sabel_Object
   
   public function delete($name, $method = null)
   {
-    if ($validator === null) {
+    if ($method === null) {
       unset($this->methods[$name]);
     } else {
       unset($this->methods[$name][$method]);
