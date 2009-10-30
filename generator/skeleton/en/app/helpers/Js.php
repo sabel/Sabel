@@ -54,6 +54,7 @@ INC;
     return join($buf, "") . "\n";
   }
 
+  /* @todo
   public static function formValidator($formObj, $errBox = "sbl_errmsg")
   {
     $include = <<<INC
@@ -84,4 +85,5 @@ INC;
     
     return join($buf, "") . "\n";
   }
+  */
 }
