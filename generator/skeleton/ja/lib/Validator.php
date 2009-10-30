@@ -9,73 +9,106 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Validator extends Sabel_Request_Validator
+class Validator extends Sabel_Validator
 {
-  public function __construct()
-  {
-    // $this->displayNames = array("INPUT_NAME" => "DISPLAY_NAME");
-  }
-  
   public function required($name, $value)
   {
-    if (realempty($value)) {
+    if (is_empty($value)) {
       return $this->getDisplayName($name) . "を入力してください";
     }
   }
   
   public function integer($name, $value)
   {
-    if (!realempty($value) && !ctype_digit($value)) {
+    if (!is_empty($value) && !is_number($value)) {
       return $this->getDisplayName($name) . "は整数で入力してください";
     }
   }
   
   public function numeric($name, $value)
   {
-    if (!realempty($value) && !is_numeric($value)) {
+    if (!is_empty($value) && !is_numeric($value)) {
       return $this->getDisplayName($name) . "は数値で入力してください";
     }
   }
   
   public function naturalNumber($name, $value)
   {
-    if (!realempty($value) && !is_natural_number($value)) {
+    if (!is_empty($value) && !is_natural_number($value)) {
       return $this->getDisplayName($name) . "は整数で入力してください";
-    }
-  }
-  
-  public function maxLength($name, $value, $max)
-  {
-    if (!realempty($value) && strlen($value) > $max) {
-      return $this->getDisplayName($name) . "は{$max}文字以内で入力してください";
-    }
-  }
-  
-  public function maxWidth($name, $value, $max)
-  {
-    if (!realempty($value) && (mb_strwidth($value) / 2) > $max) {
-      return $this->getDisplayName($name) . "は全角{$max}文字以内で入力してください";
     }
   }
   
   public function alnum($name, $value)
   {
-    if (!realempty($value) && preg_match('/^[0-9a-zA-Z]+$/', $value) === 0) {
+    if (!is_empty($value) && preg_match('/^[0-9a-zA-Z]+$/', $value) === 0) {
       return $this->getDisplayName($name) . "は半角英数字で入力してください";
+    }
+  }
+  
+  public function strlen($name, $value, $max)
+  {
+    if (!is_empty($value) && mb_strlen($value) > $max) {
+      return $this->getDisplayName($name) . "は{$max}文字以内で入力してください";
+    }
+  }
+  
+  public function strwidth($name, $value, $max)
+  {
+    if (!is_empty($value) && (mb_strwidth($value) / 2) > $max) {
+      return $this->getDisplayName($name) . "は全角{$max}文字以内で入力してください";
+    }
+  }
+  
+  public function max($name, $value, $max)
+  {
+    if (!is_empty($value) && is_number($value) && $value > $max) {
+      return $this->getDisplayName($name) . "は{$max}以下で入力してください";
+    }
+  }
+  
+  public function min($name, $value, $min)
+  {
+    if (!is_empty($value) && is_number($value) && $value < $min) {
+      return $this->getDisplayName($name) . "は{$min}以上で入力してください";
+    }
+  }
+  
+  public function boolean($name, $value)
+  {
+    if (!is_empty($value) && !in_array($value, array("0", "1", false, true, 0, 1), true)) {
+      return $this->getDisplayName($name) . "の形式が不正です";
+    }
+  }
+  
+  public function date($name, $value)
+  {
+    if (!is_empty($value)) {
+      @list ($y, $m, $d) = explode("-", str_replace("/", "-", $value));
+      if (!checkdate($m, $d, $y)) {
+        return $this->getDisplayName($name) . "の形式が不正、または無効な日付です";
+      }
+    }
+  }
+  
+  public function datetime($name, $value)
+  {
+    if (!is_empty($value)) {
+      @list ($date, $time) = explode(" ", str_replace("/", "-", $value));
+      @list ($y, $m, $d) = explode("-", $date);
+      
+      if (!checkdate($m, $d, $y)) {
+        return $this->getDisplayName($name) . "の形式が不正、または無効な日付です";
+      } else {
+        if (preg_match('/^((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])$/', $time) === 0) {
+          return $this->getDisplayName($name) . "の形式が不正、または無効な日付です";
+        }
+      }
     }
   }
   
   public function nnumber($name, $value)
   {
     return $this->naturalNumber($name, $value);
-  }
-  
-  protected function getDisplayName($name)
-  {
-    if (isset($this->displayNames[$name])) {
-      return $this->displayNames[$name];
-    } else {
-      return $name;
-    }
   }
 }

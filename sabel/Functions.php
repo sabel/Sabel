@@ -226,6 +226,17 @@ function is_ipaddr($arg)
   }
 }
 
+function is_number($num)
+{
+  if (is_int($num)) {
+    return true;
+  } elseif (is_string($num)) {
+    return (preg_match('/^\-?[1-9][0-9]*$/', $num) === 1);
+  } else {
+    return false;
+  }
+}
+
 function is_natural_number($num)
 {
   if (is_int($num)) {

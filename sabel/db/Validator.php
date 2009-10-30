@@ -213,7 +213,7 @@ class Sabel_Db_Validator extends Sabel_Object
       return is_float($value);
     } elseif ($column->isDatetime()) {
       return (preg_match($this->datetimeRegex, $value) === 1);
-    } elseif ($column->isDate()) {
+   } elseif ($column->isDate()) {
       return (preg_match($this->dateRegex, $value) === 1);
     } else {
       return true;

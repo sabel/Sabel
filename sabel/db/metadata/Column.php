@@ -81,9 +81,14 @@ class Sabel_Db_Metadata_Column extends Sabel_Object
     return ($this->type === Sabel_Db_Type::DATE);
   }
   
-  public function isBool()
+  public function isBoolean()
   {
     return ($this->type === Sabel_Db_Type::BOOL);
+  }
+  
+  public function isBool()
+  {
+    return $this->isBoolean();
   }
   
   public function isBinary()
