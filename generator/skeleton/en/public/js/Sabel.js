@@ -62,10 +62,10 @@ Sabel.Uri = function(uri)
 		var urlPrefix = location.protocol + "//" + location.hostname;
 
 		if (uri[0] === "/") {
-			var uri = urlPrefix + uri;
+			uri = urlPrefix + uri;
 		} else {
 			var currentPath = location.pathname.substr(0, location.pathname.lastIndexOf("/")+1);
-			var uri = urlPrefix + currentPath + uri;
+			uri = urlPrefix + currentPath + uri;
 		}
 		var result = Sabel.Uri.pattern.exec(uri);
 	}
@@ -232,12 +232,12 @@ Sabel.UserAgent = new function() {
 		}
 		this.version = getVersion();
 	@else @*/
-	if (this.isFirefox = /(?:Firefox|Minefield)\/([\d.]+)/.test(ua)) {
+	if ((this.isFirefox = /(?:Firefox|Minefield)\/([\d.]+)/.test(ua))) {
 		this.isMozilla = true;
 		this.version = parseFloat(RegExp.$1);
-	} else if (this.isChrome = /Chrome\/([\d.]+)/.test(ua)) {
+	} else if ((this.isChrome = /Chrome\/([\d.]+)/.test(ua))) {
 		this.version = RegExp.$1;
-	} else if (this.isSafari = /Safari\/([\d.]+)/.test(ua)) {
+	} else if ((this.isSafari = /Safari\/([\d.]+)/.test(ua))) {
 		var build = parseInt(ua.substring(ua.lastIndexOf("/") + 1));
 		if (build >= 526) {
 			this.version = 4;
@@ -259,7 +259,7 @@ Sabel.UserAgent = new function() {
 		} else if (/Opera ([\d.]+)/.test(ua)) {
 			this.version = parseFloat(RegExp.$1);
 		}
-	} else if (this.isMozilla = /Mozilla/.test(ua)) {
+	} else if ((this.isMozilla = /Mozilla/.test(ua))) {
 		this.version = "unknown";
 	}
 	/*@end @*/
@@ -412,8 +412,8 @@ Sabel.Class = function() {
 		}
 
 		subKlass.prototype.constructor = subKlass;
-		return subKlass;
 	}
+	return subKlass;
 };
 
 Sabel.String = new Sabel.Class(String, {
@@ -840,7 +840,7 @@ Sabel.Dom = {
 
 			var buf = (ext) ? Sabel.Elements() : new Array();
 			Sabel.Array.each(elms, function(elm) {
-				if (pat.test(elm.className)) buf.push((ext) ? new Sabel.Element(elm) : elm);
+				if (pat.test(elm.className)) buf.push(elm);
 			});
 			return buf;
 		}
@@ -901,7 +901,7 @@ Sabel.Dom = {
 
 		if (result.snapshotLength) {
 			var buf = new Array(result.snapshotLength), i = 0, tmp;
-			while(tmp = result.snapshotItem(i)) buf[i++] = tmp;
+			while((tmp = result.snapshotItem(i))) buf[i++] = tmp;
 			return new Sabel.Elements(buf);
 		} else {
 			return new Sabel.Elements();
@@ -923,7 +923,7 @@ Sabel.Dom.Selector = {
 	handlers: {
 		tagName: function(nodes, tagName) {
 			var founds = new Array(), elm, i = 0;
-			while (elm = nodes[i++]) {
+			while ((elm = nodes[i++])) {
 				Sabel.Dom.Selector.concat(founds, elm.getElementsByTagName(tagName));
 			}
 			return Sabel.Dom.Selector.clear(founds, "_added");
@@ -938,7 +938,7 @@ Sabel.Dom.Selector = {
 				if (nodes[0] === document) {
 					founds.push(tmpElm);
 				} else {
-					while (elm = nodes[i++]) {
+					while ((elm = nodes[i++])) {
 						if (Sabel.Element.isContain(elm, tmpElm)) {
 							founds.push(tmpElm);
 							break;
@@ -946,7 +946,7 @@ Sabel.Dom.Selector = {
 					}
 				}
 			} else {
-				while (elm = nodes[i++]) {
+				while ((elm = nodes[i++])) {
 					if (elm.getAttribute("id") === id) {
 						founds[founds.length] = elm;
 						break;
@@ -965,7 +965,7 @@ Sabel.Dom.Selector = {
 				cr.push(new RegExp("(?:^|\\s+)" + classNames[j] + "(?:\\s+|$)"));
 
 			var c, cn, flag, k;
-			while (elm = nodes[i++]) {
+			while ((elm = nodes[i++])) {
 				k = 0;
 				flag = true;
 
@@ -973,7 +973,7 @@ Sabel.Dom.Selector = {
 				c = elm.className;
 				if (!c || elm._added === true) continue;
 
-				while (cn = cr[k++]) {
+				while ((cn = cr[k++])) {
 					if (!cn.test(c)) {
 						flag = false;
 						break;
@@ -991,7 +991,7 @@ Sabel.Dom.Selector = {
 			var founds = new Array(), elm, i = 0, buf;
 			switch (combName) {
 				case "+":
-					while (elm = nodes[i++]) {
+					while ((elm = nodes[i++])) {
 						while ((elm = elm.nextSibling) && elm.nodeType !== 1);
 						if (elm && (elm.nodeName === tagName || tagName === "*")) {
 							founds[founds.length] = elm;
@@ -999,7 +999,7 @@ Sabel.Dom.Selector = {
 					}
 					break;
 				case "~":
-					while (elm = nodes[i++]) {
+					while ((elm = nodes[i++])) {
 						while ((elm = elm.nextSibling) && elm._added !== true) {
 							if (elm.nodeName === tagName || tagName === "*") {
 								elm._added = true;
@@ -1010,7 +1010,7 @@ Sabel.Dom.Selector = {
 					Sabel.Dom.Selector.clear(founds, "_added");
 					break;
 				case ">":
-					while (elm = nodes[i++]) {
+					while ((elm = nodes[i++])) {
 						buf = elm.getElementsByTagName(tagName);
 						for (var j = 0, c; c = buf[j]; j++) {
 							if (c.parentNode === elm) founds.push(c);
@@ -1035,11 +1035,11 @@ Sabel.Dom.Selector = {
 			}
 
 			checkNode:
-			while (elm = nodes[i++]) {
+			while ((elm = nodes[i++])) {
 				if (elm._added) continue;
 				var k = 0;
 
-				while (at = attrRegex[k++]) {
+				while ((at = attrRegex[k++])) {
 					if (at[1] === 'class' && window.ActiveXObject) at[1] = 'className';
 					a = elm.getAttribute(at[1]);
 
@@ -1087,7 +1087,7 @@ Sabel.Dom.Selector = {
 				var founds = new Array(), i = 0, elm;
 				isNot = (isNot) ? true : false;
 
-				while (elm = nodes[i++]) {
+				while ((elm = nodes[i++])) {
 					var buf = elm;
 					var checkValue = (check === "nodeName") ? elm.nodeName : 1;
 					while ((buf = buf[next]) && buf[check] !== checkValue);
@@ -1100,7 +1100,7 @@ Sabel.Dom.Selector = {
 				s = parseInt(s);
 				var founds = new Array(), i = 0, elm;
 				var searched = new Array();
-				while (elm = nodes[i++]) {
+				while ((elm = nodes[i++])) {
 					var parent = elm.parentNode;
 					if (parent._searched !== true) {
 						var next = s;
@@ -1190,7 +1190,7 @@ Sabel.Dom.Selector = {
 						founds = chkNth(nodes, seq[1], seq[0], "lastChild", "previousSibling", true);
 						break;
 					case "empty":
-						while (elm = nodes[i++]) {
+						while ((elm = nodes[i++])) {
 							if (elm.childNodes.length === 0) {
 								founds.push(elm);
 							}
@@ -1198,7 +1198,7 @@ Sabel.Dom.Selector = {
 						break;
 					case "contains":
 						var val = buf[2].replace(/['"]+/g, "");
-						while (elm = nodes[i++]) {
+						while ((elm = nodes[i++])) {
 							if (Sabel.Element.getTextContent(elm).indexOf(val) !== -1) {
 								founds.push(elm);
 							}
@@ -1207,7 +1207,7 @@ Sabel.Dom.Selector = {
 					case "not":
 						var chkFunc = function(nodes, func) {
 							var founds = new Array(), i = 0, elm;
-							while (elm = nodes[i++]) {
+							while ((elm = nodes[i++])) {
 								if (func(elm)) founds.push(elm);
 							}
 							return founds;
@@ -1305,14 +1305,14 @@ Sabel.Dom.Selector = {
 									founds = chkNth(nodes, seq[1], seq[0], "lastChild", "previousSibling", true, true);
 									break;
 								case "empty":
-									while (elm = nodes[i++]) {
+									while ((elm = nodes[i++])) {
 										if (elm.childNodes.length !== 0)
 											founds.push(elm);
 									}
 									break;
 								case "contains":
 									var val = buf[2].replace(/(^['"]|['"]$)/g, "");
-									while (elm = nodes[i++]) {
+									while ((elm = nodes[i++])) {
 										if (Sabel.Element.getTextContent(elm).indexOf(val) === -1) {
 											founds.push(elm);
 										}
@@ -1365,7 +1365,7 @@ Sabel.Element.get = function(element, id) {
 
 	do {
 		if (parent == element) return elm;
-	} while (parent = parent.parentNode);
+	} while ((parent = parent.parentNode));
 
 	return null;
 };
@@ -1434,7 +1434,8 @@ Sabel.Element.addClass = function(element, className) {
 
 	element = Sabel.get(element, false);
 	element.className = element.className + " " + className;
-};
+	return element;
+}
 
 Sabel.Element.removeClass = function(element, className) {
 	element = Sabel.get(element, false);
@@ -1557,12 +1558,13 @@ Sabel.Element.setOpacity = function(element, value) {
 };
 
 Sabel.Element.getBackGroundColor = function(el) {
-	var color, el = Sabel.get(el);
+	var color;
+	el = Sabel.get(el);
 	do {
 		color = Sabel.Element.getStyle(el, "backgroundColor");
 		if (color !== "" && color !== "transparent" &&
 		   (color.indexOf("rgba") === -1 || color.slice(-2) !== "0)")) break;
-	} while (el = el.parentNode);
+	} while ((el = el.parentNode));
 	return (color !== "transparent") ? color : "#ffffff";
 };
 
@@ -1694,7 +1696,7 @@ Sabel.Element.getRegion = function(element) {
 			rect.left += parseInt(l) || 0;
 		};
 
-		while (element = element.offsetParent) {
+		while ((element = element.offsetParent)) {
 			add(element.offsetTop, element.offsetLeft);
 
 			if (Sabel.UserAgent.isOpera === false) {
@@ -1825,7 +1827,7 @@ Sabel.Element.analyze = function(element) {
 		var def = document.createElement(element.nodeName);
 
 		var defAttr;
-		while (attr = as[i++]) {
+		while ((attr = as[i++])) {
 			if (typeof attr.nodeValue !== "string") continue;
 
 			defAttr = def.getAttributeNode(attr.nodeName);
@@ -1834,7 +1836,7 @@ Sabel.Element.analyze = function(element) {
 			buf[buf.length] = attr.nodeName + '="' + attr.nodeValue + '"';
 		}
 	} else {
-		while (attr = as[i++]) {
+		while ((attr = as[i++])) {
 			buf[buf.length] = attr.nodeName + '="' + attr.nodeValue + '"';
 		}
 	}
@@ -1845,7 +1847,7 @@ Sabel.Element.analyze = function(element) {
 Sabel.Element.getParentNode = function(element, tagName) {
 	tagName = (tagName || "").toUpperCase();
 	element = Sabel.get(element, false);
-	while (element = element.parentNode) {
+	while ((element = element.parentNode)) {
 		if (tagName === "" || tagName === element.tagName)
 			return new Sabel.Element(element);
 	}
@@ -1854,7 +1856,8 @@ Sabel.Element.getParentNode = function(element, tagName) {
 
 Sabel.Element.getChildElements = function(element, tagName) {
 	tagName = (tagName || "").toUpperCase();
-	var buf = new Array(), element = Sabel.get(element, false);
+	var buf = new Array();
+	element = Sabel.get(element, false);
 	Sabel.Array.each(element.childNodes, function(elm) {
 		if (elm.nodeType === 1) {
 			if (tagName === "" || tagName === elm.tagName) buf[buf.length] = elm;
@@ -1874,14 +1877,14 @@ Sabel.Element.getLastChild = function(element, tagName) {
 };
 
 Sabel.Element.getNextSibling = function(element) {
-	while (element = element.nextSibling) {
+	while ((element = element.nextSibling)) {
 		if (element.nodeType === 1) return new Sabel.Element(element);
 	}
 	return null;
 };
 
 Sabel.Element.getPreviousSibling = function(element) {
-	while (element = element.previousSibling) {
+	while ((element = element.previousSibling)) {
 		if (element.nodeType === 1) return new Sabel.Element(element);
 	}
 	return null;
@@ -1890,7 +1893,7 @@ Sabel.Element.getPreviousSibling = function(element) {
 Sabel.Element.getPreviousSiblings = function(element, nodeName) {
 	nodeName = (nodeName || "").toUpperCase();
 	var buf = new Array();
-	while (element = element.previousSibling) {
+	while ((element = element.previousSibling)) {
 		if (element.nodeType === 1) {
 			if (nodeName === "" || nodeName === element.nodeName)
 				buf[buf.length] = element;
@@ -1902,7 +1905,7 @@ Sabel.Element.getPreviousSiblings = function(element, nodeName) {
 Sabel.Element.getNextSiblings = function(element, nodeName) {
 	nodeName = (nodeName || "").toUpperCase();
 	var buf = new Array();
-	while (element = element.nextSibling) {
+	while ((element = element.nextSibling)) {
 		if (element.nodeType === 1) {
 			if (nodeName === "" || nodeName === element.nodeName)
 				buf[buf.length] = element;
@@ -1914,7 +1917,7 @@ Sabel.Element.getNextSiblings = function(element, nodeName) {
 Sabel.Element.getNodeIndex = function(element, reverse, ofType) {
 	if (ofType === true) {
 		return Sabel.Element._getOfTypeNodeIndex(element, reverse);
-	} else{
+	} else {
 		return Sabel.Element._getNodeIndex(element,reverse);
 	};
 };
@@ -3481,18 +3484,22 @@ Sabel.Widget.Calendar.prototype = {
 		this.render();
 	},
 
-	mouseOver: function(target)
+	mouseOver: function(evt)
 	{
-		Sabel.Element.addClass(target, "hover");
+		Sabel.Element.addClass(evt.target, "hover");
 	},
 
-	mouseOut: function(target)
+	mouseOut: function(evt)
 	{
-		Sabel.Element.removeClass(target, "hover");
+		Sabel.Element.removeClass(evt.target, "hover");
 	},
 
-	mouseDown: function(target)
+	mouseDown: function(e)
 	{
+		var target = e.target;
+		if (Sabel.Element.hasClass(target, 'selectable') === false) {
+			return;
+		}
 		var opt = this.options; // alias
 
 		if (opt.callback) {
@@ -3563,21 +3570,18 @@ Sabel.Widget.Calendar.prototype = {
 		var find = Sabel.Dom.getElementsByClassName;
 
 		var close = find("sbl_cal_close", this.rootElement, true).item(0);
-		close.observe("click", this.hide, false, this);
+		Sabel.Element.observe(close, "click", this.hide, false, this);
 
 		var l = find("sbl_page_l", this.rootElement, true).item(0);
-		l.observe("click", this.prevMonth, false, this);
+		Sabel.Element.observe(l, "click", this.prevMonth, false, this);
 
 		var r = find("sbl_page_r", this.rootElement, true).item(0);
-		r.observe("click", this.nextMonth, false, this);
+		Sabel.Element.observe(r, "click", this.nextMonth, false, this);
 
-		var es = find("selectable", this.rootElement, true);
-		for (var k=0; k<es.length; k++) {
-			var el = es[k];
-			Sabel.Element.observe(el, "mouseover", Sabel.Function.curry(this.mouseOver, el));
-			Sabel.Element.observe(el, "mouseout",  Sabel.Function.curry(this.mouseOut, el));
-			Sabel.Element.observe(el, "mousedown", Sabel.Function.bind(this.mouseDown, this, el));
-		}
+		var el = find("sbl_cal_days", this.rootElement, true).item(0);
+		Sabel.Element.observe(el, "mouseover", Sabel.Function.bind(this.mouseOver, this));
+		Sabel.Element.observe(el, "mouseout", Sabel.Function.bind(this.mouseOut, this));
+		Sabel.Element.observe(el, "mousedown", Sabel.Function.bindWithEvent(this.mouseDown, this));
 
 		if (day > 0) this.mouseDown(find("day"+day, this.rootElement)[0]);
 		this.show();
