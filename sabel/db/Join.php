@@ -17,11 +17,6 @@ class Sabel_Db_Join extends Sabel_Object
   protected $model = null;
   
   /**
-   * @var object[]
-   */
-  protected $objects = array();
-  
-  /**
    * @var array
    */
   protected $projection = array();
@@ -30,6 +25,16 @@ class Sabel_Db_Join extends Sabel_Object
    * @var string
    */
   protected $tblName = "";
+  
+  /**
+   * @var object[]
+   */
+  protected $objects = array();
+  
+  /**
+   * @var Sabel_Db_Join_Structure
+   */
+  protected $structure = null;
   
   public function __construct($model)
   {
@@ -73,9 +78,9 @@ class Sabel_Db_Join extends Sabel_Object
     return $this;
   }
   
-  public function setOrderBy($column, $mode = "asc")
+  public function setOrderBy($column, $mode = "asc", $nulls = "last")
   {
-    $this->model->setOrderBy($column, $mode);
+    $this->model->setOrderBy($column, $mode, $nulls);
     
     return $this;
   }

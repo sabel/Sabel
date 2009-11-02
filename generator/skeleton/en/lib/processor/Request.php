@@ -27,6 +27,8 @@ class Processor_Request extends Sabel_Bus_Processor
       $request->setGetValues($_GET);
       $request->setPostValues($_POST);
       
+      $this->setFiles($request);
+      
       if (isset($_SERVER["REQUEST_METHOD"])) {
         $request->method($_SERVER["REQUEST_METHOD"]);
       }
@@ -65,5 +67,22 @@ class Processor_Request extends Sabel_Bus_Processor
     }
     
     return normalize_uri($uri);
+  }
+  
+  protected function setFiles(Sabel_Request $request)
+  {
+    if (!empty($_FILES)) {
+      foreach ($_FILES as $name => $_FILE) {
+        if (isset($_FILE["tmp_name"]) && isset($_FILE["size"]) && $_FILE["size"] > 0) {
+          $file = new Sabel_Request_File();
+          $file->name = (isset($_FILE["name"])) ? $_FILE["name"] : ""; 
+          $file->type = (isset($_FILE["type"])) ? $_FILE["type"] : ""; 
+          $file->path = $_FILE["tmp_name"];
+          $file->size = $_FILE["size"];
+          
+          $request->setFile($name, $file);
+        }
+      }
+    }
   }
 }

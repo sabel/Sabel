@@ -540,6 +540,52 @@ abstract class Sabel_Db_Model extends Sabel_Object
    * @param mixed $arg1
    * @param mixed $arg2
    *
+   * @return int
+   */
+  public function getRows($arg1 = null, $arg2 = null)
+  {
+    $result = null;
+    if ($this->hasMethod("beforeSelect")) {
+      $result = $this->beforeSelect("getRows");
+    }
+    
+    if ($result === null) {
+      $this->setCondition($arg1, $arg2);
+      $stmt = $this->prepareStatement(Sabel_Db_Statement::SELECT);
+      $rows = $this->prepareSelect($stmt)->execute();
+      
+      $result = array();
+      if (!empty($rows)) {
+        $pkey = $this->metadata->getPrimaryKey();
+        
+        if (is_array($pkey)) {
+          foreach ($rows as $row) {
+            $ids = array();
+            foreach ($pkey as $key) $ids[] = $row[$key];
+            $result[implode(":", $ids)] = $row;
+          }
+        } else {
+          foreach ($rows as $row) {
+            $result[$row[$pkey]] = $row;
+          }
+        }
+      }
+    }
+    
+    if ($this->hasMethod("afterSelect")) {
+      $afterResult = $this->afterSelect($result, "getRows");
+      if ($afterResult !== null) $result = $afterResult;
+    }
+    
+    if ($this->autoReinit) $this->clear();
+    
+    return $result;
+  }
+  
+  /**
+   * @param mixed $arg1
+   * @param mixed $arg2
+   *
    * @return Sabel_Db_Model
    */
   public function selectOne($arg1 = null, $arg2 = null)
@@ -847,7 +893,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
    *
    * @return Sabel_Db_Statement
    */
-  protected function prepareSelect(Sabel_Db_Statement $stmt)
+  public function prepareSelect(Sabel_Db_Statement $stmt)
   {
     return $stmt->projection($this->projection)
                 ->where($this->getCondition()->build($stmt))
@@ -860,7 +906,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
    *
    * @return Sabel_Db_Statement
    */
-  protected function prepareUpdate(Sabel_Db_Statement $stmt, array $values = array())
+  public function prepareUpdate(Sabel_Db_Statement $stmt, array $values = array())
   {
     if (empty($values)) $values = $this->values;
     return $stmt->values($values)->where($this->getCondition()->build($stmt));
@@ -872,7 +918,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
    *
    * @return Sabel_Db_Statement
    */
-  protected function prepareInsert(Sabel_Db_Statement $stmt, array $values = array())
+  public function prepareInsert(Sabel_Db_Statement $stmt, array $values = array())
   {
     if (empty($values)) $values = $this->values;
     return $stmt->values($values)->sequenceColumn($this->metadata->getSequenceColumn());
@@ -883,7 +929,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
    *
    * @return Sabel_Db_Statement
    */
-  protected function prepareDelete(Sabel_Db_Statement $stmt)
+  public function prepareDelete(Sabel_Db_Statement $stmt)
   {
     return $stmt->where($this->getCondition()->build($stmt));
   }

@@ -37,6 +37,11 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   private $parameterValues = array();
   
   /**
+   * @var Sabel_Request_File[]
+   */
+  private $files = array();
+  
+  /**
    * @var array
    */
   private $httpHeaders = array();
@@ -261,6 +266,43 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   public function fetchParameterValues()
   {
     return $this->parameterValues;
+  }
+  
+  public function setFile($name, $file)
+  {
+    if ($file instanceof Sabel_Request_File) {
+      $this->files[$name] = $file;
+    } else {
+      $message = __METHOD__ . "() argument 2 must be an instance of Sabel_Request_File.";
+      throw new Sabel_Exception_Runtime($message);
+    }
+  }
+  
+  public function setFiles(array $files)
+  {
+    foreach ($files as $name => $file) {
+      $this->setFile($name, $file);
+    }
+  }
+  
+  public function hasFile($name)
+  {
+    return ($this->getFile($name) !== null);
+  }
+  
+  public function isFileSet($name)
+  {
+    return array_key_exists($name, $this->files);
+  }
+  
+  public function getFile($key)
+  {
+    return (isset($this->files[$key])) ? $this->files[$key] : null;
+  }
+  
+  public function getFiles()
+  {
+    return $this->files;
   }
   
   public function find($key)

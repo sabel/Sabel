@@ -113,7 +113,6 @@ class Sabel_Validator extends Sabel_Object
     $errors = array();
     $methods = $this->methods;
     
-    // @todo move to extroller
     foreach ($methods as $key => $_methods) {
       if (strpos($key, ":") !== false) {
         $exp = explode(":", $key, 2);
@@ -241,6 +240,26 @@ class Sabel_Validator extends Sabel_Object
         if (preg_match('/^((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])$/', $time) === 0) {
           return "Invalid " . $this->getDisplayName($name) . " format.";
         }
+      }
+    }
+  }
+  
+  public function image($name, $value, $validTypes = array())
+  {
+    if (!is_empty($value)) {
+      $data = null;
+      if (is_string($value)) {
+        $data = $value;
+      } elseif (is_object($value) && method_exists($value, "__toString")) {
+        $data = $value->__toString();
+      }
+      
+      if (empty($validTypes)) {
+        $validTypes = array("jpeg", "gif", "png");
+      }
+      
+      if (!in_array(Sabel_Util_Image::getType($data), $validTypes, true)) {
+        return "Invalid " . $this->getDisplayName($name) . " format.";
       }
     }
   }

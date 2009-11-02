@@ -267,9 +267,33 @@ class Sabel_Db_Finder
     return $this->getRawInstance()->select();
   }
   
-  public function fetchAsArray()
+  public function fetchArray($column = null)
   {
-    // @todo
+    if ($this->join === null) {
+      $model = $this->model;
+      
+      if ($column === null) {
+        return $model->getRows();
+      } else {
+        $pkey = $model->getMetadata()->getPrimaryKey();
+        if (!is_array($pkey)) $pkey = array($pkey);
+        
+        $projection = $pkey;
+        $projection[] = $column;
+        
+        $model->setProjection($projection);
+        $rows = $model->getRows();
+        
+        foreach ($rows as $idx => $row) {
+          $rows[$idx] = $row[$column];
+        }
+        
+        return $rows;
+      }
+    } else {
+      $message = __METHOD__ . "() can't use fetchArray() on join select.";
+      throw new Sabel_Db_Exception($message);
+    }
   }
   
   public function count()

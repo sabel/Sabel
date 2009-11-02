@@ -168,6 +168,11 @@ class Forms_Object extends Sabel_ValueObject
     return $writer->date($yearRange, $includeBlank);
   }
   
+  public function file($name, $attrs = "")
+  {
+    return $this->getHtmlWriter($name, $this->createInputName($name), $attrs)->file();
+  }
+  
   public function submit(array $values, array $inputNames = array())
   {
     if (empty($values)) {
@@ -227,10 +232,11 @@ class Forms_Object extends Sabel_ValueObject
   /**
    * @return boolean
    */
-  public function validate()
+  public function validate(Sabel_Validator $validator = null)
   {
-    $validator = $this->createValidator();
-    $this->setupValidator($validator);
+    if ($validator === null) {
+      $validator = $this->buildValidator();
+    }
     
     $validator->validate($this->values);
     $this->errors = $validator->getErrors();
@@ -243,6 +249,14 @@ class Forms_Object extends Sabel_ValueObject
     $validator = new Validator();
     $validator->register($this);
     $validator->setDisplayNames($this->displayNames);
+    
+    return $validator;
+  }
+  
+  protected function buildValidator()
+  {
+    $validator = $this->createValidator();
+    $this->setupValidator($validator);
     
     return $validator;
   }
@@ -304,7 +318,7 @@ class Forms_Object extends Sabel_ValueObject
           $validator->add($inputName, $_v);
         }
       } else {
-        $validator->add($name, $v);
+        $validator->add($inputName, $v);
       }
     }
   }

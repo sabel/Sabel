@@ -242,11 +242,7 @@ function is_natural_number($num)
   if (is_int($num)) {
     return ($num >= 0);
   } elseif (is_string($num)) {
-    if ($num === "0") {
-      return true;
-    } else {
-      return (preg_match('/^[1-9][0-9]*$/', $num) === 1);
-    }
+    return ($num === "0" || preg_match('/^[1-9][0-9]*$/', $num) === 1);
   } else {
     return false;
   }

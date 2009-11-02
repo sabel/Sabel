@@ -10,8 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Session_Abstract
-  extends Sabel_Object implements Sabel_Session
+abstract class Sabel_Session_Abstract extends Sabel_Object implements Sabel_Session
 {
   const CLIENT_ID_KEY = "sbl_client_id";
   

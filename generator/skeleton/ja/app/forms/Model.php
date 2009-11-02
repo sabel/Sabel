@@ -35,12 +35,11 @@ abstract class Forms_Model extends Forms_Object
   /**
    * @return boolean
    */
-  public function validate()
+  public function validate(Sabel_Validator $validator = null)
   {
-    $validator = $this->createValidator();
-    
-    $this->setupModelValidator($validator);
-    $this->setupValidator($validator);
+    if ($validator === null) {
+      $validator = $this->buildValidator();
+    }
     
     $validator->validate($this->values);
     $errors = $validator->getErrors();
@@ -52,6 +51,23 @@ abstract class Forms_Model extends Forms_Object
     $this->errors = $errors;
     
     return empty($this->errors);
+  }
+  
+  public function buildValidator()
+  {
+    $validator = $this->createValidator();
+    
+    $this->setupModelValidator($validator);
+    $this->setupValidator($validator);
+    
+    return $validator;
+  }
+  
+  public function save()
+  {
+    $this->model->setValues($this->values);
+    
+    return $this->model->save();
   }
   
   protected function uniqueCheck(array $uniques, array &$errors)

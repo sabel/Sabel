@@ -30,18 +30,27 @@ interface Sabel_Request
   public function isPut();
   public function isDelete();
   
-  public function setGetValues(array $values);
-  public function setPostValues(array $values);
-  public function setHttpHeaders(array $headers);
-  
   public function setGetValue($name, $value);
-  public function setPostValue($name, $value);
-  public function setParameterValue($name, $value);
-  
+  public function setGetValues(array $values);
   public function fetchGetValue($name);
-  public function fetchPostValue($name);
-  public function fetchParameterValue($name);
+  public function fetchGetValues();
   
+  public function setPostValue($name, $value);
+  public function setPostValues(array $values);
+  public function fetchPostValue($name);
+  public function fetchPostValues();
+  
+  public function setParameterValue($name, $value);
+  public function setParameterValues(array $values);
+  public function fetchParameterValue($name);
+  public function fetchParameterValues();
+  
+  public function setFile($name, $file);
+  public function setFiles(array $files);
+  public function getFile($name);
+  public function getFiles();
+  
+  public function setHttpHeaders(array $headers);
   public function getHttpHeader($name);
   public function getHttpHeaders();
 }

@@ -21,14 +21,11 @@ class Sabel_ValueObject extends Sabel_Object
     return $self;
   }
   
-  public function toArray()
-  {
-    return $this->values;
-  }
-  
   public function set($key, $value)
   {
     $this->values[$key] = $value;
+    
+    return $this;
   }
   
   public function __set($key, $value)
@@ -55,13 +52,6 @@ class Sabel_ValueObject extends Sabel_Object
     return ($this->get($key) !== null);
   }
   
-  public function addValues(array $values)
-  {
-    foreach ($values as $key => $val) {
-      $this->set($key, $val);
-    }
-  }
-  
   public function has($key)
   {
     return isset($this->values[$key]);
@@ -78,6 +68,25 @@ class Sabel_ValueObject extends Sabel_Object
     unset($this->values[$key]);
     
     return $ret;
+  }
+  
+  public function addValues(array $values)
+  {
+    foreach ($values as $key => $val) {
+      $this->set($key, $val);
+    }
+    
+    return $this;
+  }
+  
+  public function getValues()
+  {
+    return $this->values;
+  }
+  
+  public function toArray()
+  {
+    return $this->getValues();
   }
   
   public function merge($values)

@@ -55,8 +55,8 @@ class Validator extends Sabel_Validator
   
   public function strwidth($name, $value, $max)
   {
-    if (!is_empty($value) && (mb_strwidth($value) / 2) > $max) {
-      return $this->getDisplayName($name) . "は全角{$max}文字以内で入力してください";
+    if (!is_empty($value) && mb_strwidth($value) > $max) {
+      return $this->getDisplayName($name) . "は全角" . floor($max / 2) . "文字以内で入力してください";
     }
   }
   
@@ -103,6 +103,23 @@ class Validator extends Sabel_Validator
         if (preg_match('/^((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])$/', $time) === 0) {
           return $this->getDisplayName($name) . "の形式が不正、または無効な日付です";
         }
+      }
+    }
+  }
+  
+  public function image($name, $value)
+  {
+    if (!is_empty($value)) {
+      $data = null;
+      if (is_string($value)) {
+        $data = $value;
+      } elseif (is_object($value) && method_exists($value, "__toString")) {
+        $data = $value->__toString();
+      }
+      
+      $validTypes = array("jpeg", "gif", "png");
+      if (!in_array(Sabel_Util_Image::getType($data), $validTypes, true)) {
+        return $this->getDisplayName($name) . "の形式が不正です";
       }
     }
   }
