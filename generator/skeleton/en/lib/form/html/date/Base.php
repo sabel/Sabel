@@ -1,6 +1,6 @@
 <?php
 
-abstract class Forms_Lib_Html_Date_Base extends Sabel_Object
+abstract class Form_Html_Date_Base extends Sabel_Object
 {
   protected $name = "";
   protected $value = null;

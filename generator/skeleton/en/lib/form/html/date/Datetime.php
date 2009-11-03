@@ -1,6 +1,6 @@
 <?php
 
-class Forms_Lib_Html_Date_Datetime extends Forms_Lib_Html_Date_Base
+class Form_Html_Date_Datetime extends Form_Html_Date_Base
 {
   public function toHtml($yearRange, $withSecond, $includeBlank)
   {

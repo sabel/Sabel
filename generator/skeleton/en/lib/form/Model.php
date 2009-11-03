@@ -1,6 +1,6 @@
 <?php
 
-abstract class Forms_Model extends Forms_Object
+abstract class Form_Model extends Form_Object
 {
   protected $model = null;
   
@@ -115,7 +115,7 @@ abstract class Forms_Model extends Forms_Object
             $names[] = $this->getDisplayName($unique);
           }
           
-          $errors[] = implode(", ", $names) . ' - "' . implode(", ", $values) . '" already registered.';
+          $errors[] = implode("、", $names) . ' "' . implode(", ", $values) . '" は既に登録されています';
         }
       }
     }

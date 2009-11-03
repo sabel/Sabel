@@ -1,6 +1,6 @@
 <?php
 
-class Forms_Object extends Sabel_ValueObject
+class Form_Object extends Sabel_ValueObject
 {
   /**
    * @var string
@@ -283,7 +283,7 @@ class Forms_Object extends Sabel_ValueObject
     static $htmlWriter = null;
     
     if ($htmlWriter === null) {
-      $htmlWriter = new Forms_Lib_Html();
+      $htmlWriter = new Form_Html();
     } else {
       $htmlWriter->clear();
     }

@@ -1,6 +1,6 @@
 <?php
 
-class Forms_Lib_Html extends Sabel_Object
+class Form_Html extends Sabel_Object
 {
   /**
    * @var string
@@ -109,6 +109,11 @@ class Forms_Lib_Html extends Sabel_Object
     return $html;
   }
   
+  public function file()
+  {
+    return $this->openTag("input") . 'type="file" name="' . $this->name . '" />';
+  }
+  
   public function select($data)
   {
     $options = array();
@@ -191,13 +196,13 @@ class Forms_Lib_Html extends Sabel_Object
   
   public function datetime($yearRange, $withSecond, $includeBlank)
   {
-    $datetime = new Forms_Lib_Html_Date_Datetime($this->name, $this->value);
+    $datetime = new Form_Html_Date_Datetime($this->name, $this->value);
     return $datetime->toHtml($yearRange, $withSecond, $includeBlank);
   }
   
   public function date($yearRange, $includeBlank)
   {
-    $date = new Forms_Lib_Html_Date_Object($this->name, $this->value);
+    $date = new Form_Html_Date_Object($this->name, $this->value);
     return $date->toHtml($yearRange, $includeBlank);
   }
   
