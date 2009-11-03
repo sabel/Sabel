@@ -107,7 +107,7 @@ class Validator extends Sabel_Validator
     }
   }
   
-  public function image($name, $value)
+  public function image($name, $value, $size = "300K", $validTypes = array())
   {
     if (!is_empty($value)) {
       $data = null;
@@ -117,9 +117,16 @@ class Validator extends Sabel_Validator
         $data = $value->__toString();
       }
       
-      $validTypes = array("jpeg", "gif", "png");
+      if (empty($validTypes)) {
+        $validTypes = array("jpeg", "gif", "png");
+      }
+      
       if (!in_array(Sabel_Util_Image::getType($data), $validTypes, true)) {
         return $this->getDisplayName($name) . "の形式が不正です";
+      } elseif ($size !== null) {
+        if (strlen($data) > strtoint($size)) {
+          return $this->getDisplayName($name) . "のサイズが{$size}Bを超えています";
+        }
       }
     }
   }

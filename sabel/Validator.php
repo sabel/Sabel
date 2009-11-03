@@ -244,7 +244,7 @@ class Sabel_Validator extends Sabel_Object
     }
   }
   
-  public function image($name, $value, $validTypes = array())
+  public function image($name, $value, $size = "300K", $validTypes = array())
   {
     if (!is_empty($value)) {
       $data = null;
@@ -260,6 +260,10 @@ class Sabel_Validator extends Sabel_Object
       
       if (!in_array(Sabel_Util_Image::getType($data), $validTypes, true)) {
         return "Invalid " . $this->getDisplayName($name) . " format.";
+      } elseif ($size !== null) {
+        if (strlen($data) > strtoint($size)) {
+          return $this->getDisplayName($name) . " size exceeds {$size}B.";
+        }
       }
     }
   }

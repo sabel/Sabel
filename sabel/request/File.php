@@ -14,6 +14,10 @@ class Sabel_Request_File extends Sabel_ValueObject
   
   public function getContent()
   {
-    return file_get_contents($this->path);
+    if (is_empty($this->path)) {
+      return "";
+    } else {
+      return file_get_contents($this->path);
+    }
   }
 }

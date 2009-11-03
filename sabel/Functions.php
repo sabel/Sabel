@@ -248,6 +248,34 @@ function is_natural_number($num)
   }
 }
 
+function strtoint($str)
+{
+  if (is_int($str)) {
+    return $str;
+  } elseif (!is_string($str) || is_empty($str)) {
+    return 0;
+  }
+  
+  $len  = strlen($str);
+  $char = strtolower($str{$len - 1});
+  
+  if (in_array($char, array("k", "m", "g"), true)) {
+    $num = substr($str, 0, $len - 1);
+    if (is_number($num)) {
+      switch ($char) {
+        case "k": return $num * 1024;
+        case "m": return $num * pow(1024, 2);
+        case "g": return $num * pow(1024, 3);
+        default : return 0;
+      }
+    } else {
+      return 0;
+    }
+  } else {
+    return (is_number($str)) ? (int)$str : 0;
+  }
+}
+
 /***   sabel.db functions   ***/
 
 function is_model($model)
