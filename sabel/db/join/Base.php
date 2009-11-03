@@ -113,13 +113,6 @@ class Sabel_Db_Join_Base extends Sabel_Object
     return $model;
   }
   
-  private function __getJoinQuery($on)
-  {
-    return $stmt->quoteIdentifier($on["id"])
-           . " = " . $stmt->quoteIdentifier(strtolower($this->childName))
-           . "."   . $stmt->quoteIdentifier($on["fkey"]);
-  }
-  
   protected function _getJoinQuery(Sabel_Db_Statement $stmt)
   {
     $name  = $stmt->quoteIdentifier($this->tblName);
@@ -131,21 +124,26 @@ class Sabel_Db_Join_Base extends Sabel_Object
     }
     
     $on = $this->on;
-    
     $query[] = " ON ";
     
     if (isset($on["id"]) && isset($on["fkey"])) {
-      $query[] = $name . "." . $this->__getJoinQuery($on);
+      $query[] = $name . "." . $this->__getJoinQuery($stmt, $on);
     } else {
       $_on = array();
-      
       foreach ($on as $each) {
-        $_on[] = $name . "." . $this->__getJoinQuery($each);
+        $_on[] = $name . "." . $this->__getJoinQuery($stmt, $each);
       }
       
       $query[] = implode(" AND ", $_on);
     }
     
     return $query;
+  }
+  
+  private function __getJoinQuery(Sabel_Db_Statement $stmt, $on)
+  {
+    return $stmt->quoteIdentifier($on["id"])
+      . " = " . $stmt->quoteIdentifier(strtolower($this->childName))
+      . "."   . $stmt->quoteIdentifier($on["fkey"]);
   }
 }
