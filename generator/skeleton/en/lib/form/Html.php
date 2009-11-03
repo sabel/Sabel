@@ -118,16 +118,12 @@ class Form_Html extends Sabel_Object
   {
     $options = array();
     $value   = $this->value;
-    $matched = false;
     
     foreach ($data as $v => $text) {
-      $escaped = htmlescape($v);
-      
-      if (!$matched && $v == $value) {
-        $tag = '<option value="' . $escaped . '" selected="selected">';
-        $matched = true;
+      if (!is_empty($value) && $v == $value) {
+        $tag = '<option value="' . htmlescape($v) . '" selected="selected">';
       } else {
-        $tag = '<option value="' . $escaped . '">';
+        $tag = '<option value="' . htmlescape($v) . '">';
       }
       
       $options[] = $tag . htmlescape($text) . '</option>';
@@ -175,6 +171,10 @@ class Form_Html extends Sabel_Object
     $name  = $this->name;
     $value = $this->value;
     
+    if (!is_array($value)) {
+      $value = array();
+    }
+    
     // remove id.
     $attrs = preg_replace('/(^id="[^"]*"| id="[^"]*")/', '', $this->attributes);
     
@@ -183,7 +183,7 @@ class Form_Html extends Sabel_Object
       $check  = $this->openTag("input", 'id="' . $_id . '" ' . $attrs) . 'type="checkbox" ';
       $check .= 'name="' . $name . '[]" value="' . htmlescape($v) . '"';
       
-      if ($value !== null && in_array($v, $value)) {
+      if (!is_empty($value) && in_array($v, $value)) {
         $check .= ' checked="checked"';
       }
       
