@@ -131,6 +131,24 @@ class Validator extends Sabel_Validator
     }
   }
   
+  public function same($names, $values)
+  {
+    $ns = array();
+    $comp = true;
+    foreach ($names as $name) {
+      $ns[] = $this->getDisplayName($name);
+      if (is_empty($values[$name])) {
+        $comp = false;
+      }
+    }
+    
+    if ($comp) {
+      if (count(array_unique($values)) !== 1) {
+        return implode("と", $ns) . "が一致しません";
+      }
+    }
+  }
+  
   public function nnumber($name, $value)
   {
     return $this->naturalNumber($name, $value);

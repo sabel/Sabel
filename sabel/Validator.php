@@ -123,8 +123,17 @@ class Sabel_Validator extends Sabel_Object
     }
     
     foreach (array_keys($methods) as $key) {
-      if (!isset($values[$key])) {
-        $values[$key] = null;
+      if (strpos($key, ",") === false) {
+        if (!isset($values[$key])) {
+          $values[$key] = null;
+        }
+      } else {
+        $vs = array();
+        foreach (explode(",", $key) as $k) {
+          $vs[$k] = (isset($values[$k])) ? $values[$k] : null;
+        }
+        
+        $values[$key] = $vs;
       }
     }
     
@@ -132,6 +141,10 @@ class Sabel_Validator extends Sabel_Object
       if (!isset($methods[$key])) continue;
       
       foreach ($methods[$key] as $method => $arguments) {
+        if (strpos($key, ",") !== false) {
+          $key = explode(",", $key);
+        }
+        
         if (is_empty($arguments)) {
           if (($message = $this->$method($key, $value)) !== null) {
             $errors[] = $message;
@@ -264,6 +277,24 @@ class Sabel_Validator extends Sabel_Object
         if (strlen($data) > strtoint($size)) {
           return $this->getDisplayName($name) . " size exceeds {$size}B.";
         }
+      }
+    }
+  }
+  
+  public function same($names, $values)
+  {
+    $ns = array();
+    $comp = true;
+    foreach ($names as $name) {
+      $ns[] = $this->getDisplayName($name);
+      if (is_empty($values[$name])) {
+        $comp = false;
+      }
+    }
+    
+    if ($comp) {
+      if (count(array_unique($values)) !== 1) {
+        return implode(", ", $ns) . " are not identical.";
       }
     }
   }
