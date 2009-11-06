@@ -115,10 +115,22 @@ class Sabel_Validator extends Sabel_Object
     
     foreach ($methods as $key => $_methods) {
       if (strpos($key, ":") !== false) {
-        $exp = explode(":", $key, 2);
-        $methods[$exp[0]] = $_methods;
-        $this->displayNames[$exp[0]] = $exp[1];
-        unset($methods[$key]);
+        if (strpos($key, ",") === false) {
+          list ($iname, $dname) = explode(":", $key, 2);
+          $methods[$iname] = $_methods;
+          $this->displayNames[$iname] = $dname;
+          unset($methods[$key]);
+        } else {
+          $names = array();
+          foreach (explode(",", $key) as $k) {
+            list ($iname, $dname) = explode(":", $k, 2);
+            $names[] = $iname;
+            $this->displayNames[$iname] = $dname;
+          }
+          
+          $methods[implode(",", $names)] = $_methods;
+          unset($methods[$key]);
+        }
       }
     }
     
