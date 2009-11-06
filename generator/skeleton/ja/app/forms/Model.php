@@ -32,6 +32,11 @@ abstract class Forms_Model extends Forms_Object
     $this->values = $this->model->toArray();
   }
   
+  public function getModel()
+  {
+    return $this->model;
+  }
+  
   /**
    * @return boolean
    */

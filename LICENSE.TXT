@@ -1,20 +1,20 @@
 -------------------------------------------------------------------------------
 
-          Sabel 1.2 RC - Rapid Web Application Development Framework
+         Sabel 1.2 Beta2 - Rapid Web Application Development Framework
 
-                              The New BSD License
+                             The New BSD License
 
-                            Copyright (c) 2004-2009
-         Mori Reo <mori.reo@sabel.php-framework.org> All rights reserved.
+                           Copyright (c) 2004-2009
+        Mori Reo <mori.reo@sabel.php-framework.org> All rights reserved.
 
 -------------------------------------------------------------------------------
 
   Authors:
 
-  Mori Reo <mori.reo@sabel.php-framework.org>
-  Ebine Yutaka <ebine.yutaka@sabel.php-framework.org>
-  Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.php-framework.org>
-  Hosokawa Yasuko <hosokawa.yasuko@sabel.php-framework.org>
+    Mori Reo <mori.reo@sabel.php-framework.org>
+    Ebine Yutaka <ebine.yutaka@sabel.php-framework.org>
+    Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.php-framework.org>
+    Hosokawa Yasuko <hosokawa.yasuko@sabel.php-framework.org>
 
 -------------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@
 
 -------------------------------------------------------------------------------
 
-                   For more information on the Sabel project,
-                  please see <http://sabel.php-framework.org/>
+                  For more information on the Sabel project,
+                 please see <http://sabel.php-framework.org/>
 
 -------------------------------------------------------------------------------
