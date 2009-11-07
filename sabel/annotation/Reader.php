@@ -88,6 +88,8 @@ class Sabel_Annotation_Reader extends Sabel_Object
       }
     }
     
+    ksort($annotValues);
+    
     return array($key, $annotValues);
   }
 }
