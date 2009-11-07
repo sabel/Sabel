@@ -77,7 +77,7 @@ abstract class Form_Html_Date_Base extends Sabel_Object
     } elseif (is_array($yearRange)) {
       return $yearRange;
     } elseif (strpos($yearRange, ",")) {
-      
+      return explode(",", $yearRange);
     } else {
       $char = $yearRange{0};
       $ny = (int)date("Y");

@@ -273,6 +273,7 @@ class Sabel_Db_Finder
       $model = $this->model;
       
       if ($column === null) {
+        $this->setProjection();
         return $model->getRows();
       } else {
         $pkey = $model->getMetadata()->getPrimaryKey();
