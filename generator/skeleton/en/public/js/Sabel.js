@@ -2572,7 +2572,7 @@ Sabel.Event.prototype = {
 };
 
 Sabel.Event.getTarget = function(evt) {
-	return evt.srcElement || evt.target;
+	return new Sabel.Element(evt.srcElement || evt.target);
 };
 
 Sabel.Event.stopPropagation = function(evt) {

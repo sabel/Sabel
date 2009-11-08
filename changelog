@@ -1,1 +1,4 @@
-changelog
+2009-11-09  Hamaco  <hamanaka.kazuhiro@gmail.com>
+
+	* Sabel.js: Sabel.Event.getTargetの返り値をSabel.Elementに変更
+
