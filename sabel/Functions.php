@@ -211,7 +211,7 @@ function is_cli()
 function is_ipaddr($arg)
 {
   if (is_string($arg)) {
-    $ptn = "[0-9]{1,3}";
+    $ptn = "(0|[1-9][0-9]{0,2})";
     if (preg_match("/^{$ptn}\.{$ptn}\.{$ptn}\.{$ptn}$/", $arg) === 1) {
       foreach (explode(".", $arg) as $part) {
         if ($part > 255) return false;

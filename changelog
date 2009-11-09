@@ -1,3 +1,7 @@
+2009-11-09  Ebin <yutaka@ebine.org>
+
+	* sabel/Functions.php: is_ipaddr()関数の正規表現を修正
+
 2009-11-09  Hamaco  <hamanaka.kazuhiro@gmail.com>
 
 	* Sabel.js: Sabel.Event.getTargetの返り値をSabel.Elementに変更
