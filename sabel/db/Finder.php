@@ -94,7 +94,7 @@ class Sabel_Db_Finder
   
   public function between($column, $from, $to = null)
   {
-    $this->model->setCondition(between($column, $from, $to));
+    $this->model->setCondition(bw($column, $from, $to));
     
     return $this;
   }
@@ -106,7 +106,7 @@ class Sabel_Db_Finder
   
   public function notBetween($column, $from, $to = null)
   {
-    $this->model->setCondition(notBetween($column, $from, $to));
+    $this->model->setCondition(nbw($column, $from, $to));
     
     return $this;
   }
@@ -372,25 +372,25 @@ function ge($column, $value)
   );
 }
 
-function between($column, $from, $to = null)
+function bw($column, $from, $to = null)
 {
   if ($to === null) {
-    return __between($column, $from, false);
+    return __bw($column, $from, false);
   } else {
-    return __between($column, array($from, $to), false);
+    return __bw($column, array($from, $to), false);
   }
 }
 
-function notBetween($column, $from, $to = null)
+function nbw($column, $from, $to = null)
 {
   if ($to === null) {
-    return __between($column, $from, true);
+    return __bw($column, $from, true);
   } else {
-    return __between($column, array($from, $to), true);
+    return __bw($column, array($from, $to), true);
   }
 }
 
-function __between($column, array $params, $not)
+function __bw($column, array $params, $not)
 {
   if (isset($params["from"])) $params[0] = $params["from"];
   if (isset($params["to"]))   $params[1] = $params["to"];
