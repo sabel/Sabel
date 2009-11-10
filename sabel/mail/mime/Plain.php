@@ -14,7 +14,7 @@ class Sabel_Mail_Mime_Plain extends Sabel_Mail_Mime_Abstract
   /**
    * @var string
    */
-  protected $type = Sabel_Mail_Mime_Abstract::PLAIN;
+  protected $type = "text/plain";
   
   public function __construct($content)
   {

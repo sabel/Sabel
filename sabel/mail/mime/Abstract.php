@@ -11,12 +11,6 @@
  */
 abstract class Sabel_Mail_Mime_Abstract
 {
-  const PLAIN = "text/plain";
-  const HTML  = "text/html";
-  const GIF   = "image/gif";
-  const PNG   = "image/png";
-  const JPEG  = "image/jpeg";
-  
   /**
    * @var array
    */

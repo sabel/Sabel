@@ -19,7 +19,7 @@ class Sabel_Mail_Mime_Html extends Sabel_Mail_Mime_Abstract
   /**
    * @var string
    */
-  protected $type = Sabel_Mail_Mime_Abstract::HTML;
+  protected $type = "text/html";
   
   public function __construct($content)
   {
