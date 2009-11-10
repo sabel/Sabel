@@ -99,9 +99,51 @@ function get_temp_dir()
       unlink($tmpFile);
       return $dirName;
     } else {
-      return null;
+      return false;
     }
   }
+}
+
+function get_mime_type($path /* or filedata */)
+{
+  $tmpFile = null;
+  
+  if (!is_file($path)) {
+    if ($tmpDir = get_temp_dir()) {
+      $tmpFile = $tmpDir . DS . md5hash();
+      if (file_put_contents($tmpFile, $path)) {
+        $path = $tmpFile;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  
+  $ret = false;
+  
+  if (!is_file($path)) {
+    return $ret;
+  } elseif (extension_loaded("fileinfo")) {
+    if (defined("FILEINFO_MAGICDB")) {
+      $finfo = new finfo(FILEINFO_MIME, FILEINFO_MAGICDB);
+    } else {
+      $finfo = new finfo(FILEINFO_MIME);
+    }
+    
+    $ret = $finfo->file($path);
+  } elseif (DS === "/") {
+    $ret = trim(shell_exec("file -ib " . escapeshellcmd($path)));
+  } elseif (function_exists("mime_content_type")) {
+    $ret = mime_content_type($path);
+  }
+  
+  if ($tmpFile !== null) {
+    unlink($tmpFile);
+  }
+  
+  return $ret;
 }
 
 if (!function_exists("lcfirst")) {

@@ -1,6 +1,11 @@
-2009-11-09  Ebin <yutaka@ebine.org>
+2009-11-10  Ebin <yutaka@ebine.org>
 
-	* generator/skeleton/en/lib/form/Object: toHidden()メソッド追加（フォームの
+	* sabel/Functions.php: get_mime_type()関数追加。それに応じて
+	Sabel_Mail_Mime_Html::addImage()のMIMEタイプを省略できるように変更。
+
+2009-11-10  Ebin <yutaka@ebine.org>
+
+	* generator/skeleton/en/lib/form/Object.php: toHidden()メソッド追加（フォームの
 	値を全てhiddenで書き出す）
 
 2009-11-09  Ebin <yutaka@ebine.org>
