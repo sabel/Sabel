@@ -269,7 +269,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
       
       return $mime;
     } else {
-      $message = __METHOD__ . "() $ctype is not supported now.";
+      $message = __METHOD__ . "() {$ctype} is not supported now.";
       throw new Sabel_Mail_Mime_Exception($message);
     }
   }
@@ -412,7 +412,10 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     
     $values["value"] = substr($str, 0, $pos);
     $str = ltrim(substr($str, $pos + 1));
-    if ($str === "" || $str === ";") return $values;
+    
+    if ($str === "" || $str === ";") {
+      return $values;
+    }
     
     foreach (array_map("trim", explode(";", $str)) as $param) {
       if ($param === "") continue;

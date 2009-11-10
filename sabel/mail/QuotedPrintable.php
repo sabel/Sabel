@@ -15,11 +15,15 @@ class Sabel_Mail_QuotedPrintable
   {
     $fp = fopen("php://temp", "r+");
     
-    stream_filter_append($fp, "convert.quoted-printable-encode",
-                         STREAM_FILTER_READ,
-                         array("line-length"      => $lineLength,
-                               "line-break-chars" => $lineEnd)
-                        );
+    stream_filter_append(
+      $fp,
+      "convert.quoted-printable-encode",
+      STREAM_FILTER_READ,
+      array(
+        "line-length"      => $lineLength,
+        "line-break-chars" => $lineEnd
+      )
+    );
     
     fputs($fp, $str);
     rewind($fp);

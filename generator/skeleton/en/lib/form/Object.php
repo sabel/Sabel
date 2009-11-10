@@ -244,6 +244,29 @@ class Form_Object extends Sabel_ValueObject
     return empty($this->errors);
   }
   
+  public function toHidden($values = null, $var = null)
+  {
+    $html = array();
+    
+    if ($values === null) {
+      $values = $this->values;
+    }
+    
+    foreach ($values as $k => $v) {
+      if ($var !== null) {
+        $k = "{$var}[{$k}]";
+      }
+      
+      if (is_array($v)) {
+        $html[] = $this->toHidden($v, $k);
+      } else {
+        $html[] = '<input type="hidden" name="' . htmlescape($k) . '" value="' . htmlescape($v) . '" />';
+      }
+    }
+    
+    return implode(PHP_EOL, $html);
+  }
+  
   protected function createValidator()
   {
     $validator = new Validator();

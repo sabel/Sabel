@@ -28,10 +28,12 @@ class Sabel_Mail_Mime_Html extends Sabel_Mail_Mime_Abstract
   
   public function addImage($contentId, $data, $mimeType, $encoding = "base64")
   {
-    $this->inlineImages[] = array("cid"      => $contentId,
-                                  "data"     => $data,
-                                  "mimetype" => $mimeType,
-                                  "encoding" => $encoding);
+    $this->inlineImages[] = array(
+      "cid"      => $contentId,
+      "data"     => $data,
+      "mimetype" => $mimeType,
+      "encoding" => $encoding
+    );
     
     return $this;
   }
