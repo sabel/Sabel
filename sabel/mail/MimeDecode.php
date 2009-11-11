@@ -219,7 +219,9 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
         $enc  = $part->content->getEncoding();
         $body = $this->decodeString($part->body, $enc, $part->content->getCharset(), false);
         $cid  = (isset($part->headers["content-id"])) ? $part->headers["content-id"] : "";
-        $related["html"]->addImage($cid, $body, $part->type, $enc);
+        $related["html"]->addImage($cid, array(
+          "data" => $body, "mimetype" => $part->type, "encoding" => $enc
+        ));
       }
     }
     

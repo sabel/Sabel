@@ -82,6 +82,21 @@ class Sabel_Mail_Mime_Decoded extends Sabel_Object
     }
   }
   
+  public function getSubject()
+  {
+    return $this->getHeader("Subject");
+  }
+  
+  public function getBody()
+  {
+    return $this->body;
+  }
+  
+  public function getHtml()
+  {
+    return $this->html;
+  }
+  
   protected function removeQuote($str)
   {
     if ($str{0} === '"') {
