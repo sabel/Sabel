@@ -357,7 +357,7 @@ class Test_Aspect_Proxy extends SabelTestCase
     $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
     $target = $weaver->getProxy();
     
-    $this->assertEquals(get_class($target), "Sabel_Aspect_Proxy_Default");
+    $this->assertEquals(get_class($target), "Sabel_Aspect_Proxy");
   }
 }
 
