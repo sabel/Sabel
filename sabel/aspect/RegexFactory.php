@@ -2,6 +2,8 @@
 
 class Sabel_Aspect_RegexFactory
 {
+  private static $reflectionCache = array();
+  
   private $weaver = null;
   private $advice = null;
   
@@ -18,47 +20,61 @@ class Sabel_Aspect_RegexFactory
     return new self();
   }
   
+  public function getAdvice()
+  {
+    return $this->advice;
+  }
+  
   public function build($targetClass, $adviceClasses)
   {
     $this->weaver = new Sabel_Aspect_Weaver($targetClass);
     
-    if (!is_array($adviceClasses)) {
-      $adviceClasses = array($adviceClasses);
-    }
-    
-    $adviceClasses = array_reverse($adviceClasses);
-    
-    foreach ($adviceClasses as $adviceClass) {
-      $advice = new $adviceClass();
+    if (is_array($adviceClasses)) {
+      $this->advices = array();
+      $adviceClasses = array_reverse($adviceClasses);
       
-      $this->advice = $advice;
-      
-      $reflection = new Sabel_Reflection_Class($advice);
-      
-      $annotatedAdvisor = $reflection->getAnnotation("advisor");
-      if ($annotatedAdvisor !== null) {
-        $this->advisorClass = $annotatedAdvisor[0][0];
+      foreach ($adviceClasses as $adviceClass) {
+        $this->_build($adviceClass);
       }
-      
-      $annotatedInterceptor = $reflection->getAnnotation("interceptor");
-      if ($annotatedInterceptor !== null) {
-        $this->interceptorClass = $annotatedInterceptor[0][0];
-      }
-      
-      $annotatedClass = $reflection->getAnnotation("classMatch");
-      if ($annotatedClass !== null) {
-        $this->annotatedClass = $annotatedClass[0][0];
-      }
-      
-      foreach ($reflection->getMethods() as $method) {
-        $this->addToAdvisor($method);
-      }
+    } else {
+      $this->_build($adviceClasses);
     }
     
     return $this->weaver;
   }
   
-  private function addToAdvisor($method)
+  private function _build($adviceClass)
+  {
+    $this->advice = $advice = new $adviceClass();
+    
+    if (isset(self::$reflectionCache[$adviceClass])) {
+      $reflection = self::$reflectionCache[$adviceClass];
+    } else {
+      $reflection = new Sabel_Reflection_Class($advice);
+      self::$reflectionCache[$adviceClass] = $reflection;
+    }
+            
+    $annotatedAdvisor = $reflection->getAnnotation("advisor");
+    if ($annotatedAdvisor !== null) {
+      $this->advisorClass = $annotatedAdvisor[0][0];
+    }
+    
+    $annotatedInterceptor = $reflection->getAnnotation("interceptor");
+    if ($annotatedInterceptor !== null) {
+      $this->interceptorClass = $annotatedInterceptor[0][0];
+    }
+    
+    $annotatedClass = $reflection->getAnnotation("classMatch");
+    if ($annotatedClass !== null) {
+      $this->annotatedClass = $annotatedClass[0][0];
+    }
+    
+    foreach ($reflection->getMethods() as $method) {
+      $this->addToAdvisor($method, $advice);
+    }    
+  }
+  
+  private function addToAdvisor($method, $advice)
   {
     $annotation = $method->getAnnotations();
     
@@ -91,16 +107,11 @@ class Sabel_Aspect_RegexFactory
     }
     
     $interceptorClass = $this->interceptorClass;
-    $poInterceptor = new $interceptorClass($this->advice);
+    $poInterceptor = new $interceptorClass($advice);
     
     $setMethod = "set" . ucfirst($type) . "AdviceMethod";
     $poInterceptor->$setMethod($method->getName());
     
     $advisor->addAdvice($poInterceptor);
-  }
-  
-  public function getAdvice()
-  {
-    return $this->advice;
   }
 }

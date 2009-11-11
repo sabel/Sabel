@@ -9,6 +9,8 @@ require_once ("Test/Aspect/SimpleUsage.php");
 require_once ("Test/Aspect/classes/All.php");
 require_once ("Test/Aspect/classes/Interceptors.php");
 
+require_once ("Test/Aspect/Exp.php");
+
 /**
  *
  * @category  Aspect
@@ -30,6 +32,9 @@ class Test_Aspect_Tests
     $suite->addTest(Test_Aspect_Matcher::suite());
     $suite->addTest(Test_Aspect_Introduction::suite());
     $suite->addTest(Test_Aspect_SimpleUsage::suite());
+    
+    // @todo remove this before commit.
+    $suite->addTest(Test_Aspect_Exp::suite());
     
     return $suite;
   }

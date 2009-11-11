@@ -5,6 +5,11 @@ class Sabel_Aspect_Weaver
   protected $target  = null;
   protected $advisor = array();
   
+  /**
+   * default constructer
+   *
+   * @param $target
+   */
   public function __construct($target = null)
   {
     if ($target !== null) {
