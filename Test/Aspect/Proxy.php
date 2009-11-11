@@ -325,11 +325,11 @@ class Test_Aspect_Proxy extends SabelTestCase
   
   public function testAnnotationPlainObjectAdvice()
   {
-    $factory = new Sabel_Aspect_RegexFactory();
-    $weaver = $factory->build("Sabel_Tests_Aspect_TargetClass",
-                              "Sabel_Tests_Aspect_PlainObject_Advice");
+    $weaver = new Sabel_Aspect_Weaver();
+    $weaver->build("Sabel_Tests_Aspect_TargetClass",
+                   "Sabel_Tests_Aspect_PlainObject_Advice");
     
-    $advice = $factory->getAdvice();
+    $advice = $weaver->getAdvice();
     
     $target = $weaver->getProxy();
     
