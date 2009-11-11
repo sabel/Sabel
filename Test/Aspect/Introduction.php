@@ -16,7 +16,7 @@ class Test_Aspect_Introduction extends SabelTestCase
   
   public function setUp()
   {
-    $this->weaver = new Sabel_Aspect_Weaver_Dynamic("Sabel_Test_Aspect_Person");
+    $this->weaver = new Sabel_Aspect_Weaver("Sabel_Test_Aspect_Person");
   }
   
   public function testIntroduceLockable()

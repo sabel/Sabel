@@ -5,9 +5,19 @@
  *
  * @author Mori Reo <mori.reo@sabel.jp>
  */
-class Test_Aspect_Base extends SabelTestCase
+class Test_Aspect_Proxy extends SabelTestCase
 {
   protected $weaver = null;
+  
+  public static function suite()
+  {
+    return self::createSuite("Test_Aspect_Proxy");
+  }
+  
+  public function setUp()
+  {
+    $this->weaver = new Sabel_Aspect_Weaver("Sabel_Tests_Aspect_TargetClass");
+  }
   
   public function testRegexMethodMatcher()
   {
@@ -316,8 +326,7 @@ class Test_Aspect_Base extends SabelTestCase
   public function testAnnotationPlainObjectAdvice()
   {
     $factory = new Sabel_Aspect_RegexFactory();
-    $weaver = $factory->build(get_class($this->weaver),
-                              "Sabel_Tests_Aspect_TargetClass",
+    $weaver = $factory->build("Sabel_Tests_Aspect_TargetClass",
                               "Sabel_Tests_Aspect_PlainObject_Advice");
     
     $advice = $factory->getAdvice();
@@ -329,6 +338,26 @@ class Test_Aspect_Base extends SabelTestCase
     
     $target->setX("x");
     $this->assertEquals("setX", $advice->before);
+  }
+  
+  public function testGetClassName()
+  {
+    $weaver = $this->weaver;
+    
+    $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
+    $target = $weaver->getProxy();
+    
+    $this->assertEquals($target->getClassName(), "Sabel_Tests_Aspect_TargetClass");
+  }
+  
+  public function testTargetClass()
+  {
+    $weaver = $this->weaver;
+    
+    $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
+    $target = $weaver->getProxy();
+    
+    $this->assertEquals(get_class($target), "Sabel_Aspect_Proxy_Default");
   }
 }
 

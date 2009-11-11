@@ -18,9 +18,9 @@ class Sabel_Aspect_RegexFactory
     return new self();
   }
   
-  public function build($weaverClass, $targetClass, $adviceClasses)
+  public function build($targetClass, $adviceClasses)
   {
-    $this->weaver = new $weaverClass($targetClass);
+    $this->weaver = new Sabel_Aspect_Weaver($targetClass);
     
     if (!is_array($adviceClasses)) {
       $adviceClasses = array($adviceClasses);

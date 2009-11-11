@@ -12,8 +12,6 @@
  */
 abstract class Sabel_Container_Injection implements Sabel_Config
 {
-  private $weaverClass = "Sabel_Aspect_Weaver_Static";
-  
   private
     $binds,
     $aspects,
@@ -60,17 +58,6 @@ abstract class Sabel_Container_Injection implements Sabel_Config
     $this->aspects[$className] = $aspect;
     
     return $aspect;
-  }
-  
-  public function weaver($weaverClass)
-  {
-    $this->weaverClass = $weaverClass;
-    return $this;
-  }
-  
-  public function getWeaver()
-  {
-    return $this->weaverClass;
   }
   
   public function getAspect($className)

@@ -364,10 +364,8 @@ class Sabel_Container
       $adviceClasses[] = $this->config->getAspect($className)->getAdvice();
     }
     
-    $weaverClass = $this->config->getWeaver();
-    
     return Sabel_Aspect_RegexFactory::create()
-                                       ->build($weaverClass, $instance, $adviceClasses)
+                                       ->build($instance, $adviceClasses)
                                        ->getProxy();
   }
   
@@ -399,7 +397,7 @@ class Sabel_Container
       return null;
     }
     
-    $weaver = new Sabel_Aspect_Weaver_Static($instance);
+    $weaver = new Sabel_Aspect_Weaver($instance);
     
     foreach ($reflection->getMethods() as $method) {
       $methodAnnots = $method->getAnnotations();

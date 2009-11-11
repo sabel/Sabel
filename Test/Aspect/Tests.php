@@ -1,8 +1,6 @@
 <?php
 
-require_once ("Test/Aspect/Base.php");
-require_once ("Test/Aspect/DynamicProxy.php");
-require_once ("Test/Aspect/StaticProxy.php");
+require_once ("Test/Aspect/Proxy.php");
 require_once ("Test/Aspect/Pointcuts.php");
 require_once ("Test/Aspect/Matcher.php");
 require_once ("Test/Aspect/Introduction.php");
@@ -27,8 +25,7 @@ class Test_Aspect_Tests
   {
     $suite = new PHPUnit_Framework_TestSuite();
     
-    $suite->addTest(Test_Aspect_DynamicProxy::suite());
-    $suite->addTest(Test_Aspect_StaticProxy::suite());
+    $suite->addTest(Test_Aspect_Proxy::suite());
     $suite->addTest(Test_Aspect_Pointcuts::suite());
     $suite->addTest(Test_Aspect_Matcher::suite());
     $suite->addTest(Test_Aspect_Introduction::suite());
