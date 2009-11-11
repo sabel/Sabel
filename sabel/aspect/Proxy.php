@@ -35,7 +35,7 @@ class Sabel_Aspect_Proxy
     $this->checkTargetMethod = $check;
   }
   
-  public function getClassName()
+  public function __getClassName()
   {
     return get_class($this->target);
   }
