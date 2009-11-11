@@ -1,16 +1,45 @@
 <?php
 
-/**
- * Dynamic Proxy
- *
- * @category   aspect
- * @package    org.sabel.aspect
- * @author     Mori Reo <mori.reo@sabel.jp>
- * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- */
-class Sabel_Aspect_Proxy_Default extends Sabel_Aspect_Proxy_Abstract
+class Sabel_Aspect_Proxy
 {
+  protected $target = null;
+  
+  protected $advisor = array();
+  
+  protected $invocation = null;
+  
+  protected $checkTargetMethod = true;
+  
+  public function __construct($targetObject)
+  {
+    $this->target = $targetObject;
+    $this->__setupInvocation();
+    
+    if (!$this->invocation instanceof Sabel_Aspect_MethodInvocation) {
+      throw new Sabel_Exception_Runtime("invocation must be setup");
+    }
+  }
+  
+  public function __getTarget()
+  {
+    return $this->target;
+  }
+  
+  public function __setAdvisor($advisor)
+  {
+    $this->advisor = $advisor;
+  }
+  
+  public function __checkTargetMethod($check)
+  {
+    $this->checkTargetMethod = $check;
+  }
+  
+  public function getClassName()
+  {
+    return get_class($this->target);
+  }
+  
   protected function __setupInvocation()
   {
     $this->invocation = new Sabel_Aspect_DefaultMethodInvocation($this, $this->target);

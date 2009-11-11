@@ -20,7 +20,7 @@ if (in_array("-db", $_SERVER["argv"], true)) {
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "sakle");
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "test");
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "cookie");
-  PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
+  // PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
 }
 
 define("TEST_DATA_DIR", SABEL_BASE . DS . "Test" . DS . "data");
@@ -52,16 +52,20 @@ require_once ("PHPUnit/Framework/TestSuite.php");
 require_once ("PHPUnit/Framework/IncompleteTestError.php");
 
 require_once ("Sabel.php");
+
 require_once ("Test/SabelTestCase.php");
+
 require_once ("Test/Application.php");
 require_once ("Test/Object.php");
 require_once ("Test/ValueObject.php");
 require_once ("Test/Console.php");
+
 require_once ("Test/Annotation.php");
 require_once ("Test/Aspect/Tests.php");
 require_once ("Test/Container.php");
+
 require_once ("Test/Exception.php");
-require_once ("Test/Bus/Tests.php");
+// require_once ("Test/Bus/Tests.php");
 require_once ("Test/Request/Tests.php");
 require_once ("Test/Response/Tests.php");
 require_once ("Test/Controller/Tests.php");
@@ -69,19 +73,25 @@ require_once ("Test/Util/Tests.php");
 require_once ("Test/View/Tests.php");
 require_once ("Test/Map/Tests.php");
 require_once ("Test/Processor/Tests.php");
+
 require_once ("Test/Reflection.php");
+
 require_once ("Test/Cache/Tests.php");
 require_once ("Test/Mail/Tests.php");
 require_once ("Test/Session/Tests.php");
 require_once ("Test/Storage/Memory.php");
 require_once ("Test/VirtualInheritance.php");
+/*
 require_once ("Test/DB/TestConfig.php");
 require_once ("Test/DB/Statement/Tests.php");
 require_once ("Test/DB/Storage/Tests.php");
 require_once ("Test/DB/Tests.php");
+*/
+/*
 require_once ("Test/XML/Tests.php");
 require_once ("Test/I18n/Gettext.php");
 require_once ("Test/Cookie/Tests.php");
+*/
 
 class SabelAllTests
 {
@@ -93,6 +103,7 @@ class SabelAllTests
   public static function suite()
   {
     $suite = new PHPUnit_Framework_TestSuite();
+    /*
     
     if (in_array("-db", $_SERVER["argv"], true)) {
       $suite->addTest(Test_DB_Statement_Tests::suite());
@@ -101,6 +112,7 @@ class SabelAllTests
       return $suite;
     }
     
+
     $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_ValueObject::suite());
     $suite->addTest(Test_Console::suite());
@@ -115,11 +127,15 @@ class SabelAllTests
     $suite->addTest(Test_Session_Tests::suite());
     $suite->addTest(Test_Processor_Tests::suite());
     
+    */
+    
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Reflection::suite());
     $suite->addTest(Test_Container::suite());
     $suite->addTest(Test_Aspect_Tests::suite());
     $suite->addTest(Test_Exception::suite());
+    
+    /*
     
     $suite->addTest(Test_Storage_Memory::suite());
     $suite->addTest(Test_I18n_Gettext::suite());
@@ -127,7 +143,9 @@ class SabelAllTests
     $suite->addTest(Test_Mail_Tests::suite());
     $suite->addTest(Test_XML_Tests::suite());
     
-    $suite->addTest(Test_Application::suite());
+    */
+    
+    // $suite->addTest(Test_Application::suite());
     
     return $suite;
   }
