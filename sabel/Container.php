@@ -364,9 +364,8 @@ class Sabel_Container
       $adviceClasses[] = $this->config->getAspect($className)->getAdvice();
     }
     
-    return Sabel_Aspect_RegexFactory::create()
-                                       ->build($instance, $adviceClasses)
-                                       ->getProxy();
+    return Sabel_Aspect_Weaver::create()->build($instance, $adviceClasses)
+                                        ->getProxy();
   }
   
   protected function processAnnotatedAspect($instance, $reflection)
