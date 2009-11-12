@@ -12,10 +12,10 @@
  */
 abstract class Sabel_Container_Injection implements Sabel_Config
 {
-  private
-    $binds,
-    $aspects,
-    $lifecycle,
+  protected
+    $binds      = array(),
+    $aspects    = array(),
+    $lifecycle  = array(),
     $constructs = array();
   
   /**

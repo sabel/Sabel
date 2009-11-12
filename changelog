@@ -1,3 +1,7 @@
+2009-11-12  MoriReo <mori.reo@gmail.com>
+
+	* Sabel_Containerのload()時に、複数の設定クラスを指定できるように変更。
+
 2009-11-11  MoriReo <mori.reo@gmail.com>
 
 	* Sabel_Aspectから、StaticProxyを削除。

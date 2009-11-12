@@ -173,7 +173,7 @@ function sha1hash()
   return sha1(uniqid(mt_rand(), true));
 }
 
-function load($class, $config = null)
+function load()
 {
   static $container = null;
   
@@ -181,11 +181,7 @@ function load($class, $config = null)
     $container = Sabel_Container::create();
   }
   
-  if ($config === null) {
-    return $container->load($class);
-  } else {
-    return $container->load($class, $config);
-  }
+  return $container->load(func_get_args());
 }
 
 function l($message, $level = SBL_LOG_INFO, $identifier = "default")

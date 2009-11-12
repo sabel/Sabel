@@ -75,8 +75,51 @@ class Sabel_Container
    * @param string $className
    * @param mixed $config object | string
    */
-  public static function load($class, $config = null)
+  public static function load($args)
   {
+    $numArgs = count($args);
+
+    if ($numArgs === 0) {
+      throw new Sabel_Container_Exception_InvalidArgument("must be specify target class");
+    }
+
+    $class = $args[0];
+
+    $configs = array();
+
+    if ($numArgs >= 2) {
+      if ($args[1] instanceof Sabel_Container_Injection) {
+        $configs[] = $args[1];
+      } else {
+        // @todo literal construct value
+        // $constructerValue = $args[1];
+      }
+
+      for ($i = 2; $i < $numArgs; ++$i) {
+        if ($args[$i] instanceof Sabel_Container_Injection) {
+          $configs[] = $args[$i];
+        }
+      }
+    }
+
+    if (count($configs) >= 2) {
+      $compositeConfig = new Sabel_Container_CompositeConfig();
+
+      if (self::hasConfig("default")) {
+        $compositeConfig->add(self::getConfig("default"));
+      }
+
+      foreach ($configs as $config) {
+        $compositeConfig->add($config);
+      }
+
+      $compositeConfig->configure();
+
+      $config = $compositeConfig;
+    } else {
+      $config = $configs[0];
+    }
+
     if (is_object($config) && $config instanceof Sabel_Container_Injection) {
       return self::create($config)->newInstance($class);
     } elseif (is_string($config)) {
@@ -84,7 +127,7 @@ class Sabel_Container
         return self::create($config)->newInstance($class);
       } else {
         if (self::hasConfig("default")) {
-          return self::load($class, "default");  
+          return self::load($class, "default");
         } else {
           self::addConfig("default", new Sabel_Container_DefaultInjection());
           return self::load($class);
@@ -92,22 +135,22 @@ class Sabel_Container
       }
     } elseif ($config === null) {
       $config = "default";
-      
+
       if (self::hasConfig($config)) {
-        return self::load($class, $config);  
+        return self::load($class, $config);
       } else {
         self::addConfig($config, new Sabel_Container_DefaultInjection());
       }
-      
+
       return self::load($class, $config);
     } else {
       throw new Sabel_Container_Exception_InvalidConfiguration("configuration not found");
     }
   }
-  
+
   /**
-   * addConfig 
-   * 
+   * addConfig
+   *
    * @param string $name 
    * @param Sabel_Container_Injection $config
    * @static
@@ -121,19 +164,19 @@ class Sabel_Container
       $msg = "object type must be Sabel_Container_Injection";
       throw new Sabel_Container_Exception_InvalidConfiguration($msg);
     }
-    
+
     if (isset(self::$configs[$name])) {
       throw new Sabel_Container_Exception_InvalidConfiguration("duplicate {$name} entry");
     } else {
       self::$configs[$name] = $config;
     }
-    
+
     if (!isset(self::$configs[$name])) {
       $msg = "unknown exception";
       throw new Sabel_Container_Exception_InvalidConfiguration($msg);
     }
   }
-  
+
   /**
    * hasConfig
    *
@@ -419,28 +462,26 @@ class Sabel_Container
     
     return $weaver->getProxy();
   }
-  
+
   protected function newInstanceWithConstruct($reflection, $className)
   {
-    if ($this->config->hasConstruct($reflection->getName())) {
-      $construct = $this->config->getConstruct($className);
-      $constructArguments = array();
-      
-      foreach ($construct->getConstructs() as $constructValue) {
-        if ($this->exists($constructValue)) {
-          $instance = $this->constructInstance($constructValue);
-          $constructArguments[] = $this->applyAspect($instance);
-        } else {
-          $constructArguments[] = $constructValue;
-        }
-      }
-      
-      $instance = $reflection->newInstanceArgs($constructArguments);
-    } else {
-      $instance = $this->newInstanceWithConstructDependency($className);
+    if (!$this->config->hasConstruct($reflection->getName())) {
+      return $this->newInstanceWithConstructDependency($className);
     }
-    
-    return $instance;
+
+    $construct = $this->config->getConstruct($className);
+    $constructArguments = array();
+
+    foreach ($construct->getConstructs() as $constructValue) {
+      if ($this->exists($constructValue)) {
+        $instance = $this->constructInstance($constructValue);
+        $constructArguments[] = $this->applyAspect($instance);
+      } else {
+        $constructArguments[] = $constructValue;
+      }
+    }
+
+    return $reflection->newInstanceArgs($constructArguments);
   }
   
   protected function newInstanceWithConstructInAbstract($className, $implClass)
