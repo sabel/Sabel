@@ -82,9 +82,13 @@ class Sabel_Container
     if ($numArgs === 0) {
       throw new Sabel_Container_Exception_InvalidArgument("must be specify target class");
     }
-
-    $class = $args[0];
-
+    
+    if (is_array($args)) {
+      $class = $args[0];  
+    } else {
+      $class = $args;
+    }
+    
     $configs = array();
 
     if ($numArgs >= 2) {
@@ -117,9 +121,15 @@ class Sabel_Container
 
       $config = $compositeConfig;
     } else {
-      $config = $configs[0];
+      if (isset($configs[0])) {
+        $config = $configs[0];
+      } else if (self::hasConfig("default")) {
+        $config = self::getConfig("default");
+      } else {
+        $config = new Sabel_Container_DefaultInjection();
+      }
     }
-
+    
     if (is_object($config) && $config instanceof Sabel_Container_Injection) {
       return self::create($config)->newInstance($class);
     } elseif (is_string($config)) {
