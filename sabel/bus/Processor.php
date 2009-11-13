@@ -15,7 +15,7 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
   /**
    * @var string
    */
-  public $name;
+  public $name = "";
   
   /**
    * @var array
@@ -42,20 +42,30 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
     }
     
     $this->name = $name;
-    
-    if (!empty($this->beforeEvents)) {
-      $bus = $this->getBus();
-      foreach ($this->beforeEvents as $target => $callback) {
-        $bus->attachExecuteBeforeEvent($target, $this, $callback);
-      }
+  }
+  
+  public function __set($key, $val)
+  {
+    $this->properties[$key] = $val;
+  }
+  
+  public function __get($key)
+  {
+    if (isset($this->properties[$key])) {
+      return $this->properties[$key];
+    } else {
+      return null;
     }
-    
-    if (!empty($this->afterEvents)) {
-      $bus = $this->getBus();
-      foreach ($this->afterEvents as $target => $callback) {
-        $bus->attachExecuteAfterEvent($target, $this, $callback);
-      }
-    }
+  }
+  
+  public final function getBeforeEvents()
+  {
+    return $this->beforeEvents;
+  }
+  
+  public final function getAfterEvents()
+  {
+    return $this->afterEvents;
   }
   
   public function extract(/* string[] args */)
@@ -74,20 +84,6 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
     }
   }
   
-  public function __set($key, $val)
-  {
-    $this->properties[$key] = $val;
-  }
-  
-  public function __get($key)
-  {
-    if (isset($this->properties[$key])) {
-      return $this->properties[$key];
-    } else {
-      return null;
-    }
-  }
-  
   /**
    * @param Sabel_Bus $bus
    *
@@ -96,10 +92,5 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
   public function shutdown(Sabel_Bus $bus)
   {
     
-  }
-  
-  protected function getBus()
-  {
-    return Sabel_Context::getContext()->getBus();
   }
 }

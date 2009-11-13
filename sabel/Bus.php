@@ -63,9 +63,7 @@ class Sabel_Bus extends Sabel_Object
   public function set($key, $value)
   {
     if (isset($this->interfaces[$key]) && !$value instanceof $this->interfaces[$key]) {
-      $message = "Sabel_Bus::set() '{$key}' must be an instance of "
-               . $this->interfaces[$key];
-      
+      $message = __METHOD__ . "() '{$key}' must be an instance of " . $this->interfaces[$key];
       throw new Sabel_Exception_Runtime($message);
     }
     
@@ -95,19 +93,6 @@ class Sabel_Bus extends Sabel_Object
     }
   }
   
-  /**
-   * add processor to bus.
-   *
-   * @param Sabel_Bus_Processor $processor
-   * @return Sabel_Bus
-   */
-  public function addProcessor(Sabel_Bus_Processor $processor)
-  {
-    $this->processorList->add($processor->name, $processor);
-    
-    return $this;
-  }
-  
   public function getProcessor($name)
   {
     return $this->processorList->get($name);
@@ -129,38 +114,86 @@ class Sabel_Bus extends Sabel_Object
     }
     
     $this->interfaces = $config->getInterfaces();
-    $processorList = $this->processorList;
+    
+    $logger  = Sabel_Logger::create();
     $logging = $this->logging = $config->isLogging();
+    
+    $beforeEvents  = $this->beforeEvent;
+    $afterEvents   = $this->afterEvent;
+    $processorList = $this->processorList;
     
     try {
       while ($processor = $processorList->next()) {
-        $this->beforeEvent($processor->name);
+        $processorName = $processor->name;
         
-        if ($logging) l("Bus: execute " . $processor->name);
+        if (isset($beforeEvents[$processorName])) {
+          foreach ($beforeEvents[$processorName] as $event) {
+            if ($logging) {
+              $logger->write("Bus: beforeEvent " . $event->object->getName() . "::" . $event->method . "()");
+            }
+            
+            $event->object->{$event->method}($this);
+          }
+        }
+        
+        if ($logging) {
+          $logger->write("Bus: execute " . $processor->name);
+        }
         
         $processor->execute($this);
-        $this->afterEvent($processor->name);
+        
+        if (isset($afterEvents[$processorName])) {
+          foreach ($afterEvents[$processorName] as $event) {
+            if ($logging) {
+              $logger->write("Bus: afterEvent " . $event->object->getName() . "::" . $event->method . "()");
+            }
+            
+            $event->object->{$event->method}($this);
+          }
+        }
       }
       
       $processorList->first();
       while ($processor = $processorList->next()) {
-        if ($logging) l("Bus: shutdown " . $processor->name);
+        if ($logging) {
+          $logger->write("Bus: shutdown " . $processor->name);
+        }
+        
         $processor->shutdown($this);
       }
       
       return $this->get("result");
     } catch (Exception $e) {
-      $msg = get_class($e) . ": "
-           . $e->getMessage()   . PHP_EOL
-           . "At: " . date("r") . PHP_EOL . PHP_EOL
-           . Sabel_Exception_Printer::printTrace($e, PHP_EOL, true);
+      $message = get_class($e) . ": " . $e->getMessage();
+      $logger->write($message);
       
-      l(PHP_EOL . $msg, SBL_LOG_ERR);
-      
-      if ((ENVIRONMENT & DEVELOPMENT) > 0) {
-        echo nl2br($msg);
+      return ((ENVIRONMENT & DEVELOPMENT) > 0) ? $message : "";
+    }
+  }
+  
+  /**
+   * add processor to bus.
+   *
+   * @param Sabel_Bus_Processor $processor
+   * @return Sabel_Bus
+   */
+  public function addProcessor(Sabel_Bus_Processor $processor)
+  {
+    $this->processorList->add($processor->name, $processor);
+    
+    if ($beforeEvents = $processor->getBeforeEvents()) {
+      foreach ($beforeEvents as $target => $callback) {
+        $this->attachExecuteBeforeEvent($target, $processor, $callback);
       }
     }
+    
+    if ($afterEvents = $processor->getAfterEvents()) {
+      foreach ($afterEvents as $target => $callback) {
+        $this->attachExecuteAfterEvent($target, $processor, $callback);
+      }
+    }
+    
+    return $this;
   }
   
   public function attachExecuteBeforeEvent($processorName, $object, $method)
@@ -185,32 +218,6 @@ class Sabel_Bus extends Sabel_Object
       $events[$processorName][] = $evt;
     } else {
       $events[$processorName] = array($evt);
-    }
-  }
-  
-  private function beforeEvent($processorName)
-  {
-    if (isset($this->beforeEvent[$processorName])) {
-      foreach ($this->beforeEvent[$processorName] as $event) {
-        if ($this->logging) {
-          l("Bus: beforeEvent {$event->object->getName()}::{$event->method}()");
-        }
-        
-        $event->object->{$event->method}($this);
-      }
-    }
-  }
-  
-  private function afterEvent($processorName)
-  {
-    if (isset($this->afterEvent[$processorName])) {
-      foreach ($this->afterEvent[$processorName] as $event) {
-        if ($this->logging) {
-          l("Bus: afterEvent {$event->object->getName()}::{$event->method}()");
-        }
-        
-        $event->object->{$event->method}($this);
-      }
     }
   }
   
