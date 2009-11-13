@@ -175,6 +175,10 @@ class Sabel_Validator extends Sabel_Object
   
   public function required($name, $value)
   {
+    if (is_object($value) && method_exists($value, "__toString")) {
+      $value = $value->__toString();
+    }
+    
     if (is_empty($value)) {
       return $this->getDisplayName($name) . " is required.";
     }

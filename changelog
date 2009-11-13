@@ -1,10 +1,15 @@
+2009-11-13  Ebin <yutaka@ebine.org>
+
+	* sabel/Bus.php: プロセッサINSERT用のメソッドinsertProcessor追加。
+
 2009-11-12  MoriReo <mori.reo@gmail.com>
 
-	* Sabel_Containerのload()時に、複数の設定クラスを指定できるように変更。
+	* sabel/Container.php: Sabel_Containerのload()時に、複数の設定クラスを
+	指定できるように変更。
 
 2009-11-11  MoriReo <mori.reo@gmail.com>
 
-	* Sabel_Aspectから、StaticProxyを削除。
+	* sabel/Container.php: Sabel_AspectからStaticProxyを削除。
 
 2009-11-10  Ebin <yutaka@ebine.org>
 

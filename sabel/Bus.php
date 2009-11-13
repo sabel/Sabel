@@ -41,11 +41,6 @@ class Sabel_Bus extends Sabel_Object
    */
   protected $afterEvent  = array();
   
-  /**
-   * @var boolean
-   */
-  protected $logging = false;
-  
   public function __construct()
   {
     $this->processorList = new Sabel_Util_HashList();
@@ -76,6 +71,25 @@ class Sabel_Bus extends Sabel_Object
       return $this->holder[$key];
     } else {
       return null;
+    }
+  }
+  
+  /**
+   * check bus has a data
+   * 
+   * @param mixed string or array
+   * @return bool
+   */
+  public function has($key)
+  {
+    if (is_array($key)) {
+      foreach ($key as $k) {
+        if (!$this->has($k)) return false;
+      }
+      
+      return true;
+    } else {
+      return isset($this->holder[$key]);
     }
   }
   
@@ -114,18 +128,16 @@ class Sabel_Bus extends Sabel_Object
     }
     
     $this->interfaces = $config->getInterfaces();
-    
-    $logger  = Sabel_Logger::create();
-    $logging = $this->logging = $config->isLogging();
-    
-    $beforeEvents  = $this->beforeEvent;
-    $afterEvents   = $this->afterEvent;
-    $processorList = $this->processorList;
+    $logging = $config->isLogging();
     
     try {
+      $logger = Sabel_Logger::create();
+      $processorList = $this->processorList;
+      
       while ($processor = $processorList->next()) {
         $processorName = $processor->name;
         
+        $beforeEvents = $this->beforeEvent;
         if (isset($beforeEvents[$processorName])) {
           foreach ($beforeEvents[$processorName] as $event) {
             if ($logging) {
@@ -142,6 +154,7 @@ class Sabel_Bus extends Sabel_Object
         
         $processor->execute($this);
         
+        $afterEvents = $this->afterEvent;
         if (isset($afterEvents[$processorName])) {
           foreach ($afterEvents[$processorName] as $event) {
             if ($logging) {
@@ -180,18 +193,21 @@ class Sabel_Bus extends Sabel_Object
   public function addProcessor(Sabel_Bus_Processor $processor)
   {
     $this->processorList->add($processor->name, $processor);
+    $this->setupEvents($processor);
     
-    if ($beforeEvents = $processor->getBeforeEvents()) {
-      foreach ($beforeEvents as $target => $callback) {
-        $this->attachExecuteBeforeEvent($target, $processor, $callback);
-      }
+    return $this;
+  }
+  
+  public function insertProcessor($target, Sabel_Bus_Processor $processor, $on)
+  {
+    if ($on !== "before" && $on !== "after") {
+      $message = __METHOD__ . "() argument 3 must be 'before' or 'after'.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
     
-    if ($afterEvents = $processor->getAfterEvents()) {
-      foreach ($afterEvents as $target => $callback) {
-        $this->attachExecuteAfterEvent($target, $processor, $callback);
-      }
-    }
+    $insertMethod = ($on === "before") ? "insertPrevious" : "insertNext";
+    $this->processorList->$insertMethod($target, $processor->name, $processor);
+    $this->setupEvents($processor);
     
     return $this;
   }
@@ -206,7 +222,7 @@ class Sabel_Bus extends Sabel_Object
     $this->attachEvent($processorName, $object, $method, "after");
   }
   
-  private function attachEvent($processorName, $object, $method, $when)
+  protected function attachEvent($processorName, $object, $method, $when)
   {
     $evt = new stdClass();
     $evt->object = $object;
@@ -221,22 +237,18 @@ class Sabel_Bus extends Sabel_Object
     }
   }
   
-  /**
-   * check bus has a data
-   * 
-   * @param mixed string or array
-   * @return bool
-   */
-  public function has($key)
+  protected function setupEvents(Sabel_Bus_Processor $processor)
   {
-    if (is_array($key)) {
-      foreach ($key as $k) {
-        if (!$this->has($k)) return false;
+    if ($beforeEvents = $processor->getBeforeEvents()) {
+      foreach ($beforeEvents as $target => $callback) {
+        $this->attachExecuteBeforeEvent($target, $processor, $callback);
       }
-      
-      return true;
-    } else {
-      return isset($this->holder[$key]);
+    }
+    
+    if ($afterEvents = $processor->getAfterEvents()) {
+      foreach ($afterEvents as $target => $callback) {
+        $this->attachExecuteAfterEvent($target, $processor, $callback);
+      }
     }
   }
 }
