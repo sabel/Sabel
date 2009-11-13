@@ -242,8 +242,17 @@ class Sabel_Mail extends Sabel_Object
     return $html;
   }
   
-  public function attach($name, $data, $mimeType, $encoding = "base64", $followRFC2231 = false)
+  public function attach($name, $data, $mimeType = null, $encoding = "base64", $followRFC2231 = false)
   {
+    if ($mimeType === null) {
+      $mimeType = get_mime_type($data);
+      if (!$mimeType) $mimeType = "application/octet-stream";
+    }
+    
+    if (is_readable($data)) {
+      $data = file_get_contents($data);
+    }
+    
     $file = new Sabel_Mail_Mime_File($name, $data, $mimeType, $followRFC2231);
     $file->setCharset($this->charset);
     $file->setEncoding($encoding);

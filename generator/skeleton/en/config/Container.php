@@ -8,4 +8,4 @@ class Config_Container extends Sabel_Container_Injection
   }
 }
 
-Sabel_Container::addConfig("default", new Config_Container());
+Sabel_Container::setDefaultConfig(new Config_Container());
