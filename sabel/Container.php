@@ -11,12 +11,11 @@
  */
 class Sabel_Container
 {
-  const DEFAULT_CONFIG = "default";
   const SETTER_PREFIX  = "set";
   
   const INJECTION_ANNOTATION = "injection";
   
-  private static $configs = array();
+  private static $defaultConfig = null;
   
   /**
    * @var Sabel_Container_Injection
@@ -48,25 +47,11 @@ class Sabel_Container
   {
     if ($config === null) return new self();
     
-    if (is_object($config) && $config instanceof Sabel_Container_Injection) {
-      return new self($config);
-    } elseif (is_string($config)) {
-      if (isset(self::$configs[$config])) {
-        $config = self::$configs[$config];
-        
-        if (!is_object($config)) {
-          $config = new $config();
-        }
-        
-        return new self($config);
-      } elseif (isset(self::$configs["default"])) {
-        return new self(self::$configs["default"]);
-      } else {
-        throw new Sabel_Container_Exception_InvalidConfiguration("{$config} not registered");
-      }
-    } else {
-      throw new Sabel_Container_Exception_InvalidConfiguration();
+    if (!$config instanceof Sabel_Container_Injection) {
+      throw new Sabel_Exception_InvalidArgument("config must be a Sabel_Container_Injection");
     }
+    
+    return new self($config);
   }
   
   /**
@@ -75,12 +60,14 @@ class Sabel_Container
    * @param string $className
    * @param mixed $config object | string
    */
-  public static function load($args)
+  public static function load()
   {
+    $args = func_get_args();
+    
     $numArgs = count($args);
 
     if ($numArgs === 0) {
-      throw new Sabel_Container_Exception_InvalidArgument("must be specify target class");
+      throw new Sabel_Exception_InvalidArgument("must be specify target class");
     }
     
     if (is_array($args)) {
@@ -90,6 +77,10 @@ class Sabel_Container
     }
     
     $configs = array();
+
+    if (self::hasDefaultConfig()) {
+      $configs[] = self::getDefaultConfig();
+    }
 
     if ($numArgs >= 2) {
       if ($args[1] instanceof Sabel_Container_Injection) {
@@ -109,10 +100,6 @@ class Sabel_Container
     if (count($configs) >= 2) {
       $compositeConfig = new Sabel_Container_CompositeConfig();
 
-      if (self::hasConfig("default")) {
-        $compositeConfig->add(self::getConfig("default"));
-      }
-
       foreach ($configs as $config) {
         $compositeConfig->add($config);
       }
@@ -130,120 +117,48 @@ class Sabel_Container
       }
     }
     
-    if (is_object($config) && $config instanceof Sabel_Container_Injection) {
-      return self::create($config)->newInstance($class);
-    } elseif (is_string($config)) {
-      if (self::hasConfig($config)) {
-        return self::create($config)->newInstance($class);
-      } else {
-        if (self::hasConfig("default")) {
-          return self::load($class, "default");
-        } else {
-          self::addConfig("default", new Sabel_Container_DefaultInjection());
-          return self::load($class);
-        }
-      }
-    } elseif ($config === null) {
-      $config = "default";
-
-      if (self::hasConfig($config)) {
-        return self::load($class, $config);
-      } else {
-        self::addConfig($config, new Sabel_Container_DefaultInjection());
-      }
-
-      return self::load($class, $config);
-    } else {
+    if (!$config instanceof Sabel_Container_Injection) {
       throw new Sabel_Container_Exception_InvalidConfiguration("configuration not found");
     }
+
+    return self::create($config)->newInstance($class);
   }
 
   /**
-   * addConfig
+   * set default config
    *
-   * @param string $name 
    * @param Sabel_Container_Injection $config
    * @static
    * @access public
    * @return void
    * @throws Sabel_Container_Exception_InvalidConfiguration
    */
-  public static function addConfig($name, Sabel_Container_Injection $config)
+  public static function setDefaultConfig(Sabel_Container_Injection $config)
   {
     if (!$config instanceof Sabel_Container_Injection) {
       $msg = "object type must be Sabel_Container_Injection";
       throw new Sabel_Container_Exception_InvalidConfiguration($msg);
     }
 
-    if (isset(self::$configs[$name])) {
-      throw new Sabel_Container_Exception_InvalidConfiguration("duplicate {$name} entry");
-    } else {
-      self::$configs[$name] = $config;
-    }
-
-    if (!isset(self::$configs[$name])) {
-      $msg = "unknown exception";
-      throw new Sabel_Container_Exception_InvalidConfiguration($msg);
-    }
+    self::$defaultConfig = $config;
   }
 
   /**
-   * hasConfig
+   * has default config
    *
    * @param string $name
    * @return boolean
    */
-  public static function hasConfig($name)
+  public static function hasDefaultConfig()
   {
-    return isset(self::$configs[$name]);
+    return (self::$defaultConfig !== null);
   }
-  
-  /**
-   * getConfig
-   *
-   * @param string $name
-   * @return Sabel_Container_Injection
-   * @throws Sabel_Container_Exception_InvalidConfiguration
-   */
-  public static function getConfig($name)
+
+  public static function getDefaultConfig()
   {
-    if (self::hasConfig($name)) {
-      return self::$configs[$name];
-    } else {
-      throw new Sabel_Container_Exception_InvalidConfiguration("{$config} not registered");
-    }
+    return self::$defaultConfig;
   }
-  
-  /**
-   * clearConfig 
-   * 
-   * @param string $name 
-   * @static
-   * @access public
-   * @return boolean
-   */
-  public static function clearConfig($name)
-  {
-    if (!is_string($name)) {
-      throw new Sabel_Exception_Runtiem("name must be string givin: " . var_export($name, true));
-    }
-    
-    if (self::hasConfig($name)) {
-      unset(self::$configs[$name]);
-      return true;
-    } else {
-      return false;
-    }
-  }
-  
-  /**
-   * clear all injection configs
-   */
-  public static function clearAllConfigs()
-  {
-    self::$configs = array();
-  }
-  
+
   /**
    * default constructer
    *
@@ -318,8 +233,8 @@ class Sabel_Container
    */
   protected function injectToSetter($reflection, $sourceInstance)
   {
-    if (self::hasConfig(self::DEFAULT_CONFIG)) {
-      $defaultConfig = self::getConfig(self::DEFAULT_CONFIG);
+    if (self::hasDefaultConfig()) {
+      $defaultConfig = self::getDefaultConfig();
       $defaultConfig->configure();
 
       if ($defaultConfig->hasBinds()) {
