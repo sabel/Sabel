@@ -181,7 +181,9 @@ function load()
     $container = Sabel_Container::create();
   }
   
-  return call_user_func_array(array($container, "load"), func_get_args());
+  $args = func_get_args();
+  
+  return call_user_func_array(array($container, "load"), $args);
 }
 
 function l($message, $level = SBL_LOG_INFO, $identifier = "default")
