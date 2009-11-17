@@ -68,10 +68,13 @@ class Sabel_Xml_Element extends Sabel_Object
   public function setNodeValue($value, $cdata = false)
   {
     if ($cdata) {
-      $this->element->nodeValue = new self($this->getRawDocument()->createCDATASection($value));
+      $this->removeChildren();
+      $this->appendChild(new self($this->getRawDocument()->createCDATASection($value)));
     } else {
       $this->element->nodeValue = $value;
     }
+    
+    return $this;
   }
   
   public function getNodeValue()
@@ -81,7 +84,7 @@ class Sabel_Xml_Element extends Sabel_Object
   
   public function setValue($value)
   {
-    $this->setNodeValue($value);
+    return $this->setNodeValue($value);
   }
   
   public function getValue()
@@ -92,6 +95,8 @@ class Sabel_Xml_Element extends Sabel_Object
   public function setAttribute($name, $value)
   {
     $this->element->setAttribute($name, $value);
+    
+    return $this;
   }
   
   public function getAttribute($name)
@@ -106,10 +111,12 @@ class Sabel_Xml_Element extends Sabel_Object
   
   public function at($name, $value = null)
   {
-    if ($value === null) {
+    $c = func_num_args();
+    if ($c === 1) {
       return $this->getAttribute($name);
     } else {
-      $this->setAttribute($name, $value);
+      if ($value === null) $value = "";
+      return $this->setAttribute($name, $value);
     }
   }
   
@@ -125,6 +132,8 @@ class Sabel_Xml_Element extends Sabel_Object
     }
     
     $this->element->appendChild($element);
+    
+    return $this;
   }
   
   public function insertBefore($element)
@@ -135,6 +144,8 @@ class Sabel_Xml_Element extends Sabel_Object
     
     $parent = $this->getParent()->getRawElement();
     $parent->insertBefore($element, $this->element);
+    
+    return $this;
   }
   
   public function insertAfter($element)
@@ -145,6 +156,8 @@ class Sabel_Xml_Element extends Sabel_Object
       $parent = $this->getParent();
       $parent->appendChild($element);
     }
+    
+    return $this;
   }
   
   public function __get($tagName)
@@ -215,9 +228,8 @@ class Sabel_Xml_Element extends Sabel_Object
     }
     
     $this->appendChild($_element);
-    $element = new self($_element);
     
-    return $element;
+    return $this;
   }
   
   public function addChild($tagName, $value = null)
@@ -229,9 +241,7 @@ class Sabel_Xml_Element extends Sabel_Object
     }
     
     $this->appendChild($_element);
-    $element = new self($_element);
-    
-    return $element;
+    return new self($_element);
   }
   
   public function getChild($tagName, $namespaceUri = null)
@@ -274,6 +284,28 @@ class Sabel_Xml_Element extends Sabel_Object
       
       return $this->xpath($tagName);
     }
+  }
+  
+  public function removeChildren($ignoreTextNode = false)
+  {
+    if ($ignoreTextNode) {
+      foreach ($this->getChildren() as $child) {
+        $child->remove();
+      }
+    } else {
+      $element = $this->element;
+      
+      $children = array();
+      foreach ($element->childNodes as $child) {
+        $children[] = $child;
+      }
+      
+      foreach ($children as $child) {
+        $element->removeChild($child);
+      }
+    }
+    
+    return $this;
   }
   
   public function getParent($target = null)

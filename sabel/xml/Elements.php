@@ -111,6 +111,25 @@ class Sabel_Xml_Elements extends Sabel_Object implements Iterator, ArrayAccess
     $this->length++;
   }
   
+  public function __get($key)
+  {
+    if ($element = $this->getElementAt(0)) {
+      return $element->$key;
+    } else {
+      return null;
+    }
+  }
+  
+  public function __call($method, $args)
+  {
+    if ($element = $this->getElementAt(0)) {
+      return call_user_func_array(array($element, $method), $args);
+    } else {
+      $message = __METHOD__ . "() has no elemens.";
+      throw new Sabel_Exception_Runtime($message);
+    }
+  }
+  
   public function offsetGet($index)
   {
     return $this->getElementAt($index);

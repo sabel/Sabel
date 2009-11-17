@@ -1,3 +1,7 @@
+2009-11-17  Ebin <yutaka@ebine.org>
+
+	* sabel/xml/*: 使い易さの改善。
+
 2009-11-14  MoriReo <mori.reo@gmail.com>
 
 	* sabel/Container.php: 名前付きでの設定インタフェイスを削除。コードの改善。
