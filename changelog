@@ -1,3 +1,7 @@
+2009-11-18  Ebin <yutaka@ebine.org>
+
+	* sabel/xml/Document.php: newできないように変更。
+
 2009-11-17  Ebin <yutaka@ebine.org>
 
 	* sabel/xml/*: 使い易さの改善。

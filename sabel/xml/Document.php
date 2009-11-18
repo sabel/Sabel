@@ -41,7 +41,7 @@ class Sabel_Xml_Document extends Sabel_Object
     "formatOutput"       => true,
   );
   
-  public function __construct(array $config = array())
+  private function __construct(array $config = array())
   {
     $config = array_merge($this->config, $config);
     
