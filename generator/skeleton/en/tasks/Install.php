@@ -30,7 +30,7 @@ class Install extends Sabel_Sakle_Task
    * @var array
    */
   protected $addonRepositories = array(
-    "http://www.sabel.jp/archives/addon",
+    "http://sabel.php-framework.org/addons",
   );
   
   public function initialize()
@@ -76,7 +76,7 @@ class Install extends Sabel_Sakle_Task
   
   protected function _installAddon($name, $xml)
   {
-    $doc  = new Sabel_Xml_Document();
+    $doc  = Sabel_Xml_Document::create();
     $root = $doc->loadXML($xml);
     
     if ($error = $root->getChild("error")) {

@@ -15,7 +15,7 @@ class Sabel_Rss_Reader
   
   public static function create($url, $xmlConfig = array())
   {
-    $document = new Sabel_Xml_Document($xmlConfig);
+    $document = Sabel_Xml_Document::create($xmlConfig);
     self::$documents[] = $document;
     
     $element = $document->loadXML(file_get_contents($url));
