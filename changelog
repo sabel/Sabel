@@ -1,3 +1,8 @@
+2009-11-19  Ebin <yutaka@ebine.org>
+
+	* sabel/Functions.php: 削除し、sabel/functions/core.phpと
+	sabel/functions/db.phpに分けた。
+
 2009-11-18  Ebin <yutaka@ebine.org>
 
 	* sabel/xml/Document.php: newできないように変更。

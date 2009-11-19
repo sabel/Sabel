@@ -125,7 +125,6 @@ final class Sabel
     $SABEL = "sabel" . DIRECTORY_SEPARATOR;
     
     require ($SABEL . "Object.php");
-    require ($SABEL . "Functions.php");
     require ($SABEL . "Logger.php");
     require ($SABEL . "Bus.php");
     require ($SABEL . "Config.php");
@@ -134,6 +133,9 @@ final class Sabel
     require ($SABEL . "Session.php");
     require ($SABEL . "Response.php");
     require ($SABEL . "View.php");
+    
+    require ($SABEL . "functions" . DIRECTORY_SEPARATOR . "core.php");
+    require ($SABEL . "functions" . DIRECTORY_SEPARATOR . "db.php");
     
     $BUS     = $SABEL . "bus"        . DIRECTORY_SEPARATOR;
     $MAP     = $SABEL . "map"        . DIRECTORY_SEPARATOR;
