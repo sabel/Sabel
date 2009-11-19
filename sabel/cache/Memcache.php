@@ -21,7 +21,8 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Interface
       $this->memcache = new Memcache();
       $this->addServer($server, $port);
     } else {
-      throw new Sabel_Exception_Runtime("memcache extension not loaded.");
+      $message = __METHOD__ . "() memcache extension not loaded.";
+      throw new Sabel_Exception_Runtime($message);
     }
   }
   

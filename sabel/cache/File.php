@@ -17,7 +17,16 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
   
   private function __construct($dir)
   {
-    $this->dir = ($dir === "") ? CACHE_DIR_PATH : $dir;
+    if (empty($dir)) {
+      if (defined("CACHE_DIR_PATH")) {
+        $this->dir = CACHE_DIR_PATH;
+      } else {
+        $message = __METHOD__ . "() CACHE_DIR_PATH not defined.";
+        throw new Sabel_Exception_Runtime($message);
+      }
+    } else {
+      $this->dir = $dir;
+    }
   }
   
   public static function create($dir = "")

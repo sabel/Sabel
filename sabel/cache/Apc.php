@@ -16,7 +16,8 @@ class Sabel_Cache_Apc implements Sabel_Cache_Interface
   private function __construct()
   {
     if (!extension_loaded("apc")) {
-      throw new Sabel_Exception_Runtime("apc extension not loaded.");
+      $message = __METHOD__ . "() apc extension not loaded.";
+      throw new Sabel_Exception_Runtime($message);
     }
   }
   
@@ -43,10 +44,5 @@ class Sabel_Cache_Apc implements Sabel_Cache_Interface
   public function delete($key)
   {
     apc_delete($key);
-  }
-  
-  public function isReadable($key)
-  {
-    return ($this->read($key) !== null);
   }
 }
