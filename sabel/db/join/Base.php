@@ -116,7 +116,7 @@ class Sabel_Db_Join_Base extends Sabel_Object
   protected function _getJoinQuery(Sabel_Db_Statement $stmt)
   {
     $name  = $stmt->quoteIdentifier($this->tblName);
-    $query = array(" {$this->joinType} JOIN $name ");
+    $query = array(" {$this->joinType} JOIN {$name} ");
     
     if ($this->hasAlias()) {
       $name = $stmt->quoteIdentifier(strtolower($this->aliasName));

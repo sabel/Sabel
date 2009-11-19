@@ -19,10 +19,9 @@ class Sabel_Db_Metadata
       return self::$metadata[$tblName];
     }
     
-    $className = "Schema_" . convert_to_modelname($tblName);
-    
-    if (Sabel::using($className)) {
+    if (self::schemaClassExists($tblName)) {
       $cols = array();
+      $className = "Schema_" . convert_to_modelname($tblName);
       $schemaClass = new $className();
       foreach ($schemaClass->get() as $colName => $info) {
         $co = new Sabel_Db_Metadata_Column();
@@ -42,6 +41,12 @@ class Sabel_Db_Metadata
     }
     
     return self::$metadata[$tblName] = $tblSchema;
+  }
+  
+  public static function schemaClassExists($tblName)
+  {
+    $className = "Schema_" . convert_to_modelname($tblName);
+    return Sabel::using($className);
   }
   
   public static function getTableList($connectionName = "default")

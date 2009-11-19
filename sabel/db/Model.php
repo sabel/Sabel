@@ -96,7 +96,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       $this->_doSelectOne($this);
     }
   }
-
+  
   /**
    * @param string $mdlName
    *

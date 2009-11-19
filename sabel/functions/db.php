@@ -31,6 +31,11 @@ function is_model($model)
   return ($model instanceof Sabel_Db_Model);
 }
 
+function db_query($sql, $connectionName = "default")
+{
+  return Sabel_Db::createStatement($connectionName)->setQuery($sql)->execute();
+}
+
 function finder($mdlName, $projection = null)
 {
   return new Sabel_Db_Finder($mdlName, $projection);
