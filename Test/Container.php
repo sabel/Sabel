@@ -22,7 +22,6 @@ class Test_Container extends SabelTestCase
    */
   public function setUp()
   {
-    Sabel_Container::clearAllConfigs();
   }
   
   /**
@@ -34,37 +33,13 @@ class Test_Container extends SabelTestCase
   }
   
   /**
-   * createContainerWithName
-   *
-   * @test
-   */
-  public function createContainerWithName()
-  {
-    Sabel_Container::addConfig("ctest", new Sabel_CTest_Config());
-    $instance = Sabel_Container::load("Sabel_CTest_Controller", "ctest");
-    $this->assertTrue($instance instanceof Sabel_CTest_Controller_Interface);
-  }
-  
-  /**
-   * createContainerWithDefault 
-   *
-   * @test
-   */
-  public function createContainerWithDefault()
-  {
-    Sabel_Container::addConfig("default", new Sabel_CTest_Config());
-    $instance = Sabel_Container::load("Sabel_CTest_Controller");
-    $this->assertTrue($instance instanceof Sabel_CTest_Controller_Interface);
-  }
-  
-  /**
    * @test
    */
   public function createContainerWithInvalidConfiguration()
   {
     try {
       $container = Sabel_Container::create(new StdClass());
-    } catch (Sabel_Container_Exception_InvalidConfiguration $e) {
+    } catch (Sabel_Exception_InvalidArgument $e) {
       $this->assertTrue(true);
       return;
     }

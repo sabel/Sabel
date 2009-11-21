@@ -14,12 +14,11 @@ class Test_Aspect_SimpleUsage extends SabelTestCase
   
   public function setUp()
   {
-    Sabel_Container::addConfig("test_simpleusage", new Sabel_Test_Aspect_ConfigSimple());
   }
   
   public function testUsageConfig()
   {
-    $updatable = load("Sabel_Test_Aspect_SimpleUsage_Person", "test_simpleusage");
+    $updatable = load("Sabel_Test_Aspect_SimpleUsage_Person", new Sabel_Test_Aspect_ConfigSimple());
     
     $this->assertTrue($updatable instanceof Sabel_Aspect_Proxy);
     $updatable->updateState();
