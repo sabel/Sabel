@@ -20,7 +20,7 @@ final class Sabel
   /**
    * @var int
    */
-  private static $readableFileCount = 0;
+  private static $readableFilesNum = 0;
   
   /**
    * @var array
@@ -179,15 +179,16 @@ final class Sabel
   {
     $path  = "sabel" . DIRECTORY_SEPARATOR . "Sabel";
     $cache = Sabel_Util_VariableCache::create($path);
+    
     if ($files = $cache->read("readableFiles")) {
       self::$readableFiles = $files;
-      self::$readableFileCount = count($files);
+      self::$readableFilesNum = count($files);
     }
   }
   
   public static function shutdown()
   {
-    if (self::$readableFileCount !== count(self::$readableFiles)) {
+    if (self::$readableFilesNum !== count(self::$readableFiles)) {
       $path  = "sabel" . DIRECTORY_SEPARATOR . "Sabel";
       $cache = Sabel_Util_VariableCache::create($path);
       $cache->write("readableFiles", self::$readableFiles);

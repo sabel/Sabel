@@ -1,3 +1,7 @@
+2009-11-21  Ebin <yutaka@ebine.org>
+
+	* lib/Cache.php: lib/cache（キャッシュユーティリティ）を作成。
+
 2009-11-19  Ebin <yutaka@ebine.org>
 
 	* sabel/Functions.php: 削除し、sabel/functions/core.phpと

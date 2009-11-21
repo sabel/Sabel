@@ -37,7 +37,7 @@ final class Sabel_Container_Bind
   
   public function hasSetter()
   {
-    return (!empty($this->setter));
+    return !empty($this->setter);
   }
   
   public function getSetter()

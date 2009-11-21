@@ -16,7 +16,10 @@ class Sabel_Util_VariableCache
   private $filePath = array();
   private $data = array();
   
-  private function __construct() {}
+  private function __construct()
+  {
+    
+  }
   
   public static function create($_filePath)
   {
@@ -36,6 +39,7 @@ class Sabel_Util_VariableCache
     $instance->data = $__var_cache;
     
     self::$instances[$_filePath] = $instance;
+    
     return $instance;
   }
   
