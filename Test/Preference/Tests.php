@@ -3,6 +3,7 @@
 require_once ("Test/Preference/Base.php");
 require_once ("Test/Preference/Xml.php");
 require_once ("Test/Preference/Database.php");
+require_once ("Test/Preference/Memcache.php");
 
 /**
  * test suite for Preference package
@@ -23,6 +24,7 @@ class Test_Preference_Tests
     
     $suite->addTest(Test_Preference_Xml::suite());
     $suite->addTest(Test_Preference_Database::suite());
+    $suite->addTest(Test_Preference_Memcache::suite());
     
     return $suite;
   }
