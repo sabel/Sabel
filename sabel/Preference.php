@@ -12,6 +12,13 @@
  */
 class Sabel_Preference
 {
+  const TYPE_INT     = "int";
+  const TYPE_STRING  = "string";
+  const TYPE_FLOAT   = "float";
+  const TYPE_BOOLEAN = "boolean";
+  const TYPE_ARRAY   = "array";
+  const TYPE_OBJECT  = "object";
+
   private $backend = null;
 
   public static function create(Sabel_Config $config = null)
@@ -49,13 +56,44 @@ class Sabel_Preference
     $this->backend = $backend;
   }
 
+  /**
+   * check backend contains a preference.
+   *
+   * @param $key string
+   */
+  public function contains($key)
+  {
+    return $this->backend->has($key);
+  }
+
+  public function getAll()
+  {
+    $map = array();
+
+    foreach ($this->backend->getAll() as $key => $set) {
+      $map[$key] = $this->convertType($set["value"], $set["type"]);
+    }
+
+    return $map;
+  }
+
+  private function convertType($value, $type)
+  {
+    switch ($type) {
+      case self::TYPE_INT:     return (int)     $value;
+      case self::TYPE_FLOAT:   return (float)   $value;
+      case self::TYPE_STRING:  return (string)  $value;
+      case self::TYPE_BOOLEAN: return (boolean) $value;
+    }
+  }
+
   public function setInt($key, $value)
   {
     if (!is_int($value)) {
       $value = (int) $value;
     }
 
-    $this->backend->set($key, (int) $value);
+    $this->backend->set($key, $value, self::TYPE_INT);
   }
 
   public function getInt($key, $default = null)
@@ -64,7 +102,7 @@ class Sabel_Preference
       $default = (int) $default;
     }
 
-    $result = $this->get($key, $default);
+    $result = $this->get($key, $default, self::TYPE_INT);
 
     if (!is_int($result)) {
       return (int) $result;
@@ -73,13 +111,47 @@ class Sabel_Preference
     return $result;
   }
 
+  public function setFloat($key, $value)
+  {
+    if (!is_float($value)) {
+      $value = (float) $value;
+    }
+
+    $this->backend->set($key, $value, self::TYPE_FLOAT);
+  }
+
+  public function getFloat($key, $default = null)
+  {
+    if ($default !== null && !is_float($default)) {
+      $default = (float) $default;
+    }
+
+    $result = $this->get($key, $default, self::TYPE_FLOAT);
+
+    if (!is_float($result)) {
+      return (float) $result;
+    }
+
+    return $result;
+  }
+
+  public function setDouble($key, $value)
+  {
+    $this->setFloat($key, $vlaue);
+  }
+
+  public function getDouble($key, $default = null)
+  {
+    $this->getFloat($key, $default);
+  }
+
   public function setString($key, $value)
   {
     if (!is_string($value)) {
       $value = (string) $value;
     }
 
-    $this->backend->set($key, $value);
+    $this->backend->set($key, $value, self::TYPE_STRING);
   }
 
   public function getString($key, $default = null)
@@ -88,7 +160,7 @@ class Sabel_Preference
       $default = (string) $default;
     }
 
-    $result = $this->get($key, $default);
+    $result = $this->get($key, $default, self::TYPE_STRING);
 
     if (!is_string($result)) {
       return (string) $result;
@@ -97,18 +169,28 @@ class Sabel_Preference
     return $result;
   }
 
-  private function get($key, $default)
+  public function setBoolean($key, $value)
   {
-    if ($default !== null) {
-      $this->backend->set($key, $default);
-      return $default;
+    if (!is_bool($value)) {
+      $value = (bool) $value;
     }
 
-    if (!$this->backend->has($key) && $default === null) {
-      throw new Sabel_Exception_Runtime("preference ${key} not found");
+    $this->backend->set($key, $value, self::TYPE_BOOLEAN);
+  }
+
+  public function getBoolean($key, $default = null)
+  {
+    if ($default !== null && !is_bool($default)) {
+      $default = (boolean) $default;
     }
 
-    return $this->backend->get($key);
+    $result = $this->get($key, $default, self::TYPE_BOOLEAN);
+
+    if (!is_bool($result)) {
+      return (boolean) $result;
+    }
+
+    return $result;
   }
 
   /**
@@ -126,5 +208,19 @@ class Sabel_Preference
 
       return $removedValue;
     }
+  }
+
+  private function get($key, $default, $type)
+  {
+    if ($default !== null) {
+      $this->backend->set($key, $default, $type);
+      return $default;
+    }
+
+    if (!$this->backend->has($key) && $default === null) {
+      throw new Sabel_Exception_Runtime("preference ${key} not found");
+    }
+
+    return $this->backend->get($key);
   }
 }

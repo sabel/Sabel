@@ -14,8 +14,9 @@
  */
 interface Sabel_Preference_Backend
 {
-  public function set($key, $value);
+  public function set($key, $value, $type);
   public function has($key);
   public function get($key);
+  public function getAll();
   public function delete($key);
 }

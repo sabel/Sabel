@@ -31,6 +31,68 @@ class Test_Preference_Base extends SabelTestCase
     $this->assertEquals(2, $this->pref->getInt("test2"));
   }
 
+  public function testBoolean()
+  {
+    $this->pref->setBoolean("bool1", 1);
+    $this->assertTrue($this->pref->getBoolean("bool1"));
+
+    $this->pref->setBoolean("bool2", 0);
+    $this->assertFalse($this->pref->getBoolean("bool2"));
+
+    $this->assertTrue($this->pref->getBoolean("bool3", true));
+    $this->assertTrue($this->pref->getBoolean("bool4", "true"));
+    $this->assertTrue($this->pref->getBoolean("bool5", "t"));
+    $this->assertTrue($this->pref->getBoolean("bool6", 1.0));
+    $this->assertTrue($this->pref->getBoolean("bool7", "false"));
+    $this->assertTrue($this->pref->getBoolean("bool8", "f"));
+
+    $this->assertFalse($this->pref->getBoolean("bool9", false));
+    $this->assertFalse($this->pref->getBoolean("bool10", 0.0));
+  }
+
+  public function testGetAll()
+  {
+    $this->pref->setInt("test", 1);
+    $this->pref->setString("test1", "str");
+    $this->pref->setBoolean("test2", false);
+    $this->pref->setFloat("test3", 1.2);
+
+    $result = $this->pref->getAll();
+
+    $this->assertTrue(is_int($result["test"]));
+    $this->assertTrue(is_string($result["test1"]));
+    $this->assertTrue(is_bool($result["test2"]));
+    $this->assertTrue(is_float($result["test3"]));
+
+    $this->assertEquals(1,     $result["test"]);
+    $this->assertEquals("str", $result["test1"]);
+    $this->assertEquals(false, $result["test2"]);
+    $this->assertEquals(1.2,   $result["test3"]);
+  }
+
+  public function testDelete()
+  {
+    $this->pref->setInt("test", 1);
+
+    $this->pref->delete("test");
+
+    try {
+      $this->pref->getInt("test");
+    } catch (Sabel_Exception_Runtime $e) {
+      return;
+    }
+
+    $this->fail();
+  }
+
+  public function testContains()
+  {
+    $this->pref->setInt("test", 1);
+
+    $this->assertTrue($this->pref->contains("test"));
+    $this->assertFalse($this->pref->contains("test1"));
+  }
+
   public function testGetUndefinedKeyWithNotDefault()
   {
     try {

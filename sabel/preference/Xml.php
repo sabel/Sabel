@@ -67,12 +67,12 @@ class Sabel_Preference_Xml implements Sabel_Preference_Backend
     $this->rootNode = $this->document->load("XML", $this->filepath);
   }
 
-  public function set($key, $value)
+  public function set($key, $value, $type)
   {
     if ($this->rootNode->$key->length === 0) {
-      $this->rootNode->addChild($key)->at("value", $value);
+      $this->rootNode->addChild($key)->at("value", $value)->at("type", $type);
     } else {
-      $this->rootNode->$key->at("value", $value);
+      $this->rootNode->$key->at("value", $value)->at("type", $type);
     }
 
     $this->document->save();
@@ -80,6 +80,10 @@ class Sabel_Preference_Xml implements Sabel_Preference_Backend
 
   public function has($key)
   {
+    if (!isset($this->rootNode->$key)) {
+      return false;
+    }
+
     return ($this->rootNode->$key->length !== 0);
   }
 
@@ -88,6 +92,18 @@ class Sabel_Preference_Xml implements Sabel_Preference_Backend
     if ($this->has($key)) {
       return $this->rootNode->$key->at("value");
     }
+  }
+
+  public function getAll()
+  {
+    $map = array();
+
+    foreach ($this->rootNode->getChildren() as $child) {
+      $map[$child->tagName] = array("value" => $child->at("value"),
+                                    "type" => $child->at("type"));
+    }
+
+    return $map;
   }
 
   public function delete($key)
