@@ -2,6 +2,7 @@
 
 require_once ("Test/Preference/Base.php");
 require_once ("Test/Preference/Xml.php");
+require_once ("Test/Preference/Database.php");
 
 /**
  * test suite for Preference package
@@ -21,6 +22,7 @@ class Test_Preference_Tests
     $suite = new PHPUnit_Framework_TestSuite();
     
     $suite->addTest(Test_Preference_Xml::suite());
+    $suite->addTest(Test_Preference_Database::suite());
     
     return $suite;
   }

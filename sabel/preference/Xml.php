@@ -100,7 +100,7 @@ class Sabel_Preference_Xml implements Sabel_Preference_Backend
 
     foreach ($this->rootNode->getChildren() as $child) {
       $map[$child->tagName] = array("value" => $child->at("value"),
-                                    "type" => $child->at("type"));
+                                    "type"  => $child->at("type"));
     }
 
     return $map;
