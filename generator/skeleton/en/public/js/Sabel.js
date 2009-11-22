@@ -3461,15 +3461,25 @@ Sabel.Widget.Calendar.prototype = {
 	OneDay: (1000 * 60 * 60 * 24),
 	WeekDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
 
-	date:        null,
-	rootElement: null,
-	options:     null,
+	date:          null,
+	targetElement: null,
+	rootElement:   null,
+	options:       null,
 
-	initialize: function(rootElement, options)
+	initialize: function(targetElement, options)
 	{
 		this.date = new Date();
-		this.rootElement = Sabel.get(rootElement);
+		this.targetElement = Sabel.get(targetElement);
+		var rootElement = new Sabel.Element("div");
+		var childElement = new Sabel.Element("div");
+		childElement.addClass("sbl_calendarFrame");
+		rootElement.appendChild(childElement);
+		this.rootElement = rootElement;
 		this.options = options || {};
+
+		this.rootElement.hide();
+		this.targetElement.getParentNode().insertAfter(this.rootElement, this.targetElement);
+		this.targetElement.observe("click", this.clickHandler, false, this);
 	},
 
 	prevMonth: function()
@@ -3502,26 +3512,54 @@ Sabel.Widget.Calendar.prototype = {
 		}
 		var opt = this.options; // alias
 
+		var d = this.date; // alias
+		var cN = target.className.split(' ')[0];
 		if (opt.callback) {
-			var d = this.date; // alias
-			var cN = target.className.split(' ')[0];
 			opt.callback([d.getFullYear(), d.getMonth()+1, cN.substr(3)]);
+		} else {
+			this.targetElement.value = new Sabel.String("#{year}/#{month}/#{day}").format({
+				year: d.getFullYear(),
+				month: d.getMonth() + 1,
+				day: cN.substr(3)
+			});
 		}
 
 		var selected = Sabel.Dom.getElementsByClassName("selected", this.rootElement, true);
 		if (selected.length > 0)
-		Sabel.Element.removeClass(selected[0], "selected");
+			Sabel.Element.removeClass(selected[0], "selected");
 
 		Sabel.Element.addClass(target, "selected");
 
 		this.rootElement.hide();
 	},
-
-	render: function(year, month, day)
+	
+	clickHandler: function()
 	{
-		year  = year || this.date.getFullYear();
-		month = (month > 0) ? month - 1 : this.date.getMonth();
-		var date = this.date = new Date(year, month, 1);
+		if (this.rootElement.getFirstChild().innerHTML === "") {
+			var date = this.targetElement.value || this.options.date || "";
+			date = new Date(date.replace("-", "/", "g"));
+			if (isNaN(date.getTimezoneOffset()) === false) {
+				this.render(date);
+			} else {
+				this.render();
+			}
+		} else {
+			this.show();
+		}
+	},
+
+	render: function(date)
+	{
+		var year, month, day;
+		if (date !== undefined) {
+			year  = date.getFullYear();
+			month = date.getMonth();
+			day   = date.getDate();
+		} else {
+			year  = this.date.getFullYear();
+			month = this.date.getMonth();
+		}
+		date = this.date = new Date(year, month, 1);
 
 		var tmpDate = new Date();
 		tmpDate.setTime(date.getTime() - (this.OneDay * date.getDay()));
@@ -3529,7 +3567,6 @@ Sabel.Widget.Calendar.prototype = {
 		var time = tmpDate.getTime();
 		var html = [];
 
-		html.push('<div class="sbl_calendarFrame">');
 		html.push('  <div class="sbl_calendar">');
 		html.push('    <div class="sbl_cal_header">');
 		html.push('      <a class="sbl_page_l">&#160;</a>');
@@ -3562,9 +3599,8 @@ Sabel.Widget.Calendar.prototype = {
 		html.push('    </div>');
 		html.push('  </div>');
 		html.push('  <a class="sbl_cal_close">Close</a>');
-		html.push('</div>');
 
-		this.rootElement.innerHTML = html.join("\n");
+		this.rootElement.getFirstChild().innerHTML = html.join("\n");
 		this.rootElement.show();
 
 		var find = Sabel.Dom.getElementsByClassName;
@@ -3583,7 +3619,14 @@ Sabel.Widget.Calendar.prototype = {
 		Sabel.Element.observe(el, "mouseout", Sabel.Function.bind(this.mouseOut, this));
 		Sabel.Element.observe(el, "mousedown", Sabel.Function.bindWithEvent(this.mouseDown, this));
 
-		if (day > 0) this.mouseDown(find("day"+day, this.rootElement)[0]);
+		if (day !== undefined) {
+			var selected = Sabel.Dom.getElementsByClassName("selected", this.rootElement, true);
+			if (selected.length > 0)
+				Sabel.Element.removeClass(selected[0], "selected");
+
+			Sabel.Element.addClass(find("day"+day, this.rootElement)[0], "selected");
+		}
+
 		this.show();
 	},
 
