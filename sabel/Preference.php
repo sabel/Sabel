@@ -193,6 +193,62 @@ class Sabel_Preference
     return $result;
   }
 
+  public function setArray($key, $value)
+  {
+    if (!is_array($value)) {
+      throw new Sabel_Exception_Runtime("setArray value must be an array type");
+    }
+
+    $this->backend->set($key, serialize($value), self::TYPE_ARRAY);
+  }
+
+  public function getArray($key, $default = null)
+  {
+    if ($default !== null && !is_array($default)) {
+      throw new Sabel_Exception_Runtime("setArray value must be an array type");
+    }
+
+    if ($default !== null) {
+      $this->setArray($key, $default);
+
+      return $default;
+    }
+
+    if (!$this->backend->has($key) && $default === null) {
+      throw new Sabel_Exception_Runtime("preference ${key} not found");
+    }
+
+    return unserialize($this->backend->get($key));
+  }
+
+  public function setObject($key, $value)
+  {
+    if (!is_object($value)) {
+      throw new Sabel_Exception_Runtime("setObject value must be an object type");
+    }
+
+    $this->backend->set($key, base64_encode(serialize($value)), self::TYPE_OBJECT);
+  }
+
+  public function getObject($key, $default = null)
+  {
+    if ($default !== null && !is_object($default)) {
+      throw new Sabel_Exception_Runtime("setObject value must be an object type");
+    }
+
+    if ($default !== null) {
+      $this->setObject($key, $default);
+
+      return $default;
+    }
+
+    if (!$this->backend->has($key) && $default === null) {
+      throw new Sabel_Exception_Runtime("preference ${key} not found");
+    }
+
+    return unserialize(base64_decode($this->backend->get($key)));
+  }
+
   /**
    * delete preference
    *

@@ -70,6 +70,43 @@ class Test_Preference_Base extends SabelTestCase
     $this->assertEquals(1.2,   $result["test3"]);
   }
 
+  public function testArrayType()
+  {
+    $obj = new StdClass();
+    $obj->a = "a";
+    $obj->b = 0;
+    $obj->c = 1.1;
+    $obj->d = false;
+    $obj->obj = new StdClass();
+    $obj->array = array(0, 1, 2, array(1, 2, 3));
+
+    $assertValue = array("test", 0, 1, 1.0, false, true,
+                         array("key" => "value", 0 => 1), array(0, 1, 2),
+                         new StdClass(), $obj);
+
+    $this->pref->setArray("test", $assertValue);
+    $this->assertEquals($assertValue, $this->pref->getArray("test"));
+  }
+
+  public function testObjectType()
+  {
+    $obj = new TestForObjectType();
+
+    $this->pref->setObject("test", $obj);
+
+    $this->assertEquals($obj, $this->pref->getObject("test"));
+  }
+  
+  public function testObjectTypeWithDefault()
+  {
+    $obj = new TestForObjectType();
+
+    $obj2 = $this->pref->getObject("test", $obj);
+
+    $this->assertEquals($obj, $this->pref->getObject("test"));
+    $this->assertEquals($obj, $obj2);
+  }
+
   public function testDelete()
   {
     $this->pref->setInt("test", 1);
@@ -103,5 +140,24 @@ class Test_Preference_Base extends SabelTestCase
     }
 
     $this->fail();
+  }
+}
+
+class TestForObjectType
+{
+  private $name = "string";
+  private $age = 11;
+  private $height = 192.1;
+
+  private $composite;
+
+  public function __construct()
+  {
+    $this->composite = new StdClass();
+  }
+
+  public function getName()
+  {
+    return $this->name;
   }
 }
