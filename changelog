@@ -1,3 +1,7 @@
+2009-11-22  MoriReo <mori.reo@gmail.com>
+
+	* sabe/Preferenceパッケージを追加。
+
 2009-11-21  Ebin <yutaka@ebine.org>
 
 	* lib/Cache.php: lib/cache（キャッシュユーティリティ）を作成。
