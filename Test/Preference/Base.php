@@ -49,6 +49,15 @@ class Test_Preference_Base extends SabelTestCase
     $this->assertFalse($this->pref->getBoolean("bool9", false));
     $this->assertFalse($this->pref->getBoolean("bool10", 0.0));
   }
+  
+  public function testFloat()
+  {
+    $this->pref->setFloat("float", 1.0);
+    $this->assertEquals(1.0, $this->pref->getFloat("float"));
+    
+    $this->assertEquals(1.1, $this->pref->getFloat("float2", 1.1));
+    $this->assertEquals(1.1, $this->pref->getFloat("float2"));
+  }
 
   public function testGetAll()
   {
