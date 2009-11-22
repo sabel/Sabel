@@ -2,9 +2,14 @@
   padding: 16px 1px 1px 1px;
   border: 1px solid #444;
   background: #999 url("../images/js/calendarFrameBg.gif") repeat-x 0 0;
-  position: relative;
+  position: absolute;
   width: 218px;
   line-height: 1.5;
+/*
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+*/
 }
 
 .sbl_calendarFrame a.sbl_cal_close {
@@ -78,14 +83,6 @@
   cursor: pointer;
 }
 
-.sbl_calendar .selected {
-  background-color: #b99068;
-}
-
-.sbl_calendar .hover {
-  background-color: #decebe;
-}
-
 .sbl_calendar .sbl_cal_weekdays div,
 .sbl_calendar div.selectable,
 .sbl_calendar div.nonselectable {
@@ -111,6 +108,18 @@
 
 .sbl_calendar div.nonselectable {
   color: #bbb;
+}
+
+.sbl_calendar .sbl_cal_days div {
+	background-color: #ffffff;
+}
+
+.sbl_calendar .selected {
+  background-color: #b99068;
+}
+
+.sbl_calendar .hover {
+  background-color: #decebe;
 }
 
 .sbl_calendar div.saturday {

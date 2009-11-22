@@ -2524,7 +2524,7 @@ Sabel.Event = function(element, eventName, handler, useCapture, scope) {
 	this.eventName  = eventName;
 	this.defHandler = handler;
 	this.handler    = function(evt) {
-		handler.call(scope || this, evt || window.event);
+		handler.call(scope || element, evt || window.event);
 	};
 	this.useCapture = useCapture;
 	this.isActive   = false;
@@ -3482,31 +3482,33 @@ Sabel.Widget.Calendar.prototype = {
 		this.targetElement.observe("click", this.clickHandler, false, this);
 	},
 
-	prevMonth: function()
+	prevMonth: function(evt)
 	{
 		this.date.setMonth(this.date.getMonth() - 1);
 		this.render();
+		Sabel.Event.preventDefault(evt);
 	},
 
-	nextMonth: function()
+	nextMonth: function(evt)
 	{
 		this.date.setMonth(this.date.getMonth() + 1);
 		this.render();
+		Sabel.Event.preventDefault(evt);
 	},
 
 	mouseOver: function(evt)
 	{
-		Sabel.Element.addClass(evt.target, "hover");
+		Sabel.Element.addClass(Sabel.Event.getTarget(evt), "hover");
 	},
 
 	mouseOut: function(evt)
 	{
-		Sabel.Element.removeClass(evt.target, "hover");
+		Sabel.Element.removeClass(Sabel.Event.getTarget(evt), "hover");
 	},
 
-	mouseDown: function(e)
+	mouseDown: function(evt)
 	{
-		var target = e.target;
+		var target = Sabel.Event.getTarget(evt);
 		if (Sabel.Element.hasClass(target, 'selectable') === false) {
 			return;
 		}
