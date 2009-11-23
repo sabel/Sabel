@@ -1,6 +1,10 @@
+2009-11-23  MoriReo <mori.reo@gmail.com>
+
+	* sabel/Container.php: 設定クラスのbind->toにインスタンスを指定可能に変更。
+
 2009-11-22  MoriReo <mori.reo@gmail.com>
 
-	* sabe/Preferenceパッケージを追加。
+	* sabel/Preferenceパッケージを追加。
 
 2009-11-21  Ebin <yutaka@ebine.org>
 
