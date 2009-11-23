@@ -1,6 +1,7 @@
 2009-11-23  hamaco  <hamanaka.kazuhiro@gmail.com>
 
-	* Sabel.js: Sabel.Widget.Calendarを色々と改善。
+	* Sabel.js (Sabel.Widget.Calendar): 色々と改善。
+	* Sabel.js (Sabel.Element): insertPreviousSibling, insertNextSiblingメソッド追加。
 
 2009-11-23  MoriReo <mori.reo@gmail.com>
 
@@ -61,5 +62,5 @@
 
 2009-11-09  hamaco  <hamanaka.kazuhiro@gmail.com>
 
-	* Sabel.js: Sabel.Event.getTargetの返り値をSabel.Elementに変更
+	* Sabel.js (Sabel.Event): getTargetメソッドの返り値をSabel.Elementに変更
 
