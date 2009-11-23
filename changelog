@@ -1,10 +1,15 @@
+2009-11-23  hamaco  <hamanaka.kazuhiro@gmail.com>
+
+	* Sabel.js: Sabel.Widget.Calendarを色々と改善。
+
 2009-11-23  MoriReo <mori.reo@gmail.com>
 
 	* sabel/Container.php: 設定クラスのbind->toにインスタンスを指定可能に変更。
 
+
 2009-11-22  MoriReo <mori.reo@gmail.com>
 
-	* sabel/Preferenceパッケージを追加。
+	* sabel/Preference: パッケージを追加。
 
 2009-11-21  Ebin <yutaka@ebine.org>
 
@@ -54,7 +59,7 @@
 
 	* sabel/Functions.php: is_ipaddr()関数の正規表現を修正
 
-2009-11-09  Hamaco  <hamanaka.kazuhiro@gmail.com>
+2009-11-09  hamaco  <hamanaka.kazuhiro@gmail.com>
 
 	* Sabel.js: Sabel.Event.getTargetの返り値をSabel.Elementに変更
 
