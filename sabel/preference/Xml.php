@@ -109,8 +109,8 @@ class Sabel_Preference_Xml implements Sabel_Preference_Backend
   public function delete($key)
   {
     if ($this->has($key)) {
-      return $this->rootNode->$key = null;
       $this->document->save();
+      return $this->rootNode->$key = null;
     }
   }
 }
