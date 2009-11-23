@@ -3465,6 +3465,8 @@ Sabel.Widget.Calendar.prototype = {
 	targetElement: null,
 	rootElement:   null,
 	options:       null,
+	
+	selectBox: null,
 
 	initialize: function(targetElement, options)
 	{
@@ -3543,16 +3545,26 @@ Sabel.Widget.Calendar.prototype = {
 			if (isNaN(date.getTimezoneOffset()) === false) {
 				this.render(date);
 			} else {
-				this.render();
+				this.render(new Date());
 			}
 		} else {
 			this.show();
 		}
 	},
+	
+	_changeDate: function()
+	{
+		var date = new Array();
+		Sabel.Array.each(this.selectBox, function(el) {
+			date.push(el.value);
+		});
+		date.push("1");
+		this.render(new Date(date.join("/")));
+	},
 
 	render: function(date)
 	{
-		var year, month, day;
+		var year, month, day, i;
 		if (date !== undefined) {
 			year  = date.getFullYear();
 			month = date.getMonth();
@@ -3569,20 +3581,44 @@ Sabel.Widget.Calendar.prototype = {
 		var time = tmpDate.getTime();
 		var html = [];
 
-		html.push('  <div class="sbl_calendar">');
-		html.push('    <div class="sbl_cal_header">');
-		html.push('      <a class="sbl_page_l">&#160;</a>');
-		html.push('      <span>&#160;' + year + '年' + (month+1) + '月&#160;</span>');
-		html.push('      <a class="sbl_page_r">&#160;</a>');
-		html.push('    </div>');
-		html.push('    <div class="sbl_cal_weekdays">');
+		html.push('<div class="sbl_calendar">');
+		html.push('  <div class="sbl_cal_header">');
+		html.push('    <a class="sbl_page_l">&#160;</a>');
+		if (this.options.useSelectBox === true) {
+			var yearSelect = new Array();
+			yearSelect.push("<select>");
+			for (i = 2000; i < 2020; ++i) {
+				if (i === year) {
+					yearSelect.push('<option value="' + i + '" selected="selected">' + i + '</option>');
+				} else {
+					yearSelect.push('<option value="' + i + '">' + i + '</option>');
+				}
+			}
+			yearSelect.push("</select>");
+			var monthSelect = new Array();
+			monthSelect.push("<select>");
+			for (i = 1; i <= 12; ++i) {
+				if (i === month + 1) {
+					monthSelect.push('<option value="' + i + '" selected="selected">' + i + '</option>');
+				} else {
+					monthSelect.push('<option value="' + i + '">' + i + '</option>');
+				}
+			}
+			monthSelect.push("</select>");
+			html.push('    <span>&#160;' + yearSelect.join("\n") + "年" + monthSelect.join("\n") + '月&#160;</span>');
+		} else {
+			html.push('    <span>&#160;' + year + '年' + (month+1) + '月&#160;</span>');
+		}
+		html.push('    <a class="sbl_page_r">&#160;</a>');
+		html.push('  </div>');
+		html.push('  <div class="sbl_cal_weekdays">');
 		for (var i=0; i<this.WeekDays.length; i++) {
 			html.push('<div>'+this.WeekDays[i]+'</div>');
 		}
-		html.push('</div>');
+		html.push('  </div>');
 
-		html.push('<div class="sbl_cal_days">');
-		for (var i=0; i<42; i++) {
+		html.push('  <div class="sbl_cal_days">');
+		for (i = 0; i < 42; i++) {
 			tmpDate.setTime(time + (this.OneDay * i));
 			var cDate = tmpDate.getDate();
 
@@ -3598,9 +3634,9 @@ Sabel.Widget.Calendar.prototype = {
 				html.push("<div class='nonselectable'>" + cDate + "</div>");
 			}
 		}
-		html.push('    </div>');
 		html.push('  </div>');
-		html.push('  <a class="sbl_cal_close">Close</a>');
+		html.push('</div>');
+		html.push('<a class="sbl_cal_close">Close</a>');
 
 		this.rootElement.getFirstChild().innerHTML = html.join("\n");
 		this.rootElement.show();
@@ -3620,6 +3656,11 @@ Sabel.Widget.Calendar.prototype = {
 		Sabel.Element.observe(el, "mouseover", Sabel.Function.bind(this.mouseOver, this));
 		Sabel.Element.observe(el, "mouseout", Sabel.Function.bind(this.mouseOut, this));
 		Sabel.Element.observe(el, "mousedown", Sabel.Function.bindWithEvent(this.mouseDown, this));
+		
+		if (this.options.useSelectBox === true) {
+			this.selectBox = Sabel.find(".sbl_cal_header select");
+			this.selectBox.observe("change", this._changeDate, false, this);
+		}
 
 		if (day !== undefined) {
 			var selected = Sabel.Dom.getElementsByClassName("selected", this.rootElement, true);

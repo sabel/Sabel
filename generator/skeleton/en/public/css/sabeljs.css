@@ -109,11 +109,11 @@
 	background-color: #ffffff;
 }
 
-.sbl_calendar .selected {
+.sbl_calendar div.selected {
   background-color: #b99068;
 }
 
-.sbl_calendar .hover {
+.sbl_calendar div.hover {
   background-color: #decebe;
 }
 
