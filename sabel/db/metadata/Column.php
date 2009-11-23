@@ -21,6 +21,53 @@ class Sabel_Db_Metadata_Column extends Sabel_Object
   public $min       = null;
   public $value     = null;
   
+  public static function create($name, array $props)
+  {
+    if (!isset($props["type"])) {
+      $message = __METHOD__ . "() must set column 'type'.";
+      throw new Sabel_Exception_Runtime($message);
+    }
+    
+    $self = new self();
+    $self->name = $name;
+    $self->type = $props["type"];
+    
+    if ($self->isNumeric()) {
+      switch ($self->type) {
+      case Sabel_Db_Type::INT:
+        $self->max = (isset($props["max"])) ? $props["max"] : PHP_INT_MAX;
+        $self->min = (isset($props["min"])) ? $props["min"] : -PHP_INT_MAX - 1;
+        break;
+      case Sabel_Db_Type::SMALLINT:
+        $self->max = (isset($props["max"])) ? $props["max"] : 32767;
+        $self->min = (isset($props["min"])) ? $props["min"] : -32768;
+        break;
+      case Sabel_Db_Type::BIGINT:
+        $self->max = (isset($props["max"])) ? $props["max"] : 9223372036854775807;
+        $self->min = (isset($props["min"])) ? $props["min"] : -9223372036854775808;
+        break;
+      case Sabel_Db_Type::FLOAT:
+        $self->max = (isset($props["max"])) ? $props["max"] : 3.4028235E+38;
+        $self->min = (isset($props["min"])) ? $props["min"] : -3.4028235E+38;
+        break;
+      case Sabel_Db_Type::DOUBLE:
+        $self->max = (isset($props["max"])) ? $props["max"] : 1.79769E+308;
+        $self->min = (isset($props["min"])) ? $props["min"] : -1.79769E+308;
+        break;
+      }
+    } elseif ($self->isString()) {
+      $self->max = (isset($props["max"])) ? $props["max"] : 255;
+      $self->min = (isset($props["min"])) ? $props["min"] : 0;
+    }
+    
+    $self->increment = (isset($props["increment"]) && $props["increment"]);
+    $self->primary   = (isset($props["primary"])   && $props["primary"]);
+    $self->nullable  = (isset($props["nullable"])  && $props["nullable"]);
+    $self->default   = (isset($props["default"])) ? $props["default"] : null;
+    
+    return $self;
+  }
+  
   public function isInt($strict = false)
   {
     if ($strict) {

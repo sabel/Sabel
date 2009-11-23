@@ -35,7 +35,7 @@ class Sabel_Db_Metadata_Table extends Sabel_Object
   
   public function __get($key)
   {
-    return $this->getColumnByName($name);
+    return $this->getColumnByName($key);
   }
   
   public function getTableName()

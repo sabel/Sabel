@@ -13,7 +13,10 @@ class Sabel_Db_Type_Manager
 {
   private static $instance = null;
   
-  private function __construct() {}
+  private function __construct()
+  {
+    
+  }
   
   public static function create()
   {
@@ -26,17 +29,21 @@ class Sabel_Db_Type_Manager
   
   public function applyType(Sabel_Db_Metadata_Column $column, $type)
   {
-    $methods = array("_int",      "_bigint", "_smallint",
-                     "_string",   "_text",   "_boolean",
-                     "_datetime", "_date",   "_double",
-                     "_float",    "_binary");
+    $methods = array(
+      "_int",      "_bigint", "_smallint",
+      "_string",   "_text",   "_boolean",
+      "_datetime", "_date",   "_double",
+      "_float",    "_binary"
+    );
     
+    $type = strtolower($type);
     foreach ($methods as $method) {
-      if ($this->$method($column, $type)) return;
+      if ($this->$method($column, $type)) {
+        return;
+      }
     }
     
     $column->type = Sabel_Db_Type::UNKNOWN;
-    return;
   }
   
   protected function _int($column, $type)
@@ -81,8 +88,10 @@ class Sabel_Db_Type_Manager
   
   protected function _string($column, $type)
   {
-    $types = array("varchar", "char", "character varying",
-                   "character", "varchar2", "cstring");
+    $types = array(
+      "varchar", "char", "character varying",
+      "character", "varchar2", "cstring"
+    );
     
     if (in_array($type, $types, true)) {
       $column->type = Sabel_Db_Type::STRING;
@@ -94,7 +103,10 @@ class Sabel_Db_Type_Manager
   
   protected function _text($column, $type)
   {
-    $types = array("text", "clob", "mediumtext", "tinytext", "nclob");
+    $types = array(
+      "text", "clob", "mediumtext",
+      "tinytext", "nclob"
+    );
     
     if (in_array($type, $types, true)) {
       $column->type = Sabel_Db_Type::TEXT;
@@ -116,8 +128,10 @@ class Sabel_Db_Type_Manager
   
   protected function _datetime($column, $type)
   {
-    $types = array("timestamp", "timestamp without time zone",
-                   "datetime" , "timestamp with time zone");
+    $types = array(
+      "timestamp", "timestamp without time zone",
+      "datetime" , "timestamp with time zone"
+    );
     
     if (in_array($type, $types, true)) {
       $column->type = Sabel_Db_Type::DATETIME;
@@ -167,9 +181,10 @@ class Sabel_Db_Type_Manager
   
   protected function _binary($column, $type)
   {
-    $type  = strtolower($type);
-    $types = array("blob",  "longblob", "mediumblob",
-                   "bytea", "varbinary", "binary");
+    $types = array(
+      "blob",  "longblob", "mediumblob",
+      "bytea", "varbinary", "binary"
+    );
     
     if (in_array($type, $types, true)) {
       $column->type = Sabel_Db_Type::BINARY;
