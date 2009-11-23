@@ -3559,7 +3559,8 @@ Sabel.Widget.Calendar.prototype = {
 			date.push(el.value);
 		});
 		date.push("1");
-		this.render(new Date(date.join("/")));
+		this.date = new Date(date.join("/"));
+		this.render();
 	},
 
 	render: function(date)
