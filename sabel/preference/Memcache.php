@@ -63,8 +63,8 @@ class Sabel_Preference_Memcache implements Sabel_Preference_Backend
     $this->memcache->set(self::ALL_KEYS, $keys);
 
     if (Sabel_Preference::TYPE_BOOLEAN == $type) {
-      if ($value === 0 || $value === false) {
-        $value = "false_false";
+      if ($value === false) {
+        $value = 0;
       }
     }
 
@@ -80,8 +80,9 @@ class Sabel_Preference_Memcache implements Sabel_Preference_Backend
   public function get($key)
   {
     $value = $this->memcache->get($this->genKey($key));
+    $type  = $this->memcache->get($this->genTypeKey($key));
 
-    if ($value === "false_false") {
+    if ($type === Sabel_Preference::TYPE_BOOLEAN && $value === 0) {
       return false;
     }
 
