@@ -1533,6 +1533,18 @@ Sabel.Element.insertAfter = function(element, newChild, refChild) {
 	return element;
 };
 
+Sabel.Element.insertPreviousSibling = function(element, sibling) {
+	element = Sabel.get(element);
+	element.parentNode.insertBefore(sibling, element);
+	return element;
+}
+
+Sabel.Element.insertNextSibling = function(element, sibling) {
+	element = Sabel.get(element);
+	element.getParentNode().insertAfter(sibling, element);
+	return element;
+}
+
 Sabel.Element.setHeight = function(element, value) {
 	element = Sabel.get(element, false);
 	if (value !== "" && typeof value === "number") value = value + "px";
@@ -3480,7 +3492,7 @@ Sabel.Widget.Calendar.prototype = {
 		this.options = options || {};
 
 		this.rootElement.hide();
-		this.targetElement.getParentNode().insertAfter(this.rootElement, this.targetElement);
+		this.targetElement.insertNextSibling(this.rootElement);
 		this.targetElement.observe("click", this.clickHandler, false, this);
 	},
 
