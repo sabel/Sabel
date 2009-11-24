@@ -9,15 +9,18 @@
  */
 class Sabel_Kvs_Memcache extends Sabel_Kvs_Abstract
 {
-  private static $instance = null;
+  private static $instances = array();
   
-  private $memcache = null;
+  /**
+   * @var Memcache
+   */
+  protected $memcache = null;
   
-  private function __construct($server, $port)
+  private function __construct($host, $port)
   {
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
-      $this->addServer($server, $port);
+      $this->addServer($host, $port);
       $this->setupKeyPrefix();
     } else {
       $message = __METHOD__ . "() memcache extension not loaded.";
@@ -25,18 +28,18 @@ class Sabel_Kvs_Memcache extends Sabel_Kvs_Abstract
     }
   }
   
-  public static function create($server = "localhost", $port = 11211)
+  public static function create($host = "localhost", $port = 11211)
   {
-    if (self::$instance === null) {
-      self::$instance = new self($server, $port);
+    if (isset(self::$instances[$host][$port])) {
+      return self::$instances[$host][$port];
     }
     
-    return self::$instance;
+    return self::$instances[$host][$port] = new self($host, $port);
   }
   
-  public function addServer($server, $port = 11211, $weight = 1)
+  public function addServer($host, $port = 11211, $weight = 1)
   {
-    $this->memcache->addServer($server, $port, true, $weight);
+    $this->memcache->addServer($host, $port, true, $weight);
   }
   
   public function read($key)
@@ -52,6 +55,9 @@ class Sabel_Kvs_Memcache extends Sabel_Kvs_Abstract
   
   public function delete($key)
   {
+    $result = $this->read($key);
     $this->memcache->delete($this->genKey($key));
+    
+    return $result;
   }
 }

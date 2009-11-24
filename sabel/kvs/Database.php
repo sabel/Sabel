@@ -38,12 +38,18 @@ class Sabel_Kvs_Database implements Sabel_Kvs_Interface
     
     try {
       if ($model = $this->fetch($key, true)) {
-        if (($timeout = (int)$model->timeout) !== 0) {
+        if (($timeout = (int)$model->timeout) === 0) {
+          $result = $model->value;
+        } else {
           if ($timeout <= time()) {
             $model->delete();
           } else {
-            $result = unserialize($model->value);
+            $result = $model->value;
           }
+        }
+        
+        if ($result !== null) {
+          $result = unserialize(str_replace("\\000", "\000", $result));
         }
       }
       
@@ -61,19 +67,21 @@ class Sabel_Kvs_Database implements Sabel_Kvs_Interface
     Sabel_Db_Transaction::activate();
     
     try {
-      if ($timeout > 0) {
+      if ($timeout !== 0) {
         $timeout = time() + $timeout;
       }
       
+      $value = str_replace("\000", "\\000", serialize($value));
+      
       if ($model = $this->fetch($key, true)) {
         $model->save(array(
-          "value"   => serialize($value),
+          "value"   => $value,
           "timeout" => $timeout
         ));
       } else {
         $this->model->insert(array(
           "key"     => $key,
-          "value"   => serialize($value),
+          "value"   => $value,
           "timeout" => $timeout,
         ));
       }
@@ -93,7 +101,12 @@ class Sabel_Kvs_Database implements Sabel_Kvs_Interface
     
     try {
       if ($model = $this->fetch($key, true)) {
-        $result = unserialize($model->value);
+        if (($timeout = (int)$model->timeout) !== 0) {
+          if ($timeout > time()) {
+            $result = unserialize(str_replace("\\000", "\000", $model->value));
+          }
+        }
+        
         $model->delete();
       }
       

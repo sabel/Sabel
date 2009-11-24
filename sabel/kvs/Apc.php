@@ -43,6 +43,9 @@ class Sabel_Kvs_Apc extends Sabel_Kvs_Abstract
   
   public function delete($key)
   {
+    $result = $this->read($key);
     apc_delete($this->genKey($key));
+    
+    return $result;
   }
 }
