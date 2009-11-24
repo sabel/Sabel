@@ -251,6 +251,8 @@ abstract class Sabel_Db_Statement extends Sabel_Object
       $message = __METHOD__ . "() argument must be a boolean.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
+    
+    return $this;
   }
   
   public function execute($bindValues = array(), $additionalParameters = array(), $query = null)

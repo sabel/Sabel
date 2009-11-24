@@ -648,6 +648,36 @@ abstract class Sabel_Db_Model extends Sabel_Object
   }
   
   /**
+   * @param mixed $arg1
+   * @param mixed $arg2
+   *
+   * @return Sabel_Db_Model[]
+   */
+  public function selectForUpdate($arg1 = null, $arg2 = null)
+  {
+    $result = null;
+    if ($this->hasMethod("beforeSelect")) {
+      $result = $this->beforeSelect("selectForUpdate");
+    }
+    
+    if ($result === null) {
+      $this->setCondition($arg1, $arg2);
+      $stmt = $this->prepareStatement(Sabel_Db_Statement::SELECT);
+      $rows = $this->prepareSelect($stmt)->forUpdate(true)->execute();
+      $result = (empty($rows)) ? array() : $this->toModels($rows);
+    }
+    
+    if ($this->hasMethod("afterSelect")) {
+      $afterResult = $this->afterSelect($result, "selectForUpdate");
+      if ($afterResult !== null) $result = $afterResult;
+    }
+    
+    if ($this->autoReinit) $this->clear();
+    
+    return $result;
+  }
+  
+  /**
    * @param array $additionalValues
    *
    * @return int
