@@ -357,12 +357,15 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     $tblName = $this->quoteIdentifier($this->table);
     $projection = $this->getProjection();
     
-    $sql = "SELECT $projection FROM "
+    $sql = "SELECT {$projection} FROM "
          . $this->quoteIdentifier($this->table)
-         . $this->join . $this->where
+         . $this->join
+         . $this->where
          . $this->createConstraintSql();
     
-    if ($this->forUpdate) $sql .= " FOR UPDATE";
+    if ($this->forUpdate) {
+      $sql .= " FOR UPDATE";
+    }
     
     return $sql;
   }
@@ -385,6 +388,7 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     }
     
     $sql .= implode(", ", $cols) . ") VALUES(" . implode(", ", $hlds) . ")";
+    
     return $sql;
   }
   

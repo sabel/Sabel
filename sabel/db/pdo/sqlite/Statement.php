@@ -21,4 +21,21 @@ class Sabel_Db_Pdo_Sqlite_Statement extends Sabel_Db_Pdo_Statement
     
     return $values;
   }
+  
+  protected function createSelectSql()
+  {
+    $tblName = $this->quoteIdentifier($this->table);
+    $projection = $this->getProjection();
+    
+    $sql = "SELECT {$projection} FROM "
+         . $this->quoteIdentifier($this->table)
+         . $this->join
+         . $this->where
+         . $this->createConstraintSql();
+    
+    // Not yet implemented
+    // if ($this->forUpdate) $sql .= " FOR UPDATE";
+    
+    return $sql;
+  }
 }
