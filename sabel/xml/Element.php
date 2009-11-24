@@ -136,7 +136,62 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this;
   }
   
-  public function insertBefore($element)
+  public function insertBefore($element, $ref = null)
+  {
+    if ($element instanceof self) {
+      $element = $element->getRawElement();
+    }
+    
+    if (empty($ref)) {
+      $this->getRawElement()->appendChild($element);
+    } else {
+      if ($ref instanceof self) {
+        $this->getRawElement()->insertBefore($element, $ref->getRawElement());
+      } else {
+        $this->getRawElement()->insertBefore($element, $ref);
+      }
+    }
+  }
+  
+  public function insertAfter($element, $ref = null)
+  {
+    if ($element instanceof self) {
+      $element = $element->getRawElement();
+    }
+    
+    if (empty($ref)) {
+      $this->getRawElement()->appendChild($element);
+    } else {
+      $nextSibling = null;
+      
+      if ($ref instanceof self) {
+        if (($_elem = $ref->getNextSibling()) !== null) {
+          $nextSibling = $_elem->getRawElement();
+        }
+      } else {
+        $_element = $ref;
+        
+        while (true) {
+          if (($_element = $_element->nextSibling) === null) {
+            break;
+          }
+          
+          if ($_element->nodeType === XML_ELEMENT_NODE) {
+            $nextSibling = $_element;
+            break;
+          }
+        }
+      }
+      
+      if ($nextSibling === null) {
+        $this->getRawElement()->appendChild($element);
+      } else {
+        $this->getRawElement()->insertBefore($element, $nextSibling);
+      }
+    }
+  }
+  
+  public function insertPreviousSibling($element)
   {
     if ($element instanceof self) {
       $element = $element->getRawElement();
@@ -148,7 +203,7 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this;
   }
   
-  public function insertAfter($element)
+  public function insertNextSibling($element)
   {
     if ($next = $this->getNextSibling()) {
       $next->insertBefore($element);

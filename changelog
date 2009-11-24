@@ -1,5 +1,10 @@
 2009-11-24  ebin <yutaka@ebine.org>
 
+	* sabel/xml/Element.php: Sabel.jsに合わせ、insertPreviousSibling,
+	insertNextSiblingメソッド実装。insertBefore, insertAfterメソッド改修。
+
+2009-11-24  ebin <yutaka@ebine.org>
+
 	* sabel/controller/Page.php: __get()と__set()をpublicに修正。
 	* sabel/cache: キャッシュクラス内部でKVSパッケージを使用するように変更。
 
@@ -19,7 +24,6 @@
 2009-11-23  MoriReo <mori.reo@gmail.com>
 
 	* sabel/Container.php: 設定クラスのbind->toにインスタンスを指定可能に変更。
-
 
 2009-11-22  MoriReo <mori.reo@gmail.com>
 
