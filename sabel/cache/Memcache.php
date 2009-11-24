@@ -11,48 +11,49 @@
  */
 class Sabel_Cache_Memcache implements Sabel_Cache_Interface
 {
-  private static $instance = null;
+  private static $instances = array();
   
-  private $memcache = null;
+  /**
+   * @var Sabel_Kvs_Memcache
+   */
+  protected $kvs = null;
   
-  private function __construct($server, $port)
+  private function __construct($host, $port)
   {
     if (extension_loaded("memcache")) {
-      $this->memcache = new Memcache();
-      $this->addServer($server, $port);
+      $this->kvs = Sabel_Kvs_Memcache::create($host, $port);
     } else {
       $message = __METHOD__ . "() memcache extension not loaded.";
       throw new Sabel_Exception_Runtime($message);
     }
   }
   
-  public static function create($server = "localhost", $port = 11211)
+  public static function create($host = "localhost", $port = 11211)
   {
-    if (self::$instance === null) {
-      self::$instance = new self($server, $port);
+    if (isset(self::$instances[$host][$port])) {
+      return self::$instances[$host][$port];
     }
     
-    return self::$instance;
+    return self::$instances[$host][$port] = new self($host, $port);
   }
   
-  public function addServer($server, $port = 11211, $weight = 1)
+  public function addServer($host, $port = 11211, $weight = 1)
   {
-    $this->memcache->addServer($server, $port, true, $weight);
+    $this->kvs->addServer($host, $port, true, $weight);
   }
   
   public function read($key)
   {
-    $result = $this->memcache->get($key);
-    return ($result === false) ? null : $result;
+    return $this->kvs->read($key);
   }
   
-  public function write($key, $value, $timeout = 0, $comp = false)
+  public function write($key, $value, $timeout = 0)
   {
-    $this->memcache->set($key, $value, $comp, $timeout);
+    $this->kvs->write($key, $value, $timeout);
   }
   
   public function delete($key)
   {
-    $this->memcache->delete($key);
+    return $this->kvs->delete($key);
   }
 }

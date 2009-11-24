@@ -13,9 +13,16 @@ class Sabel_Cache_Apc implements Sabel_Cache_Interface
 {
   private static $instance = null;
   
+  /**
+   * @var Sabel_Kvs_Apc
+   */
+  protected $kvs = null;
+  
   private function __construct()
   {
-    if (!extension_loaded("apc")) {
+    if (extension_loaded("apc")) {
+      $this->kvs = Sabel_Kvs_Apc::create();
+    } else {
       $message = __METHOD__ . "() apc extension not loaded.";
       throw new Sabel_Exception_Runtime($message);
     }
@@ -32,17 +39,16 @@ class Sabel_Cache_Apc implements Sabel_Cache_Interface
   
   public function read($key)
   {
-    $result = apc_fetch($key);
-    return ($result === false) ? null : $result;
+    return $this->kvs->read($key);
   }
   
   public function write($key, $value, $timeout = 0)
   {
-    apc_store($key, $value, $timeout);
+    $this->kvs->write($key, $value, $timeout);
   }
   
   public function delete($key)
   {
-    apc_delete($key);
+    return $this->kvs->delete($key);
   }
 }

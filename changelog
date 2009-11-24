@@ -1,5 +1,10 @@
 2009-11-24  ebin <yutaka@ebine.org>
 
+	* sabel/controller/Page.php: __get()と__set()をpublicに修正。
+	* sabel/cache: キャッシュクラス内部でKVSパッケージを使用するように変更。
+
+2009-11-24  ebin <yutaka@ebine.org>
+
 	* sabel/db/Model.php: Sabel_Db_ModelにselectForUpdateメソッド追加。
 
 2009-11-24  ebin <yutaka@ebine.org>

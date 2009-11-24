@@ -11,24 +11,15 @@
  */
 class Sabel_Cache_File implements Sabel_Cache_Interface
 {
-  private static $instance = null;
+  private static $instances = array();
   
   protected $dir = "";
   
   private function __construct($dir)
   {
-    if (empty($dir)) {
-      if (defined("CACHE_DIR_PATH")) {
-        $this->dir = CACHE_DIR_PATH;
-      } else {
-        $message = __METHOD__ . "() CACHE_DIR_PATH not defined.";
-        throw new Sabel_Exception_Runtime($message);
-      }
-    } else {
+    if (is_dir($dir)) {
       $this->dir = $dir;
-    }
-    
-    if (!is_dir($this->dir)) {
+    } else {
       $message = __METHOD__ . "() '{$path}': no such file or directory.";
       throw new Sabel_Exception_Runtime($message);
     }
@@ -36,11 +27,20 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
   
   public static function create($dir = "")
   {
-    if (self::$instance === null) {
-      self::$instance = new self($dir);
+    if (empty($dir)) {
+      if (defined("CACHE_DIR_PATH")) {
+        $dir = CACHE_DIR_PATH;
+      } else {
+        $message = __METHOD__ . "() CACHE_DIR_PATH not defined.";
+        throw new Sabel_Exception_Runtime($message);
+      }
     }
     
-    return self::$instance;
+    if (isset(self::$instances[$dir])) {
+      return self::$instances[$dir];
+    }
+    
+    return self::$instances[$dir] = new self($dir);
   }
   
   public function read($key)
@@ -74,12 +74,16 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
   
   public function delete($key)
   {
+    $result = $this->read($key);
+    
     $path = $this->getPath($key);
     if (is_file($path)) unlink($path);
+    
+    return $result;
   }
   
   protected function getPath($key)
   {
-    return $this->dir . DS . $key;
+    return $this->dir . DS . $key . ".cache";
   }
 }

@@ -19,7 +19,6 @@ class Sabel_Cache_Manager
     if (self::$initialized) return;
     
     self::$support["apc"]      = extension_loaded("apc");
-    self::$support["xcache"]   = extension_loaded("xcache");
     self::$support["memcache"] = extension_loaded("memcache");
     
     self::$initialized = true;
@@ -35,8 +34,6 @@ class Sabel_Cache_Manager
       $instance = Sabel_Cache_Null::create();
     } elseif (self::$support["apc"]) {
       $instance = Sabel_Cache_Apc::create();
-    } elseif (self::$support["xcache"]) {
-      $instance = Sabel_Cache_Xcache::create();
     } elseif (self::$support["memcache"]) {
       $instance = Sabel_Cache_Memcache::create();
     } else {

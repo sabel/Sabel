@@ -34,6 +34,6 @@ class Sabel_Cache_Null implements Sabel_Cache_Interface
   
   public function delete($key)
   {
-    
+    return null;
   }
 }

@@ -261,12 +261,12 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $this->attributes[$name] = $value;
   }
   
-  protected function __get($name)
+  public function __get($name)
   {
     return $this->getAttribute($name);
   }
   
-  protected function __set($name, $value)
+  public function __set($name, $value)
   {
     $this->setAttribute($name, $value);
   }
