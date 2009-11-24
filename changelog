@@ -1,3 +1,7 @@
+2009-11-24  ebin <yutaka@ebine.org>
+
+	* sabel/kvs: KVS(Key-Value-Store)パッケージの追加。
+
 2009-11-23  hamaco  <hamanaka.kazuhiro@gmail.com>
 
 	* Sabel.js (Sabel.Widget.Calendar): 色々と改善。
