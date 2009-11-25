@@ -105,6 +105,6 @@ abstract class Sabel_Db_Driver extends Sabel_Object
       array_walk($bindParam, create_function('&$val', 'if ($val === null) $val = "NULL";'));
     }
     
-    return str_replace(array_keys($bindParam), $bindParam, $sql);
+    return strtr($sql, $bindParam);
   }
 }
