@@ -24,6 +24,7 @@ class Sabel_Rss_Writer extends Sabel_Object
     "encoding"    => "UTF-8",
     "language"    => "en",
     "home"        => "",
+    "image"       => array(),
     "rss"         => "",
     "title"       => "",
     "description" => "",
@@ -62,9 +63,37 @@ class Sabel_Rss_Writer extends Sabel_Object
    *
    * @return self
    */
-  public function setInfo(array $info)
+  public function setFeedInfo(array $info)
   {
     $this->info = array_merge($this->info, $info);
+    
+    return $this;
+  }
+  
+  public function setTitle($title)
+  {
+    $this->info["title"] = $title;
+    
+    return $this;
+  }
+  
+  public function setDescription($description)
+  {
+    $this->info["description"] = $description;
+    
+    return $this;
+  }
+  
+  public function setFeedImage($imgInfo)
+  {
+    if (is_array($imgInfo)) {
+      $this->info["image"] = $imgInfo;
+    } elseif (is_string($imgInfo)) {
+      $this->info["src"] = $imgInfo;
+    } else {
+      $message = __METHOD__ . "() argument must be an array or string.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
     
     return $this;
   }
@@ -86,9 +115,22 @@ class Sabel_Rss_Writer extends Sabel_Object
    *
    * @return self
    */
-  public function addItem(array $data)
+  public function addItem(array $item)
   {
-    $this->items[] = $data;
+    if (array_isset("url", $item)) {
+      $item["link"] = $item["url"];
+    }
+    
+    if (array_isset("summary", $item)) {
+      $item["description"] = $item["summary"];
+    }
+    
+    if (!array_isset("link", $item)) {
+      $message = __METHOD__ . "() empty item url.";
+      throw new Sabel_Exception_Runtime($message);
+    }
+    
+    $this->items[] = $item;
     
     return $this;
   }
@@ -100,7 +142,7 @@ class Sabel_Rss_Writer extends Sabel_Object
    */
   public function setSummaryLength($length)
   {
-    if (preg_match('/^[1-9][0-9]*$/', $length) === 1) {
+    if (is_natural_number($length)) {
       $this->summaryLength = $length;
     } else {
       $message = __METHOD__ . "() argument must be an integer.";
@@ -135,16 +177,17 @@ class Sabel_Rss_Writer extends Sabel_Object
     }
     
     $info = $this->info;
-    if ($info["home"] === "") {
-      $info["home"] = "http://" . $_SERVER["SERVER_NAME"] . "/";
+    if (!array_isset("home", $info)) {
+      $info["home"] = "http://" . get_server_name() . "/";
     }
     
-    if ($info["updated"] === "" && isset($items[0])) {
-      $info["updated"] = $items[0]["date"];
+    if (!array_isset("updated", $info) && isset($items[0])) {
+      $info["updated"] = (isset($items[0]["date"])) ? $items[0]["date"] : now();
     }
     
     $className = "Sabel_Rss_Writer_" . $this->type;
     $instance = new $className($info);
+    
     $xml = $instance->build($items);
     
     if ($path !== null) {

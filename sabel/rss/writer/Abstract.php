@@ -22,16 +22,21 @@ abstract class Sabel_Rss_Writer_Abstract extends Sabel_Object
    */
   protected $document = null;
   
+  abstract public function build(array $items);
+  
   public function __construct(array $info)
   {
     $this->info = $info;
     
-    $this->document = new DOMDocument();
-    $this->document->preserveWhiteSpace = false;
-    $this->document->formatOutput = true;
-    $this->document->xmlVersion = $info["xmlVersion"];
-    $this->document->encoding = $info["encoding"];
+    $arg = array();
+    if (array_isset("xmlVersion", $info)) {
+      $arg["version"] = $info["xmlVersion"];
+    }
+    
+    if (array_isset("encoding", $info)) {
+      $arg["encoding"] = $info["encoding"];
+    }
+    
+    $this->document = Sabel_Xml_Document::create($arg);
   }
-  
-  abstract public function build(array $items);
 }

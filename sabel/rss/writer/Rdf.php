@@ -13,150 +13,103 @@ class Sabel_Rss_Writer_Rdf extends Sabel_Rss_Writer_Abstract
 {
   public function build(array $items)
   {
-    $rdf = $this->createRdf();
+    $rdf = $this->document->createElement("rdf:RDF");
+    $rdf->at("xmlns", "http://purl.org/rss/1.0/");
+    $rdf->at("xmlns:rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+    $rdf->at("xmlns:content", "http://purl.org/rss/1.0/modules/content/");
+    $rdf->at("xmlns:dc", "http://purl.org/dc/elements/1.1/");
+    $rdf->at("xml:lang", $this->info["language"]);
+    
+    $this->document->setDocumentElement($rdf);
+    
     $this->createChannel($rdf, $items);
     $this->createImage($rdf);
     $this->createItems($rdf, $items);
     
-    return $this->document->saveXML();
-  }
-  
-  protected function createRdf()
-  {
-    $rdf = $this->document->createElement("rdf:RDF");
-    $rdf->setAttribute("xmlns", "http://purl.org/rss/1.0/");
-    $rdf->setAttribute("xmlns:rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-    $rdf->setAttribute("xmlns:content", "http://purl.org/rss/1.0/modules/content/");
-    $rdf->setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
-    $rdf->setAttribute("xml:lang", $this->info["language"]);
-    
-    $this->document->appendChild($rdf);
-    
-    return $rdf;
+    return $this->document->toXML();
   }
   
   protected function createChannel($rdf, $items)
   {
     $info    = $this->info;
     $dom     = $this->document;
-    $channel = $dom->createElement("channel");
+    $channel = $rdf->addChild("channel");
     
-    if (isset($info["rss"])) {
+    if (array_isset("rss", $info)) {
       $channel->setAttribute("rdf:about", $info["rss"]);
     }
     
-    $title = $dom->createElement("title");
-    $title->nodeValue = htmlescape($info["title"]);
-    $channel->appendChild($title);
-  
-    $link = $dom->createElement("link");
-    $link->nodeValue = $info["home"];
-    $channel->appendChild($link);
+    $channel->addChild("title")->setNodeValue(xmlescape($info["title"]));
+    $channel->addChild("link")->setNodeValue(xmlescape($info["home"]));
     
-    if (isset($info["description"])) {
-      $desc = $dom->createElement("description");
-      $desc->nodeValue = htmlescape($info["description"]);
-      $channel->appendChild($desc);
+    if (array_isset("description", $info)) {
+      $channel->addChild("description")->setNodeValue(xmlescape($info["description"]));
     }
     
-    if (isset($info["image"])) {
-      $image = $dom->createElement("image");
-      $image->setAttribute("rdf:resource", $info["image"]["uri"]);
-      $channel->appendChild($image);
+    if (array_isset("image[src]", $info)) {
+      $channel->addChild("image")->at("rdf:resource", $info["image"]["src"]);
     }
     
-    if (isset($info["updated"])) {
-      $date = $dom->createElement("dc:date");
-      $date->nodeValue = date("c", strtotime($info["updated"]));
-      $channel->appendChild($date);
+    if (array_isset("updated", $info)) {
+      $channel->addChild("dc:date")->setNodeValue(date("c", strtotime($info["updated"])));
     }
     
-    $seq = $dom->createElement("rdf:Seq");
+    $seq = $channel->addChild("items")->addChild("rdf:Seq");
+    
     foreach ($items as $item) {
-      $li = $dom->createElement("rdf:li");
-      $li->setAttribute("rdf:resource", $item["uri"]);
-      $seq->appendChild($li);
-    }
-    
-    $items = $dom->createElement("items");
-    $items->appendChild($seq);
-    $channel->appendChild($items);
-    
-    $rdf->appendChild($channel);
-  }
-  
-  protected function createImage($rdf)
-  {
-    $info = $this->info;
-    $dom  = $this->document;
-    
-    if (isset($info["image"])) {
-      $_image = $info["image"];
-      $url = $dom->createElement("url");
-      $url->nodeValue = $_image["uri"];
-      
-      $title = $dom->createElement("title");
-      if (isset($_image["title"])) {
-        $title->nodeValue = htmlescape($_image["title"]);
-      } else {
-        $title->nodeValue = $info["title"];
-      }
-      
-      $link = $dom->createElement("link");
-      if (isset($_image["link"])) {
-        $link->nodeValue = $_image["link"];
-      } else {
-        $link->nodeValue = $info["home"];
-      }
-      
-      $image = $dom->createElement("image");
-      $image->appendChild($title);
-      $image->appendChild($url);
-      $image->appendChild($link);
-      
-      $rdf->appendChild($image);
+      $seq->addChild("rdf:li")->at("rdf:resource", $item["link"]);
     }
   }
   
   protected function createItems($rdf, $items)
   {
-    $dom = $this->document;
-    
-    foreach ($items as $_item) {
-      $item = $dom->createElement("item");
+    foreach ($items as $item) {
+      $itemElem = $rdf->addChild("item");
+      $itemElem->at("rdf:about", xmlescape($item["link"]));
       
-      if (isset($_item["title"])) {
-        $title = $dom->createElement("title");
-        $title->nodeValue = htmlescape($_item["title"]);
-        $item->appendChild($title);
+      if (array_isset("title", $item)) {
+        $itemElem->addChild("title")->setNodeValue(xmlescape($item["title"]));
       }
       
-      if (isset($_item["uri"])) {
-        $link = $dom->createElement("link");
-        $link->nodeValue = $_item["uri"];
-        $item->setAttribute("rdf:about", $_item["uri"]);
-        $item->appendChild($link);
+      $itemElem->addChild("link")->setNodeValue(xmlescape($item["link"]));
+      
+      if (array_isset("description", $item)) {
+        $itemElem->addChild("description")->setNodeValue(xmlescape($item["description"]));
       }
       
-      if (isset($_item["date"])) {
-        $date = $dom->createElement("dc:date");
-        $date->nodeValue = date("c", strtotime($_item["date"]));
-        $item->appendChild($date);
+      if (array_isset("content", $item)) {
+        $itemElem->addChild("content:encoded")->setNodeValue($item["content"], true);
       }
       
-      if (isset($_item["summary"])) {
-        $desc = $dom->createElement("description");
-        $desc->nodeValue = htmlescape($_item["summary"]);
-        $item->appendChild($desc);
+      if (array_isset("date", $item)) {
+        $itemElem->addChild("date")->setNodeValue(date("c", strtotime($item["date"])));
+      }
+    }
+  }
+  
+  protected function createImage($rdf)
+  {
+    $info = $this->info;
+    if (array_isset("image", $info)) {
+      $imgInfo = $info["image"];
+      $image = $rdf->addChild("image");
+      
+      if (array_isset("title", $imgInfo)) {
+        $image->addChild("title")->setNodeValue(xmlescape($imgInfo["title"]));
+      } elseif (array_isset("title", $info)) {
+        $image->addChild("title")->setNodeValue(xmlescape($info["title"]));
       }
       
-      if (isset($_item["content"])) {
-        $content = $dom->createElement("content:encoded");
-        $content->appendChild($dom->createCDATASection($_item["content"]));
-        $item->appendChild($content);
+      if (array_isset("src", $imgInfo)) {
+        $image->at("rdf:about", xmlescape($imgInfo["src"]));
+        $image->addChild("url")->setNodeValue(xmlescape($imgInfo["src"]));
       }
       
-      $rdf->appendChild($item);
+      if (array_isset("link", $imgInfo)) {
+        $image->addChild("link")->setNodeValue(xmlescape($imgInfo["link"]));
+      } elseif (array_isset("home", $info)) {
+        $image->addChild("link")->setNodeValue(xmlescape($info["home"]));
+      }
     }
   }
 }

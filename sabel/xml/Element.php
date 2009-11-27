@@ -92,6 +92,19 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->getNodeValue();
   }
   
+  public function getInnerContent()
+  {
+    $content = "";
+    
+    foreach ($this->getRawElement()->childNodes as $child) {
+      $doc = new DOMDocument();
+      $doc->appendChild($doc->importNode($child, true));
+      $content .= trim($doc->saveHTML());
+    }
+    
+    return $content;
+  }
+  
   public function setAttribute($name, $value)
   {
     $this->element->setAttribute($name, $value);

@@ -1,6 +1,6 @@
-2009-11-25  ebin <yutaka@ebine.org>
+2009-11-27  ebin <yutaka@ebine.org>
 
-	* sabel/db/Driver.php: SQLインジェクション対策。
+	* sabel/rss/*: rssパッケージ改修。
 
 2009-11-24  ebin <yutaka@ebine.org>
 

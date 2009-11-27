@@ -13,115 +13,81 @@ class Sabel_Rss_Writer_Rss extends Sabel_Rss_Writer_Abstract
 {
   public function build(array $items)
   {
-    $rss = $this->createRss();
+    $rss = $this->document->createElement("rss");
+    $rss->at("version", "2.0");
+    $rss->at("xmlns:dc", "http://purl.org/dc/elements/1.1/");
+    $rss->at("xmlns:content", "http://purl.org/rss/1.0/modules/content/");
+    $rss->at("xml:lang", $this->info["language"]);
+    
+    $this->document->setDocumentElement($rss);
+    
     $this->createChannel($rss);
     $this->createItems($rss, $items);
     
-    return $this->document->saveXML();
-  }
-  
-  protected function createRss()
-  {
-    $rss = $this->document->createElement("rss");
-    $rss->setAttribute("version", "2.0");
-    $rss->setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
-    $rss->setAttribute("xmlns:content", "http://purl.org/rss/1.0/modules/content/");
-    $rss->setAttribute("xml:lang", $this->info["language"]);
-    
-    $this->document->appendChild($rss);
-    
-    return $rss;
+    return $this->document->toXML();
   }
   
   protected function createChannel($rss)
   {
     $info    = $this->info;
-    $dom     = $this->document;
-    $channel = $dom->createElement("channel");
+    $channel = $rss->addChild("channel");
     
-    $title = $dom->createElement("title");
-    $title->nodeValue = htmlescape($info["title"]);
-    $channel->appendChild($title);
-  
-    $link = $dom->createElement("link");
-    $link->nodeValue = $info["home"];
-    $channel->appendChild($link);
+    $channel->addChild("title")->setNodeValue(xmlescape($info["title"]));
+    $channel->addChild("link")->setNodeValue(xmlescape($info["home"]));
     
-    if (isset($info["description"])) {
-      $desc = $dom->createElement("description");
-      $desc->nodeValue = htmlescape($info["description"]);
-      $channel->appendChild($desc);
+    if (array_isset("description", $info)) {
+      $channel->addChild("description")->setNodeValue(xmlescape($info["description"]));
     }
     
-    if (isset($info["updated"])) {
-      $date = $dom->createElement("lastBuildDate");
-      $date->nodeValue = date("r", strtotime($info["updated"]));
-      $channel->appendChild($date);
+    if (array_isset("updated", $info)) {
+      $channel->addChild("lastBuildDate")->setNodeValue(date("c", strtotime($info["updated"])));
     }
     
-    if (isset($info["image"])) {
-      $_image = $info["image"];
-      $url = $dom->createElement("url");
-      $url->nodeValue = $_image["uri"];
+    if (array_isset("image", $info)) {
+      $imgInfo = $info["image"];
+      $image = $channel->addChild("image");
       
-      $title = $dom->createElement("title");
-      if (isset($_image["title"])) {
-        $title->nodeValue = htmlescape($_image["title"]);
-      } else {
-        $title->nodeValue = $info["title"];
+      if (array_isset("title", $imgInfo)) {
+        $image->addChild("title")->setNodeValue(xmlescape($imgInfo["title"]));
+      } elseif (array_isset("title", $info)) {
+        $image->addChild("title")->setNodeValue(xmlescape($info["title"]));
       }
       
-      $link = $dom->createElement("link");
-      if (isset($_image["link"])) {
-        $link->nodeValue = $_image["link"];
-      } else {
-        $link->nodeValue = $info["home"];
+      if (array_isset("src", $imgInfo)) {
+        $image->addChild("url")->setNodeValue(xmlescape($imgInfo["src"]));
       }
       
-      $image = $dom->createElement("image");
-      $image->appendChild($title);
-      $image->appendChild($url);
-      $image->appendChild($link);
-      $channel->appendChild($image);
+      if (array_isset("link", $imgInfo)) {
+        $image->addChild("link")->setNodeValue(xmlescape($imgInfo["link"]));
+      } elseif (array_isset("home", $info)) {
+        $image->addChild("link")->setNodeValue(xmlescape($info["home"]));
+      }
     }
-    
-    $rss->appendChild($channel);
   }
   
   protected function createItems($rss, $items)
   {
-    $dom = $this->document;
-    
-    foreach ($items as $_item) {
-      $item = $dom->createElement("item");
+    foreach ($items as $item) {
+      $itemElem = $rss->addChild("item");
       
-      if (isset($_item["title"])) {
-        $title = $dom->createElement("title");
-        $title->nodeValue = htmlescape($_item["title"]);
-        $item->appendChild($title);
+      if (array_isset("title", $item)) {
+        $itemElem->addChild("title")->setNodeValue(xmlescape($item["title"]));
       }
       
-      if (isset($_item["uri"])) {
-        $link = $dom->createElement("link");
-        $link->nodeValue = $_item["uri"];
-        $item->appendChild($link);
+      $itemElem->addChild("link")->setNodeValue(xmlescape($item["link"]));
+      
+      $content = "";
+      if (array_isset("content", $item)) {
+        $content = $item["content"];
+      } elseif (array_isset("description", $item)) {
+        $content = $item["description"];
       }
       
-      if (isset($_item["date"])) {
-        $pubDate = $dom->createElement("pubDate");
-        $pubDate->nodeValue = date("r", strtotime($_item["date"]));
-        $item->appendChild($pubDate);
-      }
+      $itemElem->addChild("description")->setNodeValue($content, true);
       
-      $content = $_item["content"];
-      if (isset($_item["summary"])) {
-        $content = $_item["summary"];
+      if (array_isset("date", $item)) {
+        $itemElem->addChild("pubDate")->setNodeValue(date("r", strtotime($item["date"])));
       }
-      
-      $desc = $dom->createElement("description");
-      $desc->appendChild($dom->createCDATASection($content));
-      $item->appendChild($desc);
-      $rss->appendChild($item);
     }
   }
 }

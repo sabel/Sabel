@@ -13,97 +13,67 @@ class Sabel_Rss_Writer_Atom10 extends Sabel_Rss_Writer_Abstract
 {
   public function build(array $items)
   {
-    $feed = $this->createFeed();
-    //$xml .= $this->createImage();
+    $feed = $this->document->createElement("feed");
+    $feed->at("xmlns", "http://www.w3.org/2005/Atom");
+    $feed->at("xml:lang", $this->info["language"]);
+    
+    $this->document->setDocumentElement($feed);
+    
+    $info = $this->info;
+    if (array_isset("title", $info)) {
+      $feed->addChild("title")->setNodeValue(xmlescape($info["title"]));
+    }
+    
+    if (array_isset("image[src]", $info)) {
+      $feed->addChild("logo")->setNodeValue($info["image"]["src"]);
+    }
+    
+    $link = $feed->addChild("link");
+    $link->at("rel", "alternate")->at("type", "text/html")->at("href", $info["home"]);
+    
+    if (array_isset("rss", $info)) {
+      $link = $dom->createElement("link");
+      $link->at("rel", "self")->at("type", "application/atom-xml")->at("href", $info["rss"]);
+    }
+    
+    if (array_isset("description", $info)) {
+      $feed->addChild("subtitle")->setNodeValue(xmlescape($info["description"]));
+    }
+    
+    if (array_isset("updated", $info)) {
+      $feed->addChild("updated")->setNodeValue(date("c", strtotime($info["updated"])));
+    }
+    
     $this->createItems($feed, $items);
     
-    return $this->document->saveXML();
-  }
-  
-  protected function createFeed()
-  {
-    $info = $this->info;
-    $dom  = $this->document;
-    $feed = $dom->createElement("feed");
-    $feed->setAttribute("xmlns", "http://www.w3.org/2005/Atom");
-    
-    $title = $dom->createElement("title");
-    $title->nodeValue = htmlescape($info["title"]);
-    $feed->appendChild($title);
-    
-    $link = $dom->createElement("link");
-    $link->setAttribute("rel",  "alternate");
-    $link->setAttribute("type", "text/html");
-    $link->setAttribute("href", $info["home"]);
-    $feed->appendChild($link);
-    
-    if (isset($info["rss"])) {
-      $link = $dom->createElement("link");
-      $link->setAttribute("rel",  "self");
-      $link->setAttribute("type", "application/atom-xml");
-      $link->setAttribute("href", $info["rss"]);
-      $feed->appendChild($link);
-    }
-    
-    if (isset($info["description"])) {
-      $subtitle = $dom->createElement("subtitle");
-      $subtitle->nodeValue = htmlescape($info["description"]);
-      $feed->appendChild($subtitle);
-    }
-    
-    if (isset($info["updated"])) {
-      $updated = $dom->createElement("updated");
-      $updated->nodeValue = date("c", strtotime($info["updated"]));
-      $feed->appendChild($updated);
-    }
-    
-    $dom->appendChild($feed);
-    
-    return $feed;
+    return $this->document->toXML();
   }
   
   protected function createItems($feed, $items)
   {
-    $dom = $this->document;
-    
-    foreach ($items as $_item) {
-      $item = $dom->createElement("entry");
+    foreach ($items as $item) {
+      $itemElem = $feed->addChild("entry");
       
-      if (isset($_item["title"])) {
-        $title = $dom->createElement("title");
-        $title->nodeValue = htmlescape($_item["title"]);
-        $item->appendChild($title);
+      if (array_isset("title", $item)) {
+        $itemElem->addChild("title")->setNodeValue(htmlescape($item["title"]));
       }
       
-      if (isset($_item["uri"])) {
-        $link = $dom->createElement("link");
-        $link->setAttribute("rel",  "alternate");
-        $link->setAttribute("type", "text/html");
-        $link->setAttribute("href", $_item["uri"]);
-        $item->appendChild($link);
+      $link = $itemElem->addChild("link");
+      $link->at("rel", "alternate")->at("type", "text/html")->at("href", $item["link"]);
+      
+      if (array_isset("description", $item)) {
+        $itemElem->addChild("summary")->setNodeValue(htmlescape($item["description"]));
       }
       
-      if (isset($_item["date"])) {
-        $updated = $dom->createElement("updated");
-        $updated->nodeValue = date("c", strtotime($_item["date"]));
-        $item->appendChild($updated);
+      if (array_isset("content", $item)) {
+        $content = $itemElem->addChild("content");
+        $content->at("type", "text")->at("mode", "escaped");
+        $content->setNodeValue($item["content"], true);
       }
       
-      if (isset($_item["summary"])) {
-        $summary = $dom->createElement("summary");
-        $summary->nodeValue = htmlescape($_item["summary"]);
-        $item->appendChild($summary);
+      if (array_isset("date", $item)) {
+        $itemElem->addChild("updated")->setNodeValue(date("c", strtotime($item["date"])));
       }
-      
-      if (isset($_item["content"])) {
-        $content = $dom->createElement("content");
-        $content->setAttribute("type", "html");
-        $content->setAttribute("mode", "escaped");
-        $content->appendChild($dom->createCDATASection($_item["content"]));
-        $item->appendChild($content);
-      }
-      
-      $feed->appendChild($item);
     }
   }
 }

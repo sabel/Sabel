@@ -16,20 +16,27 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
    */
   protected $channel = null;
   
+  /**
+   * @var Sabel_Xml_Elements
+   */
+  protected $itemsElement = null;
+  
   public function __construct(Sabel_Xml_Element $element)
   {
     $this->documentElement = $element;
-    $this->channel = $element->getChild("channel", $element->getAttribute("xmlns"));
-    $this->items = $element->getChildren("item", $element->getAttribute("xmlns"));
+    
+    $namespace = $element->at("xmlns");
+    $this->channel = $element->getChild("channel", $namespace);
+    $this->itemsElement = $element->getChildren("item", $namespace);
   }
   
   /**
    * @return string
    */
-  public function getUri()
+  public function getUrl()
   {
     if (($link = $this->channel->getChild("link")) === null) {
-      return null;
+      return "";
     } else {
       return $link->getNodeValue();
     }
@@ -41,7 +48,7 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
   public function getTitle()
   {
     if (($title = $this->channel->getChild("title")) === null) {
-      return null;
+      return "";
     } else {
       return $title->getNodeValue();
     }
@@ -53,7 +60,7 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
   public function getDescription()
   {
     if (($desc = $this->channel->getChild("description")) === null) {
-      return null;
+      return "";
     } else {
       return $desc->getNodeValue();
     }
@@ -65,8 +72,8 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
   public function getLastUpdated()
   {
     if (($date = $this->channel->getChild("dc:date")) === null) {
-      if (isset($this->items[0])) {
-        $date = $this->items[0]->getChild("dc:date");
+      if ($firstItem = $this->itemsElement->item(0)) {
+        $date = $firstItem->getChild("dc:date");
       } else {
         return null;
       }
@@ -76,32 +83,37 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
   }
   
   /**
-   * @return Sabel_ValueObject
+   * @return Sabel_ValueObject[]
    */
-  protected function toObject(Sabel_Xml_Element $element)
+  public function getItems()
   {
-    $object = new Sabel_ValueObject();
-    
-    if ($title = $element->getChild("title")) {
-      $object->title = $title->getNodeValue();
+    $items = array();
+    foreach ($this->itemsElement as $i => $item) {
+      $object = new Sabel_ValueObject();
+      
+      if ($title = $item->getChild("title")) {
+        $object->title = $title->getNodeValue();
+      }
+      
+      if ($link = $item->getChild("link")) {
+        $object->uri = $link->getNodeValue();
+      }
+      
+      if ($desc = $item->getChild("description")) {
+        $object->content = $object->description = $desc->getNodeValue();
+      }
+      
+      if ($content = $item->getChild("content:encoded")) {
+        $object->content = $content->getNodeValue();
+      }
+      
+      if ($date = $item->getChild("dc:date")) {
+        $object->date = date("Y-m-d H:i:s", strtotime($date->getNodeValue()));
+      }
+      
+      $items[] = $object;
     }
     
-    if ($link = $element->getChild("link")) {
-      $object->uri = $link->getNodeValue();
-    }
-    
-    if ($desc = $element->getChild("description")) {
-      $object->description = $desc->getNodeValue();
-    }
-    
-    if ($date = $element->getChild("dc:date")) {
-      $object->date = date("Y-m-d H:i:s", strtotime($date->getNodeValue()));
-    }
-    
-    if ($content = $element->getChild("content:encoded")) {
-      $object->content = $content->getNodeValue();
-    }
-    
-    return $object;
+    return $items;
   }
 }
