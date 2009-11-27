@@ -126,8 +126,7 @@ abstract class Sabel_Session_Abstract extends Sabel_Object implements Sabel_Sess
   
   protected function createSessionId()
   {
-    $func = (ini_get("session.hash_function") === "1") ? "sha1" : "md5";
-    return $func(uniqid(mt_rand(), true));
+    return (ini_get("session.hash_function") === "1") ? sha1hash() : md5hash();
   }
   
   protected function createClientId()

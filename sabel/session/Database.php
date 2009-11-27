@@ -17,186 +17,154 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   private static $instance = null;
   
   /**
-   * @var string
-   */
-  protected $connectionName = "default";
-  
-  /**
-   * @var string
-   */
-  protected $tableName = "sbl_session";
-  
-  /**
    * @var boolean
    */
   protected $newSession = false;
   
-  private function __construct($connectionName)
+  /**
+   * @var string
+   */
+  protected $mdlName = "";
+  
+  /**
+   * @var Sabel_Db_Model[]
+   */
+  protected $models = array();
+  
+  private function __construct($mdlName)
   {
+    $this->mdlName = $mdlName;
     $this->readSessionSettings();
-    $this->connectionName = $connectionName;
   }
   
-  public static function create($connectionName = "default")
+  public static function create($mdlName = "SblSession")
   {
     if (self::$instance === null) {
-      self::$instance = new self($connectionName);
+      self::$instance = new self($mdlName);
       register_shutdown_function(array(self::$instance, "destruct"));
     }
     
     return self::$instance;
   }
   
-  public function setConnectionName($name)
-  {
-    $this->connectionName = $name;
-  }
-  
-  public function setTableName($tblName)
-  {
-    $this->tableName = $tblName;
-  }
-  
   public function start()
   {
-    if ($this->started) return;
-    if (!$sessionId = $this->initSession()) return;
-    
-    if ($this->sessionId === "") {
-      $this->sessionId  = $sessionId;
-      $this->attributes = $this->getSessionData($this->sessionId);
-    } else {
-      $this->attributes = $this->getSessionData($sessionId);
+    if ($this->started) {
+      return;
     }
+    
+    if (!$sessionId = $this->initSession()) {
+      return;
+    }
+    
+    if (is_empty($this->sessionId)) {
+      $this->sessionId = $sessionId;
+    }
+    
+    $this->attributes = $this->getSessionData($sessionId);
     
     $this->initialize();
     $this->gc();
   }
   
-  public function setId($id)
+  public function setId($sessionId)
   {
     if ($this->started) {
       $message = __METHOD__ . "() the session has already been started.";
       throw new Sabel_Exception_Runtime($message);
     } else {
-      $this->sessionId = $id;
+      $this->sessionId = $sessionId;
     }
   }
   
   public function regenerateId()
   {
-    if ($this->started) {
-      $newId = $this->createSessionId();
-      $stmt  = $this->createStatement();
-      
-      $stmt->type(Sabel_Db_Statement::UPDATE)
-           ->values(array("id" => $newId))
-           ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @currentId@")
-           ->setBindValue("currentId", $this->sessionId)
-           ->execute();
-      
-      $this->sessionId = $newId;
-      $this->setSessionIdToCookie($newId);
-    } else {
+    if (!$this->started) {
       $message = __METHOD__ . "() must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
     }
+    
+    $newId = $this->createSessionId();
+    $session = $this->getSessionModel($this->sessionId);
+    
+    if ($session->isSelected()) {
+      $session->update(array("sid" => $newId));
+    }
+    
+    $this->sessionId = $newId;
+    $this->setSessionIdToCookie($newId);
   }
   
   public function destroy()
   {
-    if ($this->started) {
-      $stmt = $this->createStatement();
-      $stmt->type(Sabel_Db_Statement::DELETE)
-           ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
-           ->setBindValue("id", $this->sessionId)
-           ->execute();
-      
-      $attributes = $this->attributes;
-      $this->attributes = array();
-      return $attributes;
-    } else {
+    if (!$this->started) {
       $message = __METHOD__ . "() must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
     }
-  }
-  
-  protected function getSessionData($sessionId)
-  {
-    $stmt = $this->createStatement();
-    $stmt->type(Sabel_Db_Statement::SELECT)
-         ->projection(array("data", "timeout"))
-         ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
-         ->setBindValue("id", $sessionId);
     
-    if (($result = $stmt->execute()) === null) {
-      $this->newSession = true;
-      return array();
-    } elseif ($result[0]["timeout"] <= time()) {
-      return array();
-    } else {
-      return unserialize(str_replace("\\000", "\000", $result[0]["data"]));
-    }
-  }
-  
-  protected function sessionIdExists($sessionId)
-  {
-    $stmt   = $this->createStatement();
-    $result = $stmt->type(Sabel_Db_Statement::SELECT)
-                   ->projection("COUNT(*) AS cnt")
-                   ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
-                   ->setBindValue("id", $sessionId)
-                   ->execute();
+    MODEL($this->mdlName)->delete($this->sessionId);
     
-    return ((int)$result[0]["cnt"] !== 0);
-  }
-  
-  protected function gc()
-  {
-    $probability = ini_get("session.gc_probability");
-    $divisor     = ini_get("session.gc_divisor");
+    $data = $this->attributes;
+    $this->attributes = array();
     
-    if ($probability === "") $probability = 1;
-    if ($divisor     === "") $divisor     = 100;
-    
-    if (rand(1, $divisor) <= $probability) {
-      $stmt = $this->createStatement();
-      $stmt->type(Sabel_Db_Statement::DELETE)
-           ->where("WHERE " . $stmt->quoteIdentifier("timeout") . " <= @timeout@")
-           ->setBindValue("timeout", time())
-           ->execute();
-    }
-  }
-  
-  private function createStatement()
-  {
-    $stmt = Sabel_Db::createStatement($this->connectionName);
-    $stmt->setMetadata(Sabel_Db_Metadata::getTableInfo($this->tableName, $this->connectionName));
-    return $stmt;
+    return $data;
   }
   
   public function destruct()
   {
-    if ($this->newSession && empty($this->attributes)) return;
-    
-    $stmt    = Sabel_Db::createStatement($this->connectionName);
-    $value   = str_replace("\000", "\\000", serialize($this->attributes));
-    $timeout = time() + $this->maxLifetime;
-    $table   = $stmt->quoteIdentifier($this->tableName);
-    $idCol   = $stmt->quoteIdentifier("id");
-    $dataCol = $stmt->quoteIdentifier("data");
-    $toutCol = $stmt->quoteIdentifier("timeout");
-    
-    if ($this->sessionIdExists($this->sessionId)) {
-      $query = "UPDATE $table SET $dataCol = @data@, $toutCol = $timeout "
-             . "WHERE $idCol = '{$this->sessionId}'";
-    } else {
-      $query = "INSERT INTO $table ({$idCol}, {$dataCol}, {$toutCol}) "
-             . "VALUES ('{$this->sessionId}', @data@, {$timeout})";
+    if ($this->newSession && empty($this->attributes)) {
+      return;
     }
     
-    $stmt->setQuery($query)
-         ->setBindValue("data", $value)
-         ->execute();
+    $session = $this->getSessionModel($this->sessionId);
+    
+    if (!$session->isSelected()) {
+      $session->sid = $this->sessionId;
+    }
+    
+    $session->data = str_replace("\000", "\\000", serialize($this->attributes));
+    $session->timeout = time() + $this->maxLifetime;
+    $session->save();
+  }
+  
+  protected function getSessionData($sessionId)
+  {
+    $session = $this->getSessionModel($sessionId);
+    
+    if (!$session->isSelected()) {
+      $this->newSession = true;
+      return array();
+    } elseif ($session->timeout <= now()) {
+      return array();
+    } else {
+      return unserialize(str_replace("\\000", "\000", $session->data));
+    }
+  }
+  
+  protected function gc()
+  {
+    $divisor = ini_get("session.gc_divisor");
+    $probability = ini_get("session.gc_probability");
+    
+    if (empty($divisor)) $divisor = 100;
+    if (empty($probability)) $probability = 1;
+    
+    if (rand(1, $divisor) <= $probability) {
+      $model = MODEL($this->mdlName);
+      $model->setCondition(Sabel_Db_Condition::create(
+        Sabel_Db_Condition::LESS_EQUAL, "timeout", time()
+      ));
+      
+      $model->delete();
+    }
+  }
+  
+  protected function getSessionModel($sessionId)
+  {
+    if (!isset($this->models[$sessionId])) {
+      $this->models[$sessionId] = MODEL($this->mdlName, $sessionId);
+    }
+    
+    return $this->models[$sessionId];
   }
 }

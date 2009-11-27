@@ -34,20 +34,22 @@ class Sabel_Session_PHP extends Sabel_Session_Abstract
   {
     if (!$this->started) {
       session_start();
-      $this->sessionId  = session_id();
+      
+      $this->sessionId = session_id();
       $this->attributes =& $_SESSION;
+      
       $this->initialize();
     }
   }
   
-  public function setId($id)
+  public function setId($sessionId)
   {
     if ($this->started) {
       $message = __METHOD__ . "() the session has already been started.";
       throw new Sabel_Exception_Runtime($message);
     } else {
-      session_id($id);
-      $this->sessionId = $id;
+      session_id($sessionId);
+      $this->sessionId = $sessionId;
     }
   }
   

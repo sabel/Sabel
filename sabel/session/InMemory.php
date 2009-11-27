@@ -35,13 +35,13 @@ class Sabel_Session_InMemory extends Sabel_Session_Abstract
     }
   }
   
-  public function setId($id)
+  public function setId($sessionId)
   {
     if ($this->started) {
-      $message = "the session has already been started.";
+      $message = __METHOD__ . "() the session has already been started.";
       throw new Sabel_Exception_Runtime($message);
     } else {
-      $this->sessionId = $id;
+      $this->sessionId = $sessionId;
     }
   }
   
@@ -50,7 +50,7 @@ class Sabel_Session_InMemory extends Sabel_Session_Abstract
     if ($this->started) {
       $this->sessionId = $this->createSessionId();
     } else {
-      $message = "must start the session with start()";
+      $message = __METHOD__ . "() must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
     }
   }
@@ -62,7 +62,7 @@ class Sabel_Session_InMemory extends Sabel_Session_Abstract
       $this->attributes = array();
       return $attributes;
     } else {
-      $message = "must start the session with start()";
+      $message = __METHOD__ . "() must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
     }
   }

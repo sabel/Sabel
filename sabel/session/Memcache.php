@@ -12,101 +12,109 @@
 class Sabel_Session_Memcache extends Sabel_Session_Ext
 {
   /**
-   * @var self
+   * @var self[]
    */
-  private static $instance = null;
+  private static $instances = array();
   
   /**
-   * @var Memcache
+   * @var Sabel_Kvs_Memcache
    */
-  protected $memcache = null;
+  protected $kvs = null;
   
   /**
    * @var boolean
    */
   protected $newSession = false;
   
-  private function __construct($server, $port)
+  private function __construct($host, $port)
   {
     if (extension_loaded("memcache")) {
-      $this->memcache = new Memcache();
-      $this->addServer($server, $port);
+      $this->kvs = Sabel_Kvs_Memcache::create($host, $port);
       $this->readSessionSettings();
     } else {
-      throw new Sabel_Exception_Runtime("memcache extension not loaded.");
+      $message = __METHOD__ . "() memcache extension not loaded.";
+      throw new Sabel_Exception_Runtime($message);
     }
   }
   
-  public static function create($server = "localhost", $port = 11211)
+  public static function create($host = "localhost", $port = 11211)
   {
-    if (self::$instance === null) {
-      self::$instance = new self($server, $port);
-      register_shutdown_function(array(self::$instance, "destruct"));
+    if (isset(self::$instances[$host][$port])) {
+      return self::$instances[$host][$port];
     }
     
-    return self::$instance;
+    $instance = self::$instances[$host][$port] = new self($host, $port);
+    register_shutdown_function(array($instance, "destruct"));
+    
+    return $instance;
   }
   
-  public function addServer($server, $port = 11211, $weight = 1)
+  public function addServer($host, $port = 11211, $weight = 1)
   {
-    $this->memcache->addServer($server, $port, true, $weight);
+    $this->kvs->addServer($host, $port, true, $weight);
   }
   
   public function start()
   {
-    if ($this->started) return;
-    if (!$sessionId = $this->initSession()) return;
-    
-    if ($this->sessionId === "") {
-      $this->sessionId  = $sessionId;
-      $this->attributes = $this->getSessionData($this->sessionId);
-    } else {
-      $this->attributes = $this->getSessionData($sessionId);
+    if ($this->started) {
+      return;
     }
+    
+    if (!$sessionId = $this->initSession()) {
+      return;
+    }
+    
+    if (is_empty($this->sessionId)) {
+      $this->sessionId = $sessionId;
+    }
+    
+    $this->attributes = $this->getSessionData($sessionId);
     
     $this->initialize();
   }
   
-  public function setId($id)
+  public function setId($sessionId)
   {
     if ($this->started) {
-      $message = "the session has already been started.";
+      $message = __METHOD__ . "() the session has already been started.";
       throw new Sabel_Exception_Runtime($message);
     } else {
-      $this->sessionId = $id;
+      $this->sessionId = $sessionId;
     }
   }
   
   public function regenerateId()
   {
-    if ($this->started) {
-      $newId = $this->createSessionId();
-      $this->memcache->delete($this->sessionId);
-      $this->memcache->set($newId, $this->attributes, 0, $this->maxLifetime);
-      $this->sessionId = $newId;
-      $this->setSessionIdToCookie($newId);
-    } else {
-      $message = "must start the session with start()";
+    if (!$this->started) {
+      $message = __METHOD__ . "() must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
     }
+    
+    $newId = $this->createSessionId();
+    $this->kvs->delete($this->sessionId);
+    $this->kvs->write($newId, $this->attributes, $this->maxLifetime);
+    $this->sessionId = $newId;
+    $this->setSessionIdToCookie($newId);
   }
   
   public function destroy()
   {
-    if ($this->started) {
-      $this->memcache->delete($this->sessionId);
-      $attributes = $this->attributes;
-      $this->attributes = array();
-      return $attributes;
-    } else {
-      $message = "must start the session with start()";
+    if (!$this->started) {
+      $message = __METHOD__ . "() must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
     }
+    
+    $this->kvs->delete($this->sessionId);
+    
+    $attributes = $this->attributes;
+    $this->attributes = array();
+    
+    return $attributes;
   }
   
   protected function getSessionData($sessionId)
   {
-    $data = $this->memcache->get($sessionId);
+    $data = $this->kvs->read($sessionId);
     
     if (is_array($data)) {
       return $data;
@@ -119,7 +127,7 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
   public function destruct()
   {
     if (!$this->newSession || !empty($this->attributes)) {
-      $this->memcache->set($this->sessionId, $this->attributes, 0, $this->maxLifetime);
+      $this->kvs->write($this->sessionId, $this->attributes, $this->maxLifetime);
     }
   }
 }

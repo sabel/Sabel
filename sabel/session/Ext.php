@@ -53,8 +53,11 @@ abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
       return $_COOKIE[$sesName];
     }
     
-    $method = (isset($_SERVER["REQUEST_METHOD"])) ? $_SERVER["REQUEST_METHOD"] : "";
-    if ($method !== "GET" && $method !== "POST") return false;
+    $method = (isset($_SERVER["REQUEST_METHOD"])) ? $_SERVER["REQUEST_METHOD"] : "GET";
+    
+    if ($method !== "GET" && $method !== "POST") {
+      return false;
+    }
     
     $_VARS = ($method === "GET") ? $_GET : $_POST;
     $sessionId = (isset($_VARS[$sesName])) ? $_VARS[$sesName] : $this->createSessionId();

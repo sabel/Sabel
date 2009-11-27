@@ -793,7 +793,7 @@ abstract class Sabel_Db_Model extends Sabel_Object
       $this->values = array_merge($this->values, $saveValues);
       
       if (isset($this->metaCols[$vColumn]) && $result < 1) {
-        $message = __METHOD__ . "() this model has already been changed by other transactions.";
+        $message = __METHOD__ . "() has already been changed by other transactions.";
         throw new Sabel_Db_Exception_StaleModel($message);
       }
     }
