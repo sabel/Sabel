@@ -1,5 +1,10 @@
 2009-11-27  ebin <yutaka@ebine.org>
 
+	* sabel/functions/core.php: get_server_name()関数追加。environment()関数の削
+	除。それに関わる箇所の変更。lib/Cache.php作り直し。
+
+2009-11-27  ebin <yutaka@ebine.org>
+
 	* sabel/rss/*: rssパッケージ改修。
 
 2009-11-24  ebin <yutaka@ebine.org>

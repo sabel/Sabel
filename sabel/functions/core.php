@@ -198,14 +198,38 @@ function normalize_uri($uri)
   return ltrim($parsedUrl["path"], "/");
 }
 
-function realempty($value)
-{
-  return is_empty($value);
-}
-
 function is_empty($value)
 {
   return ($value === null || $value === "" || $value === array() || $value === false);
+}
+
+function array_isset($key, $array)
+{
+  if (($count = preg_match_all('/\[(.+)\]/U', $key, $matches)) > 0) {
+    $key1 = substr($key, 0, strpos($key, "["));
+    
+    if (array_isset($key1, $array)) {
+      $array = $array[$key1];
+      foreach ($matches[1] as $_key) {
+        if (array_isset($_key, $array)) {
+          $array = $array[$_key];
+        } else {
+          return false;
+        }
+      }
+      
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return (isset($array[$key]) && !is_empty($array[$key]));
+  }
+}
+
+function realempty($value)
+{
+  return is_empty($value);
 }
 
 function dump()
@@ -229,17 +253,16 @@ function dump()
   }
 }
 
-function environment($str)
+function get_server_name()
 {
-  switch (strtolower($str)) {
-    case "production":
-      return PRODUCTION;
-    case "test":
-      return TEST;
-    case "development":
-      return DEVELOPMENT;
-    default:
-      return null;
+  if (defined("SERVICE_DOMAIN")) {
+    return SERVICE_DOMAIN;
+  } elseif (isset($_SERVER["SERVER_NAME"])) {
+    return $_SERVER["SERVER_NAME"];
+  } elseif (isset($_SERVER["HTTP_HOST"])) {
+    return $_SERVER["HTTP_HOST"];
+  } else {
+    return "localhost";
   }
 }
 

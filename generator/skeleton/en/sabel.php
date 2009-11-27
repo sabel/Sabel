@@ -12,14 +12,8 @@ if (!defined("ENVIRONMENT")) {
   exit;
 }
 
-if (defined("SERVICE_DOMAIN")) {
-  $_SERVER["HTTP_HOST"]   = SERVICE_DOMAIN;
-  $_SERVER["SERVER_NAME"] = SERVICE_DOMAIN;
-} else {
-  $_SERVER["HTTP_HOST"]   = "localhost";
-  $_SERVER["SERVER_NAME"] = "localhost";
-}
-
+$_SERVER["SERVER_NAME"] = get_server_name();
+$_SERVER["HTTP_HOST"]   = $_SERVER["SERVER_NAME"];
 $_SERVER["REQUEST_URI"] = "/";
 $_SERVER["SCRIPT_NAME"] = "/index.php";
 

@@ -43,14 +43,7 @@ function get_uri_prefix($secure = false, $absolute = false)
   $prefix = "";
   
   if ($secure || $absolute) {
-    if (defined("SERVICE_DOMAIN")) {
-      $server = SERVICE_DOMAIN;
-    } elseif (isset($_SERVER["SERVER_NAME"])) {
-      $server = $_SERVER["SERVER_NAME"];
-    } else {
-      $server = "localhost";
-    }
-    
+    $server = get_server_name();
     $prefix = (($secure) ? "https" : "http") . "://" . $server;
   }
   

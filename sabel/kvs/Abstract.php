@@ -17,17 +17,6 @@ abstract class Sabel_Kvs_Abstract implements Sabel_Kvs_Interface
     $this->prefix = $prefix;
   }
   
-  protected function setupKeyPrefix()
-  {
-    if (defined("SERVICE_DOMAIN")) {
-      $this->setKeyPrefix(SERVICE_DOMAIN);
-    } elseif (isset($_SERVER["SERVER_NAME"])) {
-      $this->setKeyPrefix($_SERVER["SERVER_NAME"]);
-    } elseif (isset($_SERVER["HTTP_HOST"])) {
-      $this->setKeyPrefix($_SERVER["HTTP_HOST"]);
-    }
-  }
-  
   protected function genKey($key)
   {
     return $this->prefix . "_" . $key;

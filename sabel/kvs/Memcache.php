@@ -21,7 +21,7 @@ class Sabel_Kvs_Memcache extends Sabel_Kvs_Abstract
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
       $this->addServer($host, $port);
-      $this->setupKeyPrefix();
+      $this->setKeyPrefix(get_server_name());
     } else {
       $message = __METHOD__ . "() memcache extension not loaded.";
       throw new Sabel_Exception_Runtime($message);

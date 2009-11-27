@@ -42,12 +42,16 @@ abstract class Sabel_Sakle_Task extends Sabel_Object
   
   protected function defineEnvironment($strenv)
   {
-    if (($env = environment($strenv)) === null) {
-      $message = __METHOD__ . "() $strenv is not valid environment. "
+    if (defined("ENVIRONMENT")) return;
+    
+    $env = @constant(strtoupper($strenv));
+    
+    if ($env === null) {
+      $message = __METHOD__ . "() {$strenv} is not valid environment. "
                . "Use development, test or production.";
       
       throw new Sabel_Sakle_Exception($message);
-    } elseif (!defined("ENVIRONMENT")) {
+    } else {
       define("ENVIRONMENT", $env);
     }
   }

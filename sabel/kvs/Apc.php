@@ -14,7 +14,7 @@ class Sabel_Kvs_Apc extends Sabel_Kvs_Abstract
   private function __construct()
   {
     if (extension_loaded("apc")) {
-      $this->setupKeyPrefix();
+      $this->setKeyPrefix(get_server_name());
     } else {
       $message = __METHOD__ . "() apc extension not loaded.";
       throw new Sabel_Exception_Runtime($message);

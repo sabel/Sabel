@@ -20,8 +20,8 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
     if (is_dir($dir)) {
       $this->dir = $dir;
     } else {
-      $message = __METHOD__ . "() '{$path}': no such file or directory.";
-      throw new Sabel_Exception_Runtime($message);
+      $message = __METHOD__ . "() {$dir}";
+      throw new Sabel_Exception_DirectoryNotFound($message);
     }
   }
   
