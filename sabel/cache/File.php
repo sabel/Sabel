@@ -45,19 +45,23 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
   
   public function read($key)
   {
+    $result = null;
+    
     $path = $this->getPath($key);
     
     if (is_readable($path)) {
-      $data = unserialize(file_get_contents($path));
+      $data = @unserialize(file_get_contents($path));
       
-      if ($data["timeout"] !== 0 && time() >= $data["timeout"]) {
-        $this->delete($key);
-      } else {
-        return $data["value"];
+      if ($data !== false) {
+        if ($data["timeout"] !== 0 && time() >= $data["timeout"]) {
+          unlink($path);
+        } else {
+          $result = $data["value"];
+        }
       }
-    } else {
-      return null;
     }
+    
+    return $result;
   }
   
   public function write($key, $value, $timeout = 0)
@@ -69,7 +73,7 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
     }
     
     $data["timeout"] = $timeout;
-    file_put_contents($this->getPath($key), serialize($data));
+    file_put_contents($this->getPath($key), serialize($data), LOCK_EX);
   }
   
   public function delete($key)

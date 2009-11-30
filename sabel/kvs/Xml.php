@@ -80,7 +80,11 @@ XML;
     
     $this->unlock();
     
-    return ($result === false) ? null : $result;
+    if ($result === false || $result === "\000") {
+      return null;
+    } else {
+      return $result;
+    }
   }
   
   public function write($key, $value, $timeout = 0)
@@ -123,7 +127,9 @@ XML;
     if ($element) {
       $result = $this->_read($key, $doc, $element);
       
-      if ($result !== "\000") {
+      if ($result === "\000") {
+        $result = null;
+      } else {
         $element->parentNode->removeChild($element);
         $doc->save($this->filePath);
       }
