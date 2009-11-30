@@ -1,3 +1,7 @@
+2009-11-30  ebin <yutaka@ebine.org>
+
+	* sabel/kvs/Xml.php: ファイルロック実装。
+
 2009-11-27  ebin <yutaka@ebine.org>
 
 	* sabel/session/*: sessionパッケージ改修。

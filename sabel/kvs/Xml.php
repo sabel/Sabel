@@ -11,10 +11,9 @@ class Sabel_Kvs_Xml implements Sabel_Kvs_Interface
 {
   private static $instances = array();
   
-  /**
-   * @var Sabel_Xml_Document
-   */
-  protected $document = "";
+  protected $filePath = "";
+  protected $lockFilePath = "";
+  protected $lockfp = null;
   
   private function __construct($filePath)
   {
@@ -24,6 +23,22 @@ class Sabel_Kvs_Xml implements Sabel_Kvs_Interface
       $message = __METHOD__ . "() no such directory '{$dir}'.";
       throw new Sabel_Exception_DirectoryNotFound($message);
     }
+    
+    $lockFilePath = $filePath . ".lock";
+    
+    if (!file_exists($lockFilePath)) {
+      if (touch($lockFilePath)) {
+        chmod($lockFilePath, 0777);
+      } else {
+        $message = __METHOD__ . "() can't create .lock file '{$lockFilePath}'.";
+        throw new Sabel_Exception_Runtime($message);
+      }
+    }
+    
+    $this->filePath = $filePath;
+    $this->lockFilePath = $lockFilePath;
+    
+    $this->lock();
     
     if (!file_exists($filePath)) {
       $xml = <<<XML
@@ -39,8 +54,7 @@ XML;
       }
     }
     
-    $this->document = Sabel_Xml_Document::create();
-    $this->docElement = $this->document->load("XML", $filePath);
+    $this->unlock();
   }
   
   public static function create($filePath)
@@ -54,63 +68,117 @@ XML;
   
   public function read($key)
   {
-    $result   = null;
-    $elements = $this->docElement->$key;
+    $result = null;
     
-    if ($elements->length > 0) {
-      $element = $elements[0];
-      
-      if (($timeout = (int)$element->getAttribute("timeout")) === 0) {
-        $result = $element->getNodeValue();
-      } else {
-        if ($timeout <= time()) {
-          $element->remove();
-          $this->document->save();
-        } else {
-          $result = $element->getNodeValue();
-        }
-      }
-      
-      if ($result !== null) {
-        $result = unserialize(str_replace("\\000", "\000", $result));
-      }
+    $this->lock();
+    
+    list ($doc, $element) = $this->getElement($key);
+    
+    if ($element) {
+      $result = $this->_read($key, $doc, $element);
     }
+    
+    $this->unlock();
     
     return ($result === false) ? null : $result;
   }
   
   public function write($key, $value, $timeout = 0)
   {
-    $elements = $this->docElement->$key;
-    $value = str_replace("\000", "\\000", serialize($value));
+    $this->lock();
     
-    if ($elements->length === 0) {
-      $element = $this->docElement->addChild($key);
-    } else {
-      $element = $elements->item(0);
-    }
+    list ($doc, $element) = $this->getElement($key);
     
     if ($timeout !== 0) {
       $timeout = time() + $timeout;
     }
     
-    $element->setAttribute("timeout", $timeout);
-    $element->setNodeValue($value, true);
+    $value = $doc->createCDATASection(
+      str_replace("\000", "\\000", serialize($value))
+    );
     
-    $this->document->save();
+    if ($element === null) {
+      $element = $doc->createElement($key);
+      $element->setAttribute("timeout", $timeout);
+      $element->appendChild($value);
+      $doc->documentElement->appendChild($element);
+    } else {
+      $element->setAttribute("timeout", $timeout);
+      $element->replaceChild($value, $element->firstChild);
+    }
+    
+    $doc->save($this->filePath);
+    
+    $this->unlock();
   }
   
   public function delete($key)
   {
     $result = null;
-    $elements = $this->docElement->$key;
     
-    if ($elements->length > 0) {
-      $result = $this->read($key);
-      $elements->item(0)->remove();
-      $this->document->save();
+    $this->lock();
+    
+    list ($doc, $element) = $this->getElement($key);
+    
+    if ($element) {
+      $result = $this->_read($key, $doc, $element);
+      
+      if ($result !== "\000") {
+        $element->parentNode->removeChild($element);
+        $doc->save($this->filePath);
+      }
     }
     
+    $this->unlock();
+    
     return $result;
+  }
+  
+  protected function _read($key, $doc, $element)
+  {
+    $result = null;
+    
+    if (($timeout = (int)$element->getAttribute("timeout")) === 0) {
+      $result = $element->nodeValue;
+    } else {
+      if ($timeout <= time()) {
+        $element->parentNode->removeChild($element);
+        $doc->save($this->filePath);
+        
+        return "\000";
+      } else {
+        $result = $element->nodeValue;
+      }
+    }
+    
+    if ($result !== null) {
+      $result = unserialize(str_replace("\\000", "\000", $result));
+    }
+    
+    return ($result === false) ? null : $result;
+  }
+  
+  protected function getElement($tagName)
+  {
+    $doc = new DOMDocument();
+    $doc->load($this->filePath);
+    
+    return array($doc, $doc->documentElement->getElementsByTagName($tagName)->item(0));
+  }
+  
+  protected function lock()
+  {
+    $fp = fopen($this->lockFilePath, "r");
+    flock($fp, LOCK_EX);
+    
+    $this->lockfp = $fp;
+  }
+  
+  protected function unlock()
+  {
+    if ($this->lockfp !== null) {
+      fclose($this->lockfp);
+      $this->lockfp = null;
+    }
   }
 }
