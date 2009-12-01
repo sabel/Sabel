@@ -1,3 +1,7 @@
+2009-12-02  ebin <yutaka@ebine.org>
+
+	* sabel/http/*: Zend Frameworkから移植（CurlとかProxyとか未完了）。
+
 2009-11-30  ebin <yutaka@ebine.org>
 
 	* sabel/kvs/Xml.php: ファイルロック実装。
