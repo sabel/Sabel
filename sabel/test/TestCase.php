@@ -23,21 +23,6 @@ class Sabel_Test_TestCase extends PHPUnit_Framework_TestCase
     $this->assertNotEquals($from, $to);
   }
   
-  public function isTrue($bool)
-  {
-    $this->assertTrue($bool);
-  }
-  
-  public function isFalse($bool)
-  {
-    $this->assertFalse($bool);
-  }
-  
-  public function isNull($null)
-  {
-    $this->assertNull($null);
-  }
-  
   public function isNotNull($null)
   {
     $this->assertNotNull($null);

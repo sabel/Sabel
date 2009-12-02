@@ -48,12 +48,12 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function __construct($uri = "")
   {
-    $this->uri = $uri;
+    $this->setUri($uri);
   }
   
   public function setUri($uri)
   {
-    $this->uri = $uri;
+    $this->uri = ltrim($uri, "/");
     
     return $this;
   }

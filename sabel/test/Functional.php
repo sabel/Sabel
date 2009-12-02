@@ -19,8 +19,7 @@ class Sabel_Test_Functional extends Sabel_Test_TestCase
       $session = Sabel_Session_InMemory::create();
     }
     
-    // @todo
-    $_COOKIE[session_name()] = $session->getId();
+    Sabel_Cookie_Factory::create()->set($session->getName(), $session->getId());
     
     if ($maxRedirects > 0) {
       return $this->requestWithRedirect($request, $session, $maxRedirects);
@@ -36,9 +35,7 @@ class Sabel_Test_Functional extends Sabel_Test_TestCase
   
   protected function httpGet($uri, $session = null, $maxRedirects = 0)
   {
-    $uri = trim(preg_replace("@/{2,}@", "/", $uri, "/"));
-    $parsedUrl = parse_url("http://localhost/{$uri}");
-    $request = new Sabel_Request_Object(ltrim($parsedUrl["path"], "/"));
+    $request = new Sabel_Request_Object(normalize_uri($uri));
     
     if (isset($parsedUrl["query"]) && !empty($parsedUrl["query"])) {
       parse_str($parsedUrl["query"], $get);
@@ -54,17 +51,19 @@ class Sabel_Test_Functional extends Sabel_Test_TestCase
     $response  = $this->request($request, $session, 0);
     $responses[] = $response;
     
-    if (!$response->isRedirected()) return $responses;
+    if (!$this->isRedirected($response)) {
+      return $responses;
+    }
     
-    $redirectTo = $response->getLocationUri();
+    $location = $response->getLocation();
     for ($i = 0; $i < $maxRedirects; $i++) {
-      $response = $this->httpGet($redirectTo, $session, 0);
+      $response = $this->httpGet($location, $session, 0);
       $responses[] = $response;
       
-      if ($response->isRedirected()) {
-        break;
+      if ($this->isRedirected($response)) {
+        $location = $response->getLocation();
       } else {
-        $redirectTo = $response->getLocationUri();
+        break;
       }
     }
     
@@ -73,7 +72,7 @@ class Sabel_Test_Functional extends Sabel_Test_TestCase
   
   protected function isRedirected($response)
   {
-    return $response->getStatus()->isRedirect();
+    return $response->isRedirected();
   }
   
   protected function assertRedirect($uri, $toUri, $session = null)
@@ -81,20 +80,11 @@ class Sabel_Test_Functional extends Sabel_Test_TestCase
     $response = $this->request($uri, $session);
     
     if ($this->isRedirected($response)) {
-      $this->assertEquals($toUri, $response->getLocationUri());
+      $this->assertEquals($toUri, $response->getLocation());
     } else {
       $this->fail("not redirected");
     }
     
     return $response;
-  }
-  
-  protected function assertHtmlElementEquals($expect, $id, $html)
-  {
-    $doc = new DOMDocument();
-    @$doc->loadHTML($html);
-    $element = $doc->getElementById($id);
-    
-    $this->assertEquals($expect, $element->nodeValue);
   }
 }

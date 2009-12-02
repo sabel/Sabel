@@ -44,14 +44,14 @@ class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
   {
     Sabel::fileUsing($suiteClassFile, true);
     $testClass = new ReflectionClass($suiteClassName);
-
+    
     if ($testClass->hasMethod(self::SUITE_METHODNAME)) {
       $suiteMethod = $testClass->getMethod(self::SUITE_METHODNAME);
-
+      
       if (!$suiteMethod->isStatic()) {
         throw new Sabel_Exception_Runtime("suite() method must be static.");
       }
-
+      
       try {
         $test = $suiteMethod->invoke(NULL, $testClass->getName());
       } catch (ReflectionException $e) {
@@ -61,9 +61,9 @@ class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
     } else {
       $test = new Sabel_Test_TestSuite($testClass);
     }
-
+    
     $this->clearStatus();
-
+    
     return $test;
   }
 }

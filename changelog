@@ -1,5 +1,9 @@
 2009-12-02  ebin <yutaka@ebine.org>
 
+	* sabel/test/*: 他パッケージの更新に追い付いてない問題の修正。
+
+2009-12-02  ebin <yutaka@ebine.org>
+
 	* sabel/http/*: httpパッケージ更新。移植完了。
 
 2009-12-01  ebin <yutaka@ebine.org>

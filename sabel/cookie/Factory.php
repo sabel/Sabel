@@ -13,7 +13,7 @@ class Sabel_Cookie_Factory
 {
   public static function create()
   {
-    if (strtolower(PHP_SAPI) === "cli") {
+    if (is_cli()) {
       return Sabel_Cookie_InMemory::create();
     } else {
       return Sabel_Cookie_Http::create();
