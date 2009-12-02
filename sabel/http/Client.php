@@ -73,7 +73,7 @@ class Sabel_Http_Client
   /**
    * Request URI
    *
-   * @var Sabel_ValueObject
+   * @var Sabel_Http_Uri
    */
   protected $uri;
   
@@ -207,11 +207,11 @@ class Sabel_Http_Client
   {
     if (is_string($uri)) {
       if (($parsed = parse_url($uri)) !== false) {
-        $uri = Sabel_ValueObject::fromArray($parsed);
+        $uri = Sabel_Http_Uri::fromArray($parsed);
       }
     }
     
-    if (!$uri instanceof Sabel_ValueObject) {
+    if (!$uri instanceof Sabel_Http_Uri) {
       $message = __METHOD__ . "() Passed parameter is not a valid URI.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
@@ -240,7 +240,7 @@ class Sabel_Http_Client
   {
     $uri = $this->uri;
     
-    if ($asString && $uri instanceof Sabel_ValueObject) {
+    if ($asString && $uri instanceof Sabel_Http_Uri) {
       $pass     = (empty($uri->pass))     ? "" : ":{$uri->pass}";
       $auth     = (empty($uri->user))     ? "" : "{$uri->user}{$pass}@";
       $port     = (empty($uri->port))     ? "" : ":{$uri->port}";
@@ -779,7 +779,7 @@ class Sabel_Http_Client
    */
   public function request($method = null)
   {
-    if (!$this->uri instanceof Sabel_ValueObject) {
+    if (!$this->uri instanceof Sabel_Http_Uri) {
       $message = __METHOD__ . "() No valid URI has been passed to the client.";
       throw new Sabel_Exception_Runtime($message);
     }

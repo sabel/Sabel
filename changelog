@@ -1,5 +1,9 @@
 2009-12-02  ebin <yutaka@ebine.org>
 
+	* sabel/http/*: httpパッケージ更新。移植完了。
+
+2009-12-01  ebin <yutaka@ebine.org>
+
 	* sabel/http/*: Zend Frameworkから移植（CurlとかProxyとか未完了）。
 
 2009-11-30  ebin <yutaka@ebine.org>

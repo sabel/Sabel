@@ -451,7 +451,7 @@ class Sabel_Http_Response extends Sabel_Object
   public static function extractHeaders($response_str)
   {
     $headers = array();
-
+    
     // First, split body and headers
     $parts = preg_split('|(?:\r?\n){2}|m', $response_str, 2);
     if (!$parts[0]) return $headers;
@@ -494,7 +494,7 @@ class Sabel_Http_Response extends Sabel_Object
     
     return $headers;
   }
-
+  
   /**
    * Extract the body from a response string
    *
@@ -506,7 +506,7 @@ class Sabel_Http_Response extends Sabel_Object
     $parts = preg_split('|(?:\r?\n){2}|m', $response_str, 2);
     return (isset($parts[1])) ? $parts[1] : "";
   }
-
+  
   /**
    * Decode a "chunked" transfer-encoded body and return the decoded text
    *
@@ -543,7 +543,7 @@ class Sabel_Http_Response extends Sabel_Object
     
     return $decBody;
   }
-
+  
   /**
    * Decode a gzip encoded message (when Content-encoding = gzip)
    *
@@ -561,7 +561,7 @@ class Sabel_Http_Response extends Sabel_Object
     
     return gzinflate(substr($body, 10));
   }
-
+  
   /**
    * Decode a zlib deflated message (when Content-encoding = deflate)
    *
@@ -597,7 +597,7 @@ class Sabel_Http_Response extends Sabel_Object
       return gzinflate($body);
     }
   }
-
+  
   /**
    * Create a new Zend_Http_Response object from a string
    *

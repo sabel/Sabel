@@ -195,7 +195,7 @@ class Sabel_Http_Cookie
   {
     if (is_string($uri)) {
       if (($parsed = parse_url($uri)) !== false) {
-        $uri = Sabel_ValueObject::fromArray($parsed);
+        $uri = Sabel_Http_Uri::fromArray($parsed);
       } else {
         $uri = false;
       }
@@ -257,7 +257,7 @@ class Sabel_Http_Cookie
   {
     if (is_string($ref_uri)) {
       if (($parsed = parse_url($ref_uri)) !== false) {
-        $ref_uri = Sabel_ValueObject::fromArray($parsed);
+        $ref_uri = Sabel_Http_Uri::fromArray($parsed);
       }
     }
     
@@ -280,7 +280,7 @@ class Sabel_Http_Cookie
     $value = urldecode(trim($value));
     
     // Set default domain and path
-    if ($ref_uri instanceof Sabel_ValueObject) {
+    if ($ref_uri instanceof Sabel_Http_Uri) {
       $domain = $ref_uri->host;
       $path = $ref_uri->path;
       $path = substr($path, 0, strrpos($path, "/"));

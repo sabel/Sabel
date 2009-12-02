@@ -149,11 +149,11 @@ class Sabel_Http_CookieJar implements Countable, IteratorAggregate
   {
     if (is_string($uri)) {
       if (($parsed = parse_url($uri)) !== false) {
-        $uri = Sabel_ValueObject::fromArray($parsed);
+        $uri = Sabel_Http_Uri::fromArray($parsed);
       }
     }
     
-    if (!$uri instanceof Sabel_ValueObject) {
+    if (!$uri instanceof Sabel_Http_Uri) {
       $message = __METHOD__ . "() Invalid URI string or object passed.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
@@ -189,11 +189,11 @@ class Sabel_Http_CookieJar implements Countable, IteratorAggregate
   {
     if (is_string($uri)) {
       if (($parsed = parse_url($uri)) !== false) {
-        $uri = Sabel_ValueObject::fromArray($parsed);
+        $uri = Sabel_Http_Uri::fromArray($parsed);
       }
     }
     
-    if (!$uri instanceof Sabel_ValueObject) {
+    if (!$uri instanceof Sabel_Http_Uri) {
       $message = __METHOD__ . "() Invalid URI specified.";
       throw new Sabel_Exception_Runtime($message);
     }
