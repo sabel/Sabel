@@ -11,11 +11,6 @@
  */
 class Sabel_Rss_Reader_Atom03 extends Sabel_Rss_Reader_Abstract
 {
-  /**
-   * @var Sabel_Xml_Elements
-   */
-  protected $itemsElement = null;
-  
   public function __construct(Sabel_Xml_Element $element)
   {
     $this->documentElement = $element;
@@ -25,7 +20,7 @@ class Sabel_Rss_Reader_Atom03 extends Sabel_Rss_Reader_Abstract
   /**
    * @return string
    */
-  public function getUrl()
+  public function getHome()
   {
     $links = $this->documentElement->getChildren("link");
     

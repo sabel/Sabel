@@ -18,6 +18,11 @@ abstract class Sabel_Rss_Reader_Abstract extends Sabel_Object
   protected $documentElement = null;
   
   /**
+   * @var Sabel_Xml_Elements
+   */
+  protected $itemsElement = null;
+  
+  /**
    * @var int
    */
   protected $pointer = 0;
@@ -30,7 +35,7 @@ abstract class Sabel_Rss_Reader_Abstract extends Sabel_Object
   /**
    * @return string
    */
-  abstract public function getUrl();
+  abstract public function getHome();
   
   /**
    * @return string

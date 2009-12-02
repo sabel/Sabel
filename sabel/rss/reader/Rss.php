@@ -16,11 +16,6 @@ class Sabel_Rss_Reader_Rss extends Sabel_Rss_Reader_Abstract
    */
   protected $channel = null;
   
-  /**
-   * @var Sabel_Xml_Elements
-   */
-  protected $itemsElement = null;
-  
   public function __construct(Sabel_Xml_Element $element)
   {
     $this->documentElement = $element;
@@ -32,7 +27,7 @@ class Sabel_Rss_Reader_Rss extends Sabel_Rss_Reader_Abstract
   /**
    * @return string
    */
-  public function getUrl()
+  public function getHome()
   {
     if (($link = $this->channel->getChild("link")) === null) {
       return "";
