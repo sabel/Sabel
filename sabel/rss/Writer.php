@@ -70,6 +70,13 @@ class Sabel_Rss_Writer extends Sabel_Object
     return $this;
   }
   
+  public function setHome($url)
+  {
+    $this->info["home"] = $url;
+    
+    return $this;
+  }
+  
   public function setTitle($title)
   {
     $this->info["title"] = $title;
@@ -84,28 +91,16 @@ class Sabel_Rss_Writer extends Sabel_Object
     return $this;
   }
   
-  public function setFeedImage($imgInfo)
+  public function setImage($imgInfo)
   {
     if (is_array($imgInfo)) {
       $this->info["image"] = $imgInfo;
     } elseif (is_string($imgInfo)) {
-      $this->info["src"] = $imgInfo;
+      $this->info["image"]["src"] = $imgInfo;
     } else {
       $message = __METHOD__ . "() argument must be an array or string.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
-    
-    return $this;
-  }
-  
-  /**
-   * @param array $info
-   *
-   * @return self
-   */
-  public function setImage(array $info)
-  {
-    $this->info["image"] = $info;
     
     return $this;
   }
