@@ -208,61 +208,34 @@ Sabel.Window = {
 };
 
 Sabel.UserAgent = new function() {
-	var ua = navigator.userAgent;
+	var ua = navigator.userAgent, w = window;
 	this.ua = ua;
 
 	this.isIE = false;
 	this.isFirefox = false;
-	this.isMozilla = false;
 	this.isSafari  = false;
 	this.isOpera   = false;
 	this.isChrome  = false;
+	this.isMozilla = false;
 
-	/*@cc_on
-	@if (@_jscript)
+	if (w.ActiveXObject) { // ActiveXObjectが存在すればIE
 		this.isIE = true;
-		function getVersion() {
-			switch (@_jscript_version) {
-				case 5.1: return "5.01";
-				case 5.6: return "6.0";
-				case 5.7: return "7.0";
-				case 5.8: return "8.0";
-				default: return @_jscript_version;
-			}
-		}
-		this.version = getVersion();
-	@else @*/
-	if ((this.isFirefox = /(?:Firefox|Minefield)\/([\d.]+)/.test(ua))) {
-		this.isMozilla = true;
-		this.version = parseFloat(RegExp.$1);
-	} else if ((this.isChrome = /Chrome\/([\d.]+)/.test(ua))) {
-		this.version = RegExp.$1;
-	} else if ((this.isSafari = /Safari\/([\d.]+)/.test(ua))) {
-		var build = parseInt(ua.substring(ua.lastIndexOf("/") + 1));
-		if (build >= 526) {
-			this.version = 4;
-		} else if (build >= 525) {
-			this.version = 3.1;
-		} else if (build >= 523) {
-			this.version = 3;
-		} else if (build >= 412) {
-			this.version = 2;
-		} else if (build >= 100) {
-			this.version = 1.1;
-		} else if (build >= 85) {
-			this.version = 1;
-		}
-	} else if (window.opera) {
+	} else if (w.opera) {	// window.operaが存在すればOpera
 		this.isOpera = true;
-		if (typeof opera.version === "function") {
-			this.version = opera.version();
-		} else if (/Opera ([\d.]+)/.test(ua)) {
-			this.version = parseFloat(RegExp.$1);
-		}
-	} else if ((this.isMozilla = /Mozilla/.test(ua))) {
-		this.version = "unknown";
+		this.version = opera.version();
+	} else if (w.execScript) { // execScriptが存在すればChrome (IEも存在するが既にチェック済)
+		this.isChrome = true;
+	} else if (w.getMatchedCSSRules) { // getMatchedCSSRulesが存在すればSafari3 (Chromeも存在するが既にチェック済)
+		//} else if (w.defaultstatus) { // Safari2対応ならこっち
+		this.isSafari = true;
+	} else if (w.Components) { // Componentsが存在すればGecko
+		this.isFirefox = true;
+	} else {
+		this.isMozilla = /Mozilla/.test(ua);
 	}
-	/*@end @*/
+	if (this.version === undefined) {
+		this.version = /(MSIE |Firefox\/|Version\/|Chrome\/)([0-9.]+)/.exec(ua)[2];
+	}
 
 	this.isWindows = /Win/.test(ua);
 	this.isMac     = /Mac/.test(ua);
@@ -1927,11 +1900,13 @@ Sabel.Element.getNextSiblings = function(element, nodeName) {
 };
 
 Sabel.Element.getNodeIndex = function(element, reverse, ofType) {
+	var ret;
 	if (ofType === true) {
-		return Sabel.Element._getOfTypeNodeIndex(element, reverse);
+		ret = Sabel.Element._getOfTypeNodeIndex(element, reverse);
 	} else {
-		return Sabel.Element._getNodeIndex(element,reverse);
+		ret = Sabel.Element._getNodeIndex(element,reverse);
 	};
+	return ret;
 };
 
 Sabel.Element._getNodeIndex = function(element, reverse) {
@@ -2091,7 +2066,7 @@ Sabel.Elements.stopObserve = function(elements, eventName, handler) {
 
 Sabel.Elements.each = function(elements, callback) {
 	var i = 0, el;
-	while(el = elements.item(i)) callback(el, i++);
+	while((el = elements.item(i))) callback(el, i++);
 	return elements;
 };
 
@@ -2161,7 +2136,7 @@ Sabel.Ajax.prototype = {
 
 	request: function(url, options) {
 		var xmlhttp = this.xmlhttp;
-		var options = this.setOptions(options);
+		options = this.setOptions(options);
 
 		this.completed = false;
 		this._abort();
@@ -2439,9 +2414,8 @@ Sabel.Form.prototype = {
 			for (var i = 0; i < el.length; i++) {
 				if ((value = method(el[i])) !== null) return value;
 			}
-		} else {
-			return el.value;
 		}
+		return el.value;
 	},
 
 	set: function(key, val) {
@@ -3260,10 +3234,10 @@ Sabel.Effect.Slide.prototype = {
 
 Sabel.Effect.Highlight = new Sabel.Class({
 	init: function(element, to) {
-		var element = this.element = Sabel.get(element);
-		var from    = this.from    = Sabel.CSS.getRGB(element.getBackGroundColor());
-		var to      = this.to      = Sabel.CSS.getRGB(to || "yellow");
-		this.step   = [from[0] - to[0], from[1] - to[1], from[2] - to[2]];
+		element = this.element = Sabel.get(element);
+		var from = this.from    = Sabel.CSS.getRGB(element.getBackGroundColor());
+		to = this.to      = Sabel.CSS.getRGB(to || "yellow");
+		this.step  = [from[0] - to[0], from[1] - to[1], from[2] - to[2]];
 	},
 
 	start: function(state) {
