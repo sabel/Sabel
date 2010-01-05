@@ -139,6 +139,7 @@ class Sabel_Map_Config_Route
     
     $i = 0;
     $url = array();
+    $defaults = $this->defaults;
     
     foreach ($parts as $name) {
       if ($name{0} !== ":") {
@@ -148,8 +149,8 @@ class Sabel_Map_Config_Route
         if (isset($params[$key])) {
           $url[] = $params[$key];
         } elseif ($firstIndex !== false && $i >= $firstIndex) {
-          if (isset($this->defaults[$name])) $url[] = $this->defaults[$name];
-        } elseif (isset($currentUris[$key])) {
+          if (isset($defaults[$name])) $url[] = $defaults[$name];
+        } elseif (array_isset($key, $currentUris)) {
           $url[] = $currentUris[$key];
         }
         

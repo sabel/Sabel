@@ -69,12 +69,15 @@ class Sabel_Map_Candidate extends Sabel_Object
       throw new Sabel_Exception_InvalidArgument($message);
     }
     
-    if (strpos($param, ",") === false && strpos($param, ":") === false) {
+    if ($param !== "" && strpos($param, ",") === false && strpos($param, ":") === false) {
       return ltrim($param, "/");
     }
     
     $parameters = array();
-    if ($param !== "") {
+    
+    if ($param === "") {
+      $parameters = $this->destination;
+    } else {
       foreach (explode(",", $param) as $param) {
         list ($key, $val) = array_map("trim", explode(":", $param));
         if ($key === "n") $key = "name";
