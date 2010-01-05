@@ -126,7 +126,7 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
   
   public function destruct()
   {
-    if (!$this->newSession || !empty($this->attributes)) {
+    if ($this->started && (!$this->newSession || !empty($this->attributes))) {
       $this->kvs->write($this->sessionId, $this->attributes, $this->maxLifetime);
     }
   }

@@ -98,7 +98,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   public function destroy()
   {
     if (!$this->started) {
-      $message = __METHOD__ . "() must start the session with start()";
+      $message = __METHOD__ . "() must start the session with start().";
       throw new Sabel_Exception_Runtime($message);
     }
     
@@ -112,7 +112,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   
   public function destruct()
   {
-    if ($this->newSession && empty($this->attributes)) {
+    if (!$this->started || $this->newSession && empty($this->attributes)) {
       return;
     }
     
