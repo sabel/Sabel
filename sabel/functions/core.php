@@ -294,7 +294,7 @@ function is_number($num)
   if (is_int($num)) {
     return true;
   } elseif (is_string($num)) {
-    return (preg_match('/^\-?[1-9][0-9]*$/', $num) === 1);
+    return ($num === "0" || preg_match('/^\-?[1-9][0-9]*$/', $num) === 1);
   } else {
     return false;
   }
