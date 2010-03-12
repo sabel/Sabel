@@ -1,3 +1,7 @@
+2010-03-12  ebin <yutaka@ebine.org>
+
+	* generator/skeleton/*: フォーム周りを若干更新。
+
 2009-12-02  ebin <yutaka@ebine.org>
 
 	* sabel/test/*: 他パッケージの更新に追い付いてない問題の修正。

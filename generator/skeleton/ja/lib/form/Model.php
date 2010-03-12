@@ -124,7 +124,7 @@ abstract class Form_Model extends Form_Object
             $names[] = $this->getDisplayName($unique);
           }
           
-          $errors[] = implode(", ", $names) . ' "' . implode(", ", $values) . '" already exists.';
+          $errors[] = implode("、", $names) . ' "' . implode(", ", $values) . '" は既に登録されています';
         }
       }
     }

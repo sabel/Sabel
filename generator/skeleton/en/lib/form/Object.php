@@ -143,6 +143,20 @@ class Form_Object extends Sabel_ValueObject
   
   public function select($name, $values, $attrs = "")
   {
+    if (is_string($values) && strpos($values, ":") !== false) {
+      list ($from, $to) = explode(":", $values);
+      if (is_number($from) && is_number($to)) {
+        $buf = array();
+        for ($i = $from; $i <= $to; $i++) {
+          $buf[$i] = $i;
+        }
+        
+        $values = $buf;
+      } else {
+        trigger_error("argument is not a number: {$values}", E_USER_WARNING);
+      }
+    }
+    
     return $this->getHtmlWriter($name, $this->createInputName($name), $attrs)->select($values);
   }
   

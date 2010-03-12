@@ -18,4 +18,5 @@ if ((ENVIRONMENT & PRODUCTION) > 0) {
   define("SBL_LOG_LEVEL", SBL_LOG_ALL);
 }
 
-define("SERVICE_DOMAIN", "localhost");
+//define("SERVICE_DOMAIN", "www.example.com");
+//define("FILEINFO_MAGICDB", "/usr/share/misc/magic");

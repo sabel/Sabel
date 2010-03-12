@@ -75,7 +75,7 @@ class Sabel_Validator extends Sabel_Object
       }
     }
     
-    $message = "Call to undefined method Sabel_Validator::{$method}()";
+    $message = __METHOD__ . "() Call to undefined method.";
     throw new Sabel_Exception_Runtime($message);
   }
   
