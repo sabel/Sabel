@@ -2200,7 +2200,8 @@ Sabel.Ajax.prototype = {
 			onFailure: function(){},
 			onTimeout: function(){},
 			scope: null,
-			async: true
+			async: true,
+			autoEval: false
 		};
 		Sabel.Object.extend(options, defaultOptions);
 		options.method = options.method.toLowerCase();
@@ -2254,6 +2255,9 @@ Sabel.Ajax.prototype = {
 		var response = new Object();
 		response.responseXML  = xmlhttp.responseXML;
 		response.responseText = this.responseFilter(xmlhttp.responseText);
+		if (this.options.autoEval === true) {
+			response.responseJson = eval("eval(" + response.responseText+ ")");
+		}
 		response.status = xmlhttp.status;
 		response.statusText = xmlhttp.statusText;
 		return response;
