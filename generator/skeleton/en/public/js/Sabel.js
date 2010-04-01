@@ -887,11 +887,15 @@ Sabel.find  = Sabel.Dom.getElementsBySelector;
 Sabel.xpath = Sabel.Dom.getElementsByXPath;
 
 Sabel.Dom.Selector = {
-	pattern: new RegExp("^\\s*" +
-		         "([~>+])?\\s*"+ "(\\w+|\\*)?" + "(?:#(\\w+))?" +
-		         "((?:\\.\\w+)+)?" +
-		         "((?:\\[@?\\w+(?:[$^!~*|]?=['\"]?.+['\"]?)?\\])*)?" +
-		         "((?::[\\w-]+(?:\\([^\\s]+\\))?)*)"),
+	pattern: new RegExp(
+		"^\\s*" + // Space
+		"([~>+])?\\s*" + // 
+		"(\\w+|\\*)?" + // TagName
+		"(?:#(\\w+))?" + // ID
+		"((?:\\.[a-zA-Z0-9_-]+)+)?" + // ClassName
+		"((?:\\[@?\\w+(?:[$^!~*|]?=['\"]?.+['\"]?)?\\])*)?" + // Attribute
+		"((?::[\\w-]+(?:\\([^\\s]+\\))?)*)" // 
+	),
 
 	handlers: {
 		tagName: function(nodes, tagName) {
