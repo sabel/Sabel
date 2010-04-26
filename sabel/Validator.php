@@ -221,7 +221,7 @@ class Sabel_Validator extends Sabel_Object
   
   public function strwidth($name, $value, $max)
   {
-    if (!is_empty($value) && (mb_strwidth($value) / 2) > $max) {
+    if (!is_empty($value) && strlen($value) > $max) {
       return $this->getDisplayName($name) . " must be {$max} characters or less.";
     }
   }
@@ -277,6 +277,7 @@ class Sabel_Validator extends Sabel_Object
   {
     if (!is_empty($value)) {
       $data = null;
+      
       if (is_string($value)) {
         $data = $value;
       } elseif (is_object($value) && method_exists($value, "__toString")) {
@@ -301,6 +302,7 @@ class Sabel_Validator extends Sabel_Object
   {
     $ns = array();
     $comp = true;
+    
     foreach ($names as $name) {
       $ns[] = $this->getDisplayName($name);
       if (is_empty($values[$name])) {
