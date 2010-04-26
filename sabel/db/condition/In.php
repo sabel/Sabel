@@ -21,7 +21,7 @@ class Sabel_Db_Condition_In extends Sabel_Db_Abstract_Condition
     $prepared = array();
     foreach ($this->value as $v) {
       $n = ++self::$counter;
-      $stmt->setBindValue("__h{$n}", $v);
+      $stmt->bind("__h{$n}", $v);
       $prepared[] = "@__h{$n}@";
     }
     

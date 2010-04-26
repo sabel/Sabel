@@ -16,7 +16,7 @@ class Sabel_Db_Condition_GreaterThan extends Sabel_Db_Abstract_Condition
   public function build(Sabel_Db_Statement $stmt)
   {
     $num = ++self::$counter;
-    $stmt->setBindValue("__h{$num}", $this->value);
+    $stmt->bind("__h{$num}", $this->value);
     
     $column = $this->getQuotedColumn($stmt);
     if ($this->isNot) $column = "NOT " . $column;

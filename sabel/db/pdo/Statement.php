@@ -19,9 +19,22 @@ abstract class Sabel_Db_Pdo_Statement extends Sabel_Db_Statement
     $this->driver = $driver;
   }
   
-  public function setBindValue($key, $val)
+  public function bind($key, $val)
   {
     $this->bindValues[":{$key}"] = $val;
+    
+    return $this;
+  }
+  
+  public function unbind($key)
+  {
+    if (is_array($key)) {
+      foreach ($key as $k) {
+        unset($this->bindValues[":{$k}"]);
+      }
+    } else {
+      unset($this->bindValues[":{$key}"]);
+    }
     
     return $this;
   }

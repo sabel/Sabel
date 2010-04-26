@@ -283,31 +283,43 @@ abstract class Sabel_Db_Statement extends Sabel_Object
     }
   }
   
-  public function setBindValue($key, $val)
+  public function bind($key, $val)
   {
     $this->bindValues["@{$key}@"] = $val;
     
     return $this;
   }
   
-  public function setBindValues(array $values)
+  public function unbind($key)
   {
-    $this->bindValues = array();
-    return $this->appendBindValues($values);
+    if (is_array($key)) {
+      foreach ($key as $k) {
+        unset($this->bindValues["@{$k}@"]);
+      }
+    } else {
+      unset($this->bindValues["@{$key}@"]);
+    }
+    
+    return $this;
   }
   
-  public function getBindValues()
+  public function binds(array $values)
+  {
+    foreach ($values as $key => $val) {
+      $this->bind($key, $val);
+    }
+    
+    return $this;
+  }
+  
+  public function getBinds()
   {
     return $this->bindValues;
   }
   
-  public function appendBindValues(array $values)
+  public function clearBinds()
   {
-    foreach ($values as $key => $val) {
-      $this->setBindValue($key, $val);
-    }
-    
-    return $this;
+    $this->bindValues = array();
   }
   
   public function isSelect()

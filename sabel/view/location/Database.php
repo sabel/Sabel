@@ -103,7 +103,7 @@ class Sabel_View_Location_Database extends Sabel_View_Location
     $stmt = $this->createStatement();
     $stmt->type(Sabel_Db_Statement::DELETE)
          ->where("WHERE " . $stmt->quoteIdentifier("name") . " = @name@")
-         ->setBindValue("name", $this->_getPath())
+         ->bind("name", $this->_getPath())
          ->execute();
     
     $this->contents = "";
@@ -129,8 +129,8 @@ class Sabel_View_Location_Database extends Sabel_View_Location
     $stmt->type(Sabel_Db_Statement::SELECT)
          ->projection(array("contents"))
          ->where("WHERE $nCol = @name@ AND $nsCol = @namespace@")
-         ->setBindValue("name", $this->_getPath())
-         ->setBindValue("namespace", $this->namespace);
+         ->bind("name", $this->_getPath())
+         ->bind("namespace", $this->namespace);
 
     $result = $stmt->execute();
     return ($result === null) ? null : $result[0]["contents"];

@@ -81,7 +81,7 @@ class Sabel_Db_Condition_Like extends Sabel_Db_Abstract_Condition
   {
     $value = $this->addSpecialCharacter($value);
     $num = ++self::$counter;
-    $stmt->setBindValue("__h{$num}", $value);
+    $stmt->bind("__h{$num}", $value);
     
     $column = $this->getQuotedColumn($stmt);
     if ($this->isNot) $column = "NOT " . $column;

@@ -19,8 +19,8 @@ class Sabel_Db_Condition_Between extends Sabel_Db_Abstract_Condition
     $t   = ++self::$counter;
     $val = $this->value;
     
-    $stmt->setBindValue("__h{$f}", $val[0]);
-    $stmt->setBindValue("__h{$t}", $val[1]);
+    $stmt->bind("__h{$f}", $val[0]);
+    $stmt->bind("__h{$t}", $val[1]);
     
     $column = $this->getQuotedColumn($stmt);
     if ($this->isNot) $column = "NOT " . $column;
