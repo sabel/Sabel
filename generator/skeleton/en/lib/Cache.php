@@ -2,10 +2,24 @@
 
 class Cache
 {
-  public static function create($backend)
+  private static $defaultBackend = "";
+  
+  public static function create($backend = "")
   {
-    if ((ENVIRONMENT & PRODUCTION) > 0) {
-      switch ($backend) {
+    if (empty($backend) && empty(self::$defaultBackend)) {
+      $message = __METHOD__ . "() must specify the backend.";
+      throw new Sabel_Exception_Runtime($message);
+    }
+    
+    if ((ENVIRONMENT & PRODUCTION) < 1) {
+      return Sabel_Cache_Null::create();
+    }
+    
+    if (empty($backend)) {
+      $backend = self::$defaultBackend;
+    }
+    
+    switch ($backend) {
       case "file":
         $storage = Sabel_Cache_File::create(CACHE_DIR_PATH . DS . "data");
         break;
@@ -18,12 +32,9 @@ class Cache
         break;
       default:
         $message = __METHOD__ . "() invalid cache backend.";
-        throw new Exception($message);
-      }
-      
-      return $storage;
-    } else {
-      return Sabel_Cache_Null::create();
+        throw new Sabel_Exception_Runtime($message);
     }
+    
+    return $storage;
   }
 }
