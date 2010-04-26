@@ -2,7 +2,7 @@
 
 class TestProcessor_Initializer extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     Sabel_Db_Config::initialize($bus->getConfig("database"));
     //Sabel::fileUsing(RUN_BASE . DS . LIB_DIR_NAME . DS . "db" . DS . "utility.php", true);

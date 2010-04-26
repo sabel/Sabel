@@ -4,7 +4,7 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
 {
   protected $virtualControllerName = "SabelVirtualController";
   
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $destination = $bus->get("destination");
     if (($controller = $this->createController($destination)) === null) {

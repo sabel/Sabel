@@ -21,9 +21,9 @@ class Test_Cache_Tests
   {
     $suite = new PHPUnit_Framework_TestSuite();
     
-    if (extension_loaded("apc")) {
-      $suite->addTest(Test_Cache_Apc::suite());
-    }
+    //if (extension_loaded("apc")) {
+    //  $suite->addTest(Test_Cache_Apc::suite());
+    //}
     
     if (extension_loaded("memcache")) {
       $suite->addTest(Test_Cache_Memcache::suite());

@@ -510,8 +510,8 @@ class Sabel_Xml_Element extends Sabel_Object
     
     $_self = $this->reproduce();
     $_elem = $element->reproduce();
-    $this->insertBefore($_self);
-    $element->insertBefore($_elem);
+    $this->insertPreviousSibling($_self);
+    $element->insertPreviousSibling($_elem);
     
     $parent = $this->getParent()->getRawElement();
     $parent->replaceChild($element->getRawElement(), $this->getRawElement());

@@ -153,7 +153,7 @@ class TestBusConfig extends Sabel_Bus_Config
 
 class HogeProcessor extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $bus->set("a", "10");
     $bus->set("result", "hoge_result");
@@ -162,7 +162,7 @@ class HogeProcessor extends Sabel_Bus_Processor
 
 class FugaProcessor extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $bus->set("b", "20");
     $bus->set("result", "fuga_result");
@@ -171,9 +171,10 @@ class FugaProcessor extends Sabel_Bus_Processor
 
 class FooProcessor extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
-    $this->extract("a", "b");
+    $this->a = $bus->get("a");
+    $this->b = $bus->get("b");
     
     if ($this->a !== "10") throw new Exception("test error");
     if ($this->b !== "20") throw new Exception("test error");

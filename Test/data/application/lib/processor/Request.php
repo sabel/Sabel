@@ -2,7 +2,7 @@
 
 class TestProcessor_Request extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     if ($bus->has("request")) {
       $request = $bus->get("request");

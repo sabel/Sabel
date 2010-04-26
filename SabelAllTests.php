@@ -20,7 +20,7 @@ if (in_array("-db", $_SERVER["argv"], true)) {
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "sakle");
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "test");
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "cookie");
-  PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
+  PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "Header.php");
 }
 
 define("TEST_DATA_DIR", SABEL_BASE . DS . "Test" . DS . "data");
@@ -61,7 +61,7 @@ require_once ("Test/ValueObject.php");
 require_once ("Test/Console.php");
 
 require_once ("Test/Annotation.php");
-require_once ("Test/Aspect/Tests.php");
+//require_once ("Test/Aspect/Tests.php");
 require_once ("Test/Container.php");
 
 require_once ("Test/Exception.php");
@@ -79,7 +79,6 @@ require_once ("Test/Reflection.php");
 require_once ("Test/Cache/Tests.php");
 require_once ("Test/Mail/Tests.php");
 require_once ("Test/Session/Tests.php");
-require_once ("Test/Storage/Memory.php");
 require_once ("Test/VirtualInheritance.php");
 require_once ("Test/DB/TestConfig.php");
 require_once ("Test/DB/Statement/Tests.php");
@@ -126,10 +125,9 @@ class SabelAllTests
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Reflection::suite());
     $suite->addTest(Test_Container::suite());
-    $suite->addTest(Test_Aspect_Tests::suite());
+    //$suite->addTest(Test_Aspect_Tests::suite());
     $suite->addTest(Test_Exception::suite());
     
-    $suite->addTest(Test_Storage_Memory::suite());
     $suite->addTest(Test_I18n_Gettext::suite());
     $suite->addTest(Test_Cookie_Tests::suite());
     $suite->addTest(Test_Mail_Tests::suite());

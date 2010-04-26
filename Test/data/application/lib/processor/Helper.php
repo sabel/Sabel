@@ -2,7 +2,7 @@
 
 class TestProcessor_Helper extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $destination    = $bus->get("destination");
     $moduleName     = $destination->getModule();

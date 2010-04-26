@@ -26,36 +26,42 @@ class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
   public function getSize()
   {
     clearstatcache();
+    
     return filesize($this->path);
   }
   
   public function isReadable()
   {
     clearstatcache();
+    
     return is_readable($this->path);
   }
   
   public function isWritable()
   {
     clearstatcache();
+    
     return is_writable($this->path);
   }
   
   public function isExecutable()
   {
     clearstatcache();
+    
     return is_executable($this->path);
   }
   
   public function atime()
   {
     clearstatcache();
+    
     return fileatime($this->path);
   }
   
   public function mtime()
   {
     clearstatcache();
+    
     return filemtime($this->path);
   }
   

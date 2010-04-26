@@ -14,7 +14,6 @@ require_once ("Test/DB/Ibase.php");
 require_once ("Test/DB/Oci.php");
 require_once ("Test/DB/PdoOci.php");
 require_once ("Test/DB/SchemaColumn.php");
-require_once ("Test/DB/Validate.php");
 require_once ("Test/DB/Config.php");
 
 class Condition extends Sabel_Db_Condition{}

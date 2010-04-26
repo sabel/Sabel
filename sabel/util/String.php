@@ -252,6 +252,10 @@ class Sabel_Util_String extends Sabel_Object
       $string = $func($this->string, $start, $length);
     }
     
+    if (!$string) {
+      $string = "";
+    }
+    
     return new self($string);
   }
   

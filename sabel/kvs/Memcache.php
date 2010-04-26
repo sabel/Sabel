@@ -56,7 +56,7 @@ class Sabel_Kvs_Memcache extends Sabel_Kvs_Abstract
   public function delete($key)
   {
     $result = $this->read($key);
-    $this->memcache->delete($this->genKey($key));
+    $this->memcache->delete($this->genKey($key), 0);
     
     return $result;
   }

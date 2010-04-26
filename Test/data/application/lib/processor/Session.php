@@ -2,14 +2,14 @@
 
 class TestProcessor_Session extends Sabel_Bus_Processor
 {
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     if (!$bus->has("session")) {
       $bus->set("session", Sabel_Session_PHP::create());
     }
   }
   
-  public function shutdown($bus)
+  public function shutdown(Sabel_Bus $bus)
   {
     $session = $bus->get("session");
     

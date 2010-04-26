@@ -21,18 +21,18 @@ class Test_I18n_Gettext extends SabelTestCase
     
     $this->assertTrue($gettext->isInitialized());
     
-    $this->assertEquals("名前", _("name"));
-    $this->assertEquals("住所", _("address"));
+    $this->assertEquals("名前", __("name"));
+    $this->assertEquals("住所", __("address"));
   }
   
   public function testMessagesFileName()
   {
-    $this->assertEquals("名前", _("name"));
-    $this->assertEquals("住所", _("address"));
+    $this->assertEquals("名前", __("name"));
+    $this->assertEquals("住所", __("address"));
     
     Sabel_I18n_Gettext::getInstance()->setMessagesFileName("hiragana.php");
-    $this->assertEquals("なまえ", _("name"));
-    $this->assertEquals("じゅうしょ", _("address"));
+    $this->assertEquals("なまえ", __("name"));
+    $this->assertEquals("じゅうしょ", __("address"));
   }
   
   public function testCodeSet()
@@ -40,12 +40,12 @@ class Test_I18n_Gettext extends SabelTestCase
     $gettext = Sabel_I18n_Gettext::getInstance();
     $gettext->setCodeSet("EUC-JP");
     
-    $this->assertEquals(mb_convert_encoding("なまえ", "EUC-JP", "UTF-8"), _("name"));
-    $this->assertEquals(mb_convert_encoding("じゅうしょ", "EUC-JP", "UTF-8"), _("address"));
+    $this->assertEquals(mb_convert_encoding("なまえ", "EUC-JP", "UTF-8"), __("name"));
+    $this->assertEquals(mb_convert_encoding("じゅうしょ", "EUC-JP", "UTF-8"), __("address"));
   }
 }
 
-function _($msgid)
+function __($msgid)
 {
   return Sabel_I18n_Sabel_Gettext::_($msgid);
 }

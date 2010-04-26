@@ -35,16 +35,16 @@ class Test_Util_String extends SabelTestCase
   public function testCharAt()
   {
     $string = new String("test");
-    $this->assertEquals("t",  $string->charAt(0)->toString());
-    $this->assertEquals("e",  $string->charAt(1)->toString());
-    $this->assertEquals("t",  $string->charAt(3)->toString());
-    $this->assertEquals(null, $string->charAt(4));
-    $this->assertEquals(null, $string->charAt(-1));
+    $this->assertEquals("t", $string->charAt(0)->toString());
+    $this->assertEquals("e", $string->charAt(1)->toString());
+    $this->assertEquals("t", $string->charAt(3)->toString());
+    $this->assertEquals("",  $string->charAt(4)->toString());
+    $this->assertEquals("",  $string->charAt(-1)->toString());
     
     $string = new String("あいうえお");
-    $this->assertEquals("い",  $string->charAt(1)->toString());
-    $this->assertEquals("え",  $string->charAt(3)->toString());
-    $this->assertEquals(null,  $string->charAt(5));
+    $this->assertEquals("い", $string->charAt(1)->toString());
+    $this->assertEquals("え", $string->charAt(3)->toString());
+    $this->assertEquals("",   $string->charAt(5)->toString());
   }
   
   public function testIndexOf()
@@ -66,7 +66,7 @@ class Test_Util_String extends SabelTestCase
     $this->assertEquals("d", $string->last()->toString());
     
     $string = new String();
-    $this->assertEquals(null, $string->last());
+    $this->assertEquals("", $string->last()->toString());
     
     $string = new String("あいうえお");
     $this->assertEquals("お", $string->last()->toString());

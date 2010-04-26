@@ -31,7 +31,7 @@ class TestProcessor_View extends Sabel_Bus_Processor
     $bus->get("controller")->setAttribute("view", $view);
   }
   
-  public function execute($bus)
+  public function execute(Sabel_Bus $bus)
   {
     $response = $bus->get("response");
     if ($response->isRedirected()) return;

@@ -429,7 +429,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
       } else {
         $quote = $value{0};
         if ($quote === '"' || $quote === "'") {
-          if ($quote === $value{strlen($value)-1}) {
+          if ($quote === substr($value, -1, 1)) {
             $value = str_replace("\\{$quote}", $quote, substr($value, 1, -1));
           }
         }

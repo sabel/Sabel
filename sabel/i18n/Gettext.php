@@ -121,13 +121,12 @@ class Sabel_I18n_Gettext
     if ($acceptLanguage === null) {
       if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
         $acceptLanguage = $_SERVER["HTTP_ACCEPT_LANGUAGE"];
-        dump($acceptLanguage);
       } else {
         return $languages;
       }
     }
     
-    if ($acceptLanguage !== "" && $acceptLanguage !== null) {
+    if (!empty($acceptLanguage)) {
       foreach (explode(",", $acceptLanguage) as $lang) {
         if (strpos($lang, ";") === false) {
           $q = "1.0";

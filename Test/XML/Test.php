@@ -23,7 +23,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testDocument()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $test = $this->loadXML($xml, "simple");
     $this->assertEquals("test", $test->tagName);
     $this->assertEquals("utf-8", $xml->getEncoding());
@@ -32,7 +32,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testAttribute()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $test = $this->loadXML($xml, "simple");
     $this->assertEquals("foo", $test->getChild("foo")->at("attr"));
     $this->assertEquals("bar", $test->getChild("bar")->at("attr"));
@@ -41,7 +41,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testAttributes()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $test = $this->loadXML($xml, "simple");
     $attrs = $test->getChild("foo")->getAttributes();
     
@@ -65,7 +65,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testNodeValue()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $test = $this->loadXML($xml, "simple");
     $this->assertEquals("footext", trim($test->getChild("foo")->getValue()));
     $this->assertEquals("bartext", trim($test->getChild("bar")->getValue()));
@@ -74,7 +74,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testElementsCount()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $test = $this->loadXML($xml, "test");
     $this->assertEquals(2, $test->getRawElement()->getElementsByTagName("foo")->length);
     $this->assertEquals(1, $test->getChildren("foo")->length);
@@ -82,7 +82,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testCreateDocument()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $xml->setEncoding("utf-8")->setVersion("1.0");
     
     $users = $xml->createElement("users");
@@ -105,7 +105,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testElements()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $_users = $this->loadXML($xml, "users");
     $users = $_users->getChildren("user");
     $this->assertEquals(3, $users->length);
@@ -123,7 +123,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testSimpleAccess()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $this->assertEquals("tanaka", $users->user[0]->name[0]->getValue());
@@ -136,7 +136,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function setSetNodeValue()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     $users->user[0]->age[0]->setNodeValue("20");
     $this->saveXML($xml, "users");
@@ -148,14 +148,14 @@ class Test_XML_Test extends SabelTestCase
   
   public function testSetAttribute()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     $users->user[0]->setAttribute("id", 1);
     $users->user[1]->setAttribute("id", 2);
     $users->user[2]->setAttribute("id", 3);
     $this->saveXML($xml, "users");
     
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     $this->assertEquals("1", $users->user[0]->getAttribute("id"));
     $this->assertEquals("2", $users->user[1]->getAttribute("id"));
@@ -168,7 +168,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testInsertBefore()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $this->assertEquals("tanaka", $users->user[0]->name[0]->getValue());
@@ -179,12 +179,12 @@ class Test_XML_Test extends SabelTestCase
     $aUser->addChild("name", "yamada");
     $aUser->addChild("age", "60");
     
-    $users->user[2]->insertBefore($aUser);
+    $users->user[2]->insertPreviousSibling($aUser);
     $this->saveXML($xml, "users");
     
     //-------------------------------------
     
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     $this->assertEquals("tanaka", $users->user[0]->name[0]->getValue());
     $this->assertEquals("suzuki", $users->user[1]->name[0]->getValue());
@@ -194,19 +194,19 @@ class Test_XML_Test extends SabelTestCase
   
   public function testInsertAfter()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $aUser = $xml->createElement("user");
     $aUser->addChild("name", "koike");
     $aUser->addChild("age", "80");
     
-    $users->user[3]->insertAfter($aUser);
+    $users->user[3]->insertNextSibling($aUser);
     $this->saveXML($xml, "users");
     
     //-------------------------------------
     
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     $this->assertEquals("tanaka", $users->user[0]->name[0]->getValue());
     $this->assertEquals("suzuki", $users->user[1]->name[0]->getValue());
@@ -217,7 +217,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetParent()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $age = $users->user[0]->age[0];
@@ -228,7 +228,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetFirstChild()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $aUser = $users->user[0];
@@ -237,7 +237,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetLastChild()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $aUser = $users->getLastChild();
@@ -248,7 +248,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetNextSibling()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $aUser = $users->getFirstChild();
@@ -267,7 +267,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetNextSiblings()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $elems = $users->user[2]->getNextSiblings();
@@ -278,7 +278,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetPreviousSibling()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $aUser = $users->getLastChild();
@@ -298,7 +298,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetPreviousSiblings()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $elems = $users->user[2]->getPreviousSiblings();
@@ -314,7 +314,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetSiblings()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $elems = $users->user[2]->getSiblings();
@@ -327,7 +327,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testFindFromAttribute()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "find");
     
     $elems = $users->select("from user where @id = 1");
@@ -351,7 +351,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testSelectByIsNull()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "find");
     
     $elems = $users->select("from user.foo.bar where @type IS NULL");
@@ -373,7 +373,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testReturnElement()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "find");
     
     $elems = $users->select("from user.foo.bar where @type = 'b'");
@@ -413,7 +413,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testLike()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "find");
     
     $elems = $users->select("from user where foo.bar.baz like 'test%'");
@@ -443,7 +443,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testAnd()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "find");
     
     $elems = $users->select("from user where foo.bar.baz LIKE '%456%' AND test IS NOT NULL");
@@ -453,7 +453,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testOr()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "find");
     
     $elems = $users->select("from user where profile.age >= 60 OR profile.age <= 20");
@@ -468,7 +468,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testSwap()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $tanaka = $users->user[0];
@@ -510,7 +510,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testRemoveElement()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $this->assertEquals(5, $users->user->length);
@@ -528,7 +528,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testDelete()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     
     $aUser = $users->user[1];
@@ -552,7 +552,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testCDATA()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     $aUser = $users->getFirstChild();
     $aUser->name[0]->setValue(null);
@@ -563,7 +563,7 @@ class Test_XML_Test extends SabelTestCase
     
     //--------------------------------------------
     
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $users = $this->loadXML($xml, "users");
     $aUser = $users->getFirstChild();
     $this->assertEquals("<test><![CDATA['test']]></test>", $aUser->name[0]->getValue());
@@ -571,7 +571,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testNamespace()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $nodes = $this->loadXML($xml, "ns");
     
     $this->assertEquals("defitem4 value", $nodes->defitem3[0]->defitem4[0]->getValue());
@@ -588,7 +588,7 @@ class Test_XML_Test extends SabelTestCase
   
   public function testGetAllChildren()
   {
-    $xml = new Sabel_Xml_Document();
+    $xml = Sabel_Xml_Document::create();
     $nodes = $this->loadXML($xml, "ns");
     $foo = $nodes->getChild("foo:foo");
     
