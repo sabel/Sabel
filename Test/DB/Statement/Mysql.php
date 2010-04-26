@@ -49,8 +49,8 @@ class Test_DB_Statement_Mysql extends SabelTestCase
     $stmt = Sabel_Db::createStatement("default");
     $stmt->type(Sabel_Db_Statement::SELECT);
     $stmt->setMetadata(Sabel_Db_Metadata::getTableInfo("student"));
-    $stmt->constraints(array("order" => array("id" => "DESC")));
-    $expected = "SELECT `id`, `name` FROM `student` ORDER BY `id` DESC";
+    $stmt->constraints(array("order" => array("id" => array("mode" => "DESC", "nulls" => "LAST"))));
+    $expected = "SELECT `id`, `name` FROM `student` ORDER BY `id` IS NULL, `id` DESC";
     $this->assertEquals($expected, $stmt->getQuery());
   }
   
@@ -59,8 +59,8 @@ class Test_DB_Statement_Mysql extends SabelTestCase
     $stmt = Sabel_Db::createStatement("default");
     $stmt->type(Sabel_Db_Statement::SELECT);
     $stmt->setMetadata(Sabel_Db_Metadata::getTableInfo("student"));
-    $stmt->constraints(array("order" => array("id" => "DESC", "name" => "ASC")));
-    $expected = "SELECT `id`, `name` FROM `student` ORDER BY `id` DESC, `name` ASC";
+    $stmt->constraints(array("order" => array("id" => array("mode" => "DESC", "nulls" => "LAST"), "name" => array("mode" => "ASC", "nulls" => "LAST"))));
+    $expected = "SELECT `id`, `name` FROM `student` ORDER BY `id` IS NULL, `id` DESC, `name` IS NULL, `name` ASC";
     $this->assertEquals($expected, $stmt->getQuery());
   }
   

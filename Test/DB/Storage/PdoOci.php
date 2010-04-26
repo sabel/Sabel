@@ -14,6 +14,6 @@ class Test_DB_Storage_PdoOci extends Test_DB_Storage_Test
   public function testInit()
   {
     Sabel_Db_Config::add("default", Test_DB_TestConfig::getPdoOciConfig());
-    MODEL("SblStorage")->delete();
+    MODEL("SblKvs")->delete();
   }
 }

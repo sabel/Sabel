@@ -44,7 +44,7 @@ class Sabel_Db_Mysql_Statement extends Sabel_Db_Statement
     }
     
     $this->values = $values;
-    $this->appendBindValues($values);
+    $this->binds($values);
     
     return $this;
   }

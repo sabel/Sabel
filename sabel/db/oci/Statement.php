@@ -36,7 +36,7 @@ class Sabel_Db_Oci_Statement extends Sabel_Db_Statement
     }
     
     $this->values = $values;
-    $this->appendBindValues($values);
+    $this->binds($values);
     
     return $this;
   }
@@ -101,7 +101,7 @@ class Sabel_Db_Oci_Statement extends Sabel_Db_Statement
       $seqName = strtoupper("{$this->table}_{$column}_seq");
       $rows = $this->driver->execute("SELECT {$seqName}.NEXTVAL AS id FROM DUAL");
       $this->values[$column] = $id = $rows[0]["id"];
-      $this->appendBindValues(array($column => $id));
+      $this->bind($column, $id);
       $this->driver->setLastInsertId($id);
     }
     

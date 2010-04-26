@@ -107,7 +107,6 @@ class SabelAllTests
       return $suite;
     }
     
-
     $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_ValueObject::suite());
     $suite->addTest(Test_Console::suite());

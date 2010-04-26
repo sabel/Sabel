@@ -1,3 +1,7 @@
+2010-04-26  ebin <yutaka@ebine.org>
+
+	* Test/*: テストを全体的に修正。
+
 2010-03-12  ebin <yutaka@ebine.org>
 
 	* generator/skeleton/*: フォーム周りを若干更新。

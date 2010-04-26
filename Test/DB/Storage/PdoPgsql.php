@@ -14,6 +14,6 @@ class Test_DB_Storage_PdoPgsql extends Test_DB_Storage_Test
   public function testInit()
   {
     Sabel_Db_Config::add("default", Test_DB_TestConfig::getPdoPgsqlConfig());
-    MODEL("SblStorage")->delete();
+    MODEL("SblKvs")->delete();
   }
 }

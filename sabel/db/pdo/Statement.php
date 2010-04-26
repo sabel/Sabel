@@ -50,7 +50,7 @@ abstract class Sabel_Db_Pdo_Statement extends Sabel_Db_Statement
     }
     
     $this->values = $values;
-    $this->appendBindValues($values);
+    $this->binds($values);
     
     return $this;
   }

@@ -21,7 +21,7 @@ class Sabel_Kvs_Database implements Sabel_Kvs_Interface
     $this->model = MODEL($mdlName);
   }
   
-  public static function create($mdlName = "SblKeyValueStore")
+  public static function create($mdlName = "SblKvs")
   {
     if (isset(self::$instances[$mdlName])) {
       return self::$instances[$mdlName];

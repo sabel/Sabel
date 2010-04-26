@@ -16,14 +16,14 @@ class Test_DB_Storage_Test extends SabelTestCase
     $stdClass->bool = false;
     $obj->fuga = $stdClass;
     
-    $storage = new Sabel_Storage_Database();
-    $storage->store("hashkey", $obj, 60);
+    $storage = Sabel_Kvs_Database::create();
+    $storage->write("hashkey", $obj, 60);
   }
   
   public function testFetch()
   {
-    $storage = new Sabel_Storage_Database();
-    $obj = $storage->fetch("hashkey");
+    $storage = Sabel_Kvs_Database::create();
+    $obj = $storage->read("hashkey");
     
     $hoge = $obj->hoge;
     $fuga = $obj->fuga;

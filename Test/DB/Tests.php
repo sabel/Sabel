@@ -92,7 +92,6 @@ class Test_DB_Tests
     }
     
     $suite->addTest(Test_DB_SchemaColumn::suite());
-    $suite->addTest(Test_DB_Validate::suite());
     $suite->addTest(Test_DB_Config::suite());
     
     return $suite;
