@@ -23,28 +23,17 @@ function unshift_include_paths($paths, $prefix = "")
 if (extension_loaded("mbstring")) {
   function htmlescape($str, $charset = null)
   {
-    static $ienc = null;
-    
-    if ($charset === null) {
-      if ($ienc === null) {
-        $ienc = mb_internal_encoding();
-      }
-      
-      $charset = $ienc;
+    if ($charset === null && !defined("APP_ENCODING")) {
+      $charset = mb_internal_encoding();
     }
     
-    return htmlentities($str, ENT_QUOTES, $ienc);
+    return htmlentities($str, ENT_QUOTES, $charset);
   }
   
-  function xmlescape($str, $charset = null) {
-    static $ienc = null;
-    
-    if ($charset === null) {
-      if ($ienc === null) {
-        $ienc = mb_internal_encoding();
-      }
-      
-      $charset = $ienc;
+  function xmlescape($str, $charset = null)
+  {
+    if ($charset === null && !defined("APP_ENCODING")) {
+      $charset = mb_internal_encoding();
     }
     
     return str_replace("&#039;", "&apos;", htmlspecialchars($str, ENT_QUOTES, $charset));

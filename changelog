@@ -1,3 +1,8 @@
+2010-04-27  ebin <yutaka@ebine.org>
+
+	* generator/skeleton/en/config/INIT.php : APP_ENCODING定数の追加。それにとも
+	なう若干の改修。Sabel_Util_String::mbTrim()のバグ修正。
+
 2010-04-26  ebin <yutaka@ebine.org>
 
 	* Test/*: テストを全体的に修正。

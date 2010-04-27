@@ -36,6 +36,7 @@ define("LOG_DIR_PATH",      RUN_BASE . DS  . "logs");
 define("CACHE_DIR_PATH",    RUN_BASE . DS  . "cache");
 define("COMPILED_DIR_PATH", CACHE_DIR_PATH . DS . "templates");
 
+define("APP_ENCODING", mb_internal_encoding());
 define("DEFAULT_LAYOUT_NAME", "layout");
 
 ################# INCLUDE_PATH SETTINGS ####################

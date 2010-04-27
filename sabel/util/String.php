@@ -352,15 +352,57 @@ class Sabel_Util_String extends Sabel_Object
     return $this;
   }
   
-  protected function mbTrim($charlist, $type = "both")
+  public function textlink($htmlescaped = true)
   {
-    static $ienc = null;
-    
-    if ($ienc === null) {
-      $ienc = strtolower(mb_internal_encoding());
+    if ($htmlescaped) {
+      $lt = "&lt;";
+      $gt = "&gt;";
+      $qt = "&quot;";
+    } else {
+      $lt = '<';
+      $gt = '>';
+      $qt = '"';
     }
     
-    if ($ienc === "utf-8") {
+    $text = $this->string;
+    $chars = '0-9a-zA-Z_\-\.\~\/\?@%=:;&#';
+    
+    preg_match_all(
+      '!' . $lt . 'a .*href=' . $qt . '(https?://[' . $chars . ']+)' .
+      $qt . '.*' . $gt . '(.+)' . $lt . '/a' . $gt . '!U',
+      $text,
+      $matches
+    );
+    
+    $replaces = array();
+    if (isset($matches[0])) {
+      for ($i = 0, $mc = count($matches[0]); $i < $mc; $i++) {
+        $hash = md5hash();
+        $replaces[$hash] = '<a href="' . $matches[1][$i] . '">' . $matches[2][$i] . '</a>';
+        $text = str_replace($matches[0][$i], $hash, $text);
+      }
+    }
+    
+    $text = preg_replace('!https?://[' . $chars . ']+!', '<a href="$0">$0</a>', $text);
+    
+    if ($replaces) {
+      $text = strtr($text, $replaces);
+    }
+    
+    $this->string = $text;
+    
+    return $this;
+  }
+  
+  protected function mbTrim($charlist, $type = "both")
+  {
+    if (defined("APP_ENCODING")) {
+      $encoding = strtolower(APP_ENCODING);
+    } else {
+      $encoding = strtolower(mb_internal_encoding());
+    }
+    
+    if ($encoding === "utf-8") {
       $del   = "~";
       $clist = ($charlist === null) ? '[\s　]*' : "[" . str_replace($del, "\\{$del}", $charlist) . "]*";
       
@@ -384,7 +426,13 @@ class Sabel_Util_String extends Sabel_Object
       
       $this->string = preg_replace($del . $regex . "\${$del}us", '$1', $this->string);
     } else {
-      $clist = ($charlist === null) ? '[\s　]*' : "[{$charlist}]*";
+      if (in_array($encoding, array("euc-jp", "eucjp-win", "eucjp-ms", "cp51932"))) {
+        $space = "\xa1\xa1";
+      } else {  // sjis etc.
+        $space = "\x81\x40";
+      }
+      
+      $clist = ($charlist === null) ? "[\s{$space}]*" : "[{$charlist}]*";
       switch (strtolower($type)) {
         case "both":
           $regex = "^{$clist}(.*?){$clist}$";
