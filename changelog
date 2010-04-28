@@ -1,3 +1,7 @@
+2010-04-28  ebin <yutaka@ebine.org>
+
+	* sabel/xml/Element.php: insertNextSibling()のバグ修正。
+
 2010-04-27  ebin <yutaka@ebine.org>
 
 	* generator/skeleton/en/config/INIT.php : APP_ENCODING定数の追加。それにとも

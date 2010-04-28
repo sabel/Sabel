@@ -122,7 +122,7 @@ function get_mime_type($path /* or filedata */)
     }
     
     $ret = $finfo->file($path);
-  } elseif (DS === "/") {
+  } elseif (DS === "/") {  // *nix
     $ret = trim(shell_exec("file -ib " . escapeshellcmd($path)));
   } elseif (function_exists("mime_content_type")) {
     $ret = mime_content_type($path);

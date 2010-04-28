@@ -219,7 +219,7 @@ class Sabel_Xml_Element extends Sabel_Object
   public function insertNextSibling($element)
   {
     if ($next = $this->getNextSibling()) {
-      $next->insertBefore($element);
+      $next->insertPreviousSibling($element);
     } else {
       $parent = $this->getParent();
       $parent->appendChild($element);
