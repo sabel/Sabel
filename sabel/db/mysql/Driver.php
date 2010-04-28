@@ -23,8 +23,7 @@ class Sabel_Db_Mysql_Driver extends Sabel_Db_Driver
       }
       
       if (isset($params["charset"])) {
-        list (, , $v) = explode(".", PHP_VERSION);
-        if ($v{0} >= 3) {
+        if (function_exists("mysql_set_charset")) {
           mysql_set_charset($params["charset"], $conn);
         } else {
           mysql_query("SET NAMES " . $params["charset"], $conn);

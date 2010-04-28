@@ -1,5 +1,10 @@
 2010-04-28  ebin <yutaka@ebine.org>
 
+	* sabel/db/mysql/Driver.php: mysql_set_charset関数がない環境でも
+	mysql_set_charsetが実行されて落ちる問題の修正。
+
+2010-04-28  ebin <yutaka@ebine.org>
+
 	* sabel/xml/Element.php: insertNextSibling()のバグ修正。
 
 2010-04-27  ebin <yutaka@ebine.org>
