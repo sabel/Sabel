@@ -35,7 +35,7 @@ class Schema extends Sabel_Sakle_Task
         if ($isAll || in_array($tblName, $tables, true)) {
           $writer = new Sabel_Db_Metadata_FileWriter($outputDir);
           $writer->write($db->getTable($tblName));
-          $this->success("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
+          $this->success("output Schema 'Schema_" . convert_to_modelname($tblName) . "'");
         }
         
         $tList->add($connectionName, $tblName);
@@ -122,7 +122,7 @@ class TableListWriter
     $fileName  = ucfirst($cn) . "TableList";
     $className = "Schema_" . $fileName;
     
-    Sabel_Console::success("generate tablelist of '{$cn}'");
+    Sabel_Console::success("output table list of '{$cn}' database.");
     
     $contents = array();
     $contents[] = "<?php" . PHP_EOL;
