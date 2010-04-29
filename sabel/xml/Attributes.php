@@ -21,6 +21,18 @@ class Sabel_Xml_Attributes extends Sabel_Object
     $this->attributes = $attributes;
   }
   
+  public function toArray()
+  {
+    $ret = array();
+    $attributes = $this->attributes;
+    
+    foreach ($attributes as $attribute) {
+      $ret[$attribute->name] = $attributes->getNamedItem($attribute->name)->value;
+    }
+    
+    return $ret;
+  }
+  
   public function get($key)
   {
     if (($attr = $this->attributes->getNamedItem($key)) === null) {

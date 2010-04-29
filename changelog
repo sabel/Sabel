@@ -1,5 +1,10 @@
 2010-04-29  ebin <yutaka@ebine.org>
 
+	* generator/skeleton/en/tasks/Install.php: アドオンインストーラ修正。
+	Sabel_Xml_AttributesクラスにtoArray()メソッド追加。
+
+2010-04-29  ebin <yutaka@ebine.org>
+
 	* generator/skeleton/en/tasks/Install.php: アドオンインストーラ実装。
 
 2010-04-28  ebin <yutaka@ebine.org>

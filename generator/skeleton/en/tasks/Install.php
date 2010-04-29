@@ -76,7 +76,7 @@ class Install extends Sabel_Sakle_Task
         return;
       } elseif ((float)$version > $v) {
         $_v = (strpos($v, ".") === false) ? "{$v}.0" : $v;
-        $this->message("upgrade {$name} from {$_v} to {$version}.");
+        $this->message("upgrade {$name} from {$_v} => {$version}.");
       } else {
         $this->message("nothing to install.");
         return;
@@ -86,7 +86,7 @@ class Install extends Sabel_Sakle_Task
     $fs = new Sabel_Util_FileSystem(RUN_BASE);
     
     foreach ($files as $path => $file) {
-      $path = str_replace("/", DS, "addon/{$name}/{$path}");
+      $path = str_replace("/", DS, $path);
       
       if ($file["backup"] && $fs->isFile($path)) {
         $oldFile = $path . ".old";
@@ -110,20 +110,20 @@ class Install extends Sabel_Sakle_Task
   {
     $ret = array();
     $files = $dom->files->item(0);
-    $basepath = $files->at("basepath");
+    $attrs = $dom->getAttributes()->toArray();
+    
+    $baseurl = $this->replaceAttributes($files->at("baseurl"), $attrs);
     
     foreach ($files->file as $file) {
-      $path = $file->at("path");
-      $ret[$path] = array(
-        "source" => file_get_contents($this->repo . "/" . $basepath . "/" . $path),
-        "backup" => false
-      );
+      $path = $this->replaceAttributes($file->at("path"), $attrs);
+      $fileUrl = $this->repo . "/" . $baseurl . "/" . $file->at("url");
+      $ret[$path] = array("source" => file_get_contents($fileUrl), "backup" => false);
     }
     
     $backup = $dom->backup;
     if ($backup->length > 0) {
       foreach ($backup->file as $file) {
-        $path = $file->at("path");
+        $path = $this->replaceAttributes($file->at("path"), $attrs);
         if (isset($ret[$path])) {
           $ret[$path]["backup"] = true;
         }
@@ -131,5 +131,16 @@ class Install extends Sabel_Sakle_Task
     }
     
     return $ret;
+  }
+  
+  protected function replaceAttributes($str, $attrs)
+  {
+    if ($attrs) {
+      foreach ($attrs as $key => $value) {
+        $str = str_replace("{{$key}}", $value, $str);
+      }
+    }
+    
+    return $str;
   }
 }
