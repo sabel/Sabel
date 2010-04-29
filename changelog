@@ -1,3 +1,7 @@
+2010-04-29  ebin <yutaka@ebine.org>
+
+	* generator/skeleton/en/tasks/Install.php: アドオンインストーラ実装。
+
 2010-04-28  ebin <yutaka@ebine.org>
 
 	* sabel/db/mysql/Driver.php: mysql_set_charset関数がない環境でも

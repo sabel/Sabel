@@ -215,8 +215,13 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   
   public function copy($src, $dest)
   {
-    if (!$this->isAbsolutePath($dest)) $dest = $this->path . DS . $dest;
-    if (!$this->isAbsolutePath($src))  $src  = $this->path . DS . $src;
+    if (!$this->isAbsolutePath($dest)) {
+      $dest = $this->path . DS . $dest;
+    }
+    
+    if (!$this->isAbsolutePath($src)) {
+      $src = $this->path . DS . $src;
+    }
     
     $dir = new self($src);
     $this->_mkdir($dest, $dir->getPermission());
