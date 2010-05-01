@@ -59,10 +59,10 @@ function get_uri_prefix($secure = false, $absolute = false)
 /**
  * create uri
  */
-function uri($param, $secure = false, $absolute = false)
+function uri($uri, $secure = false, $absolute = false)
 {
   $context = Sabel_Context::getContext();
-  return get_uri_prefix($secure, $absolute) . "/" . $context->getCandidate()->uri($param);
+  return get_uri_prefix($secure, $absolute) . "/" . $context->getCandidate()->uri($uri);
 }
 
 /**
