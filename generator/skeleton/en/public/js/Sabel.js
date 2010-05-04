@@ -3741,7 +3741,7 @@ Sabel.Widget.Dropdown = new Sabel.Class({
 		if (el.hasClass("root")) {
 			child.setStyle({
 				display: "block",
-				top: el.getHeight(true) + "px",
+				top: (el.getOffsetTop() + el.getHeight(true)) + "px",
 				left: el.getOffsetLeft() + "px"
 			});
 		} else {
