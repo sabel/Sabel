@@ -1,3 +1,9 @@
+2010-05-08  ebin <yutaka@ebine.org>
+
+	* sabel/test/*: test関連のクラスのリファクタリング。モデル（DB）を使用しない
+	Fixtureに対応。テスト実行時にtestsディレクトリをインクルードパスに追加するよ
+	うに変更。
+
 2010-05-02  ebin <yutaka@ebine.org>
 
 	* sabel/response/Redirector.php: uri()にもパラメータを渡せるように変更。

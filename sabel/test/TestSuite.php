@@ -5,7 +5,7 @@
  *
  * @category   Test
  * @package    org.sabel.test
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @author     Ebine Yutaka <yutaka@ebine.org>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
@@ -21,11 +21,21 @@ class Sabel_Test_TestSuite extends PHPUnit_Framework_TestSuite
     $this->doFixture("downFixture");
   }
   
+  public function add($className)
+  {
+    $reflection = new ReflectionClass(new $className());
+    
+    if ($reflection->isSubClassOf("Sabel_Test_TestSuite")) {
+      $this->addTest($reflection->getMethod("suite")->invoke(null));
+    } else {
+      $this->addTest(new self($className));
+    }
+  }
+  
   protected function doFixture($method)
   {
     $name = ($this->name === "") ? get_class($this) : $this->name;
     
-    $fixtureDir = RUN_BASE . DS . "tests" . DS . "fixture";
     $reflection = new Sabel_Reflection_Class($name);
     $annotation = $reflection->getAnnotation("fixture");
     
@@ -35,9 +45,8 @@ class Sabel_Test_TestSuite extends PHPUnit_Framework_TestSuite
       }
       
       try {
-        foreach ($annotation[0] as $fixtureName) {
-          Sabel::fileUsing($fixtureDir . DS . $this->getFixturePath($fixtureName), true);
-          $className = "Fixture_" . $fixtureName;
+        foreach ($annotation[0] as $fixture) {
+          $className = "Fixture_" . $fixture;
           $fixture = new $className();
           $fixture->$method();
         }
@@ -49,20 +58,5 @@ class Sabel_Test_TestSuite extends PHPUnit_Framework_TestSuite
         }
       }
     }
-  }
-  
-  protected function getFixturePath($fixtureName)
-  {
-    $exp = explode("_", $fixtureName);
-    
-    if (count($exp) === 1) {
-      $path = $exp[0] . ".php";
-    } else {
-      $class = array_pop($exp);
-      $prePath = implode("/", array_map("lcfirst", $exp));
-      $path = $prePath . DIRECTORY_SEPARATOR . $class . ".php";
-    }
-    
-    return $path;
   }
 }
