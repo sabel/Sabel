@@ -274,7 +274,8 @@ class Form_Object extends Sabel_ValueObject
       if (is_array($v)) {
         $html[] = $this->toHidden($v, $k);
       } else {
-        $html[] = '<input type="hidden" name="' . htmlescape($k) . '" value="' . htmlescape($v) . '" />';
+        $html[] = '<input type="hidden" name="' . htmlescape($k, APP_ENCODING)
+                . '" value="' . htmlescape($v, APP_ENCODING) . '" />';
       }
     }
     
@@ -328,7 +329,7 @@ class Form_Object extends Sabel_ValueObject
     $value = $this->get($name);
     
     if (is_string($value)) {
-      $value = htmlescape($value);
+      $value = htmlescape($value, APP_ENCODING);
     }
     
     return $htmlWriter->setName($inputName)->setValue($value)->setAttributes($attrs);
