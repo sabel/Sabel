@@ -76,7 +76,7 @@ class Sabel_Map_Candidate extends Sabel_Object
     $parameters = array();
     
     if ($param === "") {
-      $parameters = $this->destination;
+      $parameters = array_merge($this->destination, $this->uriParameters);
     } else {
       foreach (explode(",", $param) as $param) {
         list ($key, $val) = array_map("trim", explode(":", $param));
