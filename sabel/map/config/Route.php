@@ -146,7 +146,7 @@ class Sabel_Map_Config_Route
         $url[] = $name;
       } else {
         $key = ltrim($name, ":");
-        if (isset($params[$key])) {
+        if (array_isset($key, $params)) {
           $url[] = $params[$key];
         } elseif ($firstIndex !== false && $i >= $firstIndex) {
           if (isset($defaults[$name])) $url[] = $defaults[$name];
