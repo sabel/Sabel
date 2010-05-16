@@ -13,7 +13,7 @@ class Sabel_Container
 {
   const SETTER_PREFIX  = "set";
 
-  const INJECTION_ANNOTATION = "injection";
+  const INJECTION_ANNOTATION = "inject";
 
   private static $defaultConfig = null;
 
@@ -266,14 +266,27 @@ class Sabel_Container
           }
         } else {
           foreach ($reflection->getMethods() as $method) {
-            $injection = $method->getAnnotation(self::INJECTION_ANNOTATION);
-            
-            if (isset($injection[0][0]) && $injection[0][0] === $ifName) {
-              $injectionMethod = $method->getName();
-              
-              $argumentInstance = $this->newInstanceWithConstruct($reflection, $implClassName);
+            $injectionMethod = $method->getName();
 
+            $injection  = $method->getAnnotation(self::INJECTION_ANNOTATION);
+            $parameters = $method->getParameters();
+
+            if (isset($injection[0][0]) && $injection[0][0] === $ifName) {
+              $argumentInstance = $this->newInstanceWithConstruct($reflection, $implClassName);
               $sourceInstance->$injectionMethod($argumentInstance);
+            } elseif (isset($parameters[0]) && $injection !== null) {
+              $parameter = $parameters[0];
+
+              $parameterClass = $parameter->getClass();
+
+              if ($parameterClass === null) {
+                throw new Sabel_Container_Exception_InvalidConfiguration("must be type name specified");
+              }
+
+              if ($ifName === $parameterClass->getName()) {
+                $argumentInstance = $this->newInstanceWithConstruct($reflection, $implClassName);
+                $sourceInstance->$injectionMethod($argumentInstance);
+              }
             }
           }
         }
