@@ -724,6 +724,16 @@ Sabel.Array.sum = function(array) {
 	return result;
 };
 
+Sabel.Array.unique = function(array) {
+	var result = new Array();
+	Sabel.Array.each(array, function(val) {
+		if (result.indexOf(val) === -1) {
+			result.push(val);
+		}
+	});
+	return result;
+};
+
 Sabel.Object.extend(Sabel.Array, Sabel.Object.Methods);
 Sabel.Function = function(method) {
 	return Sabel.Object.create(method, Sabel.Function);
