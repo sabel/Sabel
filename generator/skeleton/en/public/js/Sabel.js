@@ -2172,6 +2172,10 @@ Sabel.Ajax.prototype = {
 			}
 		}
 		xmlhttp.send((options.method === "post") ? options.params : "");
+
+		if (options.async === false) {
+			this.onStateChange();
+		}
 	},
 
 	abort: function() {
