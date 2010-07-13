@@ -5,7 +5,7 @@
  *
  * @category   Request
  * @package    org.sabel.request
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @author     Ebine Yutaka <yutaka@ebine.org>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
@@ -33,14 +33,20 @@ class Sabel_Validator extends Sabel_Object
   
   public function add($name, $method)
   {
-    $v = $this->_parse($method);
-    $m = $v["method"];
-    $a = $v["arguments"];
-    
-    if ($m{0} === "-") {
-      $this->delete($name, substr($m, 1));
+    if (is_array($method)) {
+      foreach ($method as $m) {
+        $this->add($name, $m);
+      }
     } else {
-      $this->methods[$name][$m] = $a;
+      $v = $this->_parse($method);
+      $m = $v["method"];
+      $a = $v["arguments"];
+      
+      if ($m{0} === "-") {
+        $this->delete($name, substr($m, 1));
+      } else {
+        $this->methods[$name][$m] = $a;
+      }
     }
     
     return $this;

@@ -1,3 +1,9 @@
+2010-07-13  ebin <yutaka@ebine.org>
+
+	* generator/skeleton/en/lib/form/Object.php: 複数のインプット名によるフォー
+	ムバリデーションの際、カンマで連結したインプット名をsubmitメソッドに渡さなく
+	てもいいように変更。
+
 2010-05-10  ebin <yutaka@ebine.org>
 
 	* sabel/map/Candidate.php: uriメソッドのバグ修正。

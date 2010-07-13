@@ -346,17 +346,33 @@ class Form_Object extends Sabel_ValueObject
   
   protected function setupValidator(Sabel_Validator $validator)
   {
+    $keys = array();
+    
     $validators = $this->validators;
     foreach ($this->inputNames as $inputName) {
+      $keys[$inputName] = true;
       if (!isset($validators[$inputName])) continue;
       
-      $v = $validators[$inputName];
-      if (is_array($v)) {
-        foreach ($v as $_v) {
-          $validator->add($inputName, $_v);
+      $validator->add($inputName, $validators[$inputName]);
+      
+      unset($validators[$inputName]);
+    }
+    
+    if ($validators) {
+      foreach ($validators as $inputName => $v) {
+        if (strpos($inputName, ",") === false) continue;
+        
+        $comp = true;
+        foreach (explode(",", $inputName) as $_inputName) {
+          if (!isset($keys[$_inputName])) {
+            $comp = false;
+            break;
+          }
         }
-      } else {
-        $validator->add($inputName, $v);
+        
+        if ($comp) {
+          $validator->add($inputName, $v);
+        }
       }
     }
   }
