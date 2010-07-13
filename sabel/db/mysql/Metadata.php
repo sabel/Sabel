@@ -181,15 +181,19 @@ SQL;
     $sql = <<<SQL
 SELECT
   kcu.column_name, kcu.referenced_table_name AS ref_table,
-  kcu.referenced_column_name ref_column, refc.delete_rule, refc.update_rule
-  FROM information_schema.table_constraints tc
-    INNER JOIN information_schema.referential_constraints refc
-      ON refc.constraint_name = tc.constraint_name
-    INNER JOIN information_schema.key_column_usage kcu
+  kcu.referenced_column_name ref_column, rc.delete_rule, rc.update_rule
+  FROM information_schema.table_constraints AS tc
+    INNER JOIN information_schema.referential_constraints AS rc
+      ON rc.constraint_name = tc.constraint_name
+    INNER JOIN information_schema.key_column_usage AS kcu
       ON kcu.constraint_name = tc.constraint_name
-  WHERE tc.constraint_schema = '{$this->schemaName}'
+  WHERE tc.table_schema = '{$this->schemaName}'
     AND tc.table_name = '{$tblName}'
     AND tc.constraint_type = 'FOREIGN KEY'
+    AND rc.constraint_schema = '{$this->schemaName}'
+    AND rc.table_name = '{$tblName}'
+    AND kcu.constraint_schema = '{$this->schemaName}'
+    AND kcu.table_name = '{$tblName}';
 SQL;
     
     $rows = $this->driver->execute($sql);
