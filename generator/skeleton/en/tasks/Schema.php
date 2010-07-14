@@ -30,15 +30,28 @@ class Schema extends Sabel_Sakle_Task
     foreach (Sabel_Db_Config::get() as $connectionName => $params) {
       Sabel_Db_Config::add($connectionName, $params);
       $db = Sabel_Db::createMetadata($connectionName);
+      $dbTables = $db->getTableList();
       
-      foreach ($db->getTableList() as $tblName) {
-        if ($isAll || in_array($tblName, $tables, true)) {
+      if ($isAll) {
+        foreach ($dbTables as $tblName) {
           $writer = new Sabel_Db_Metadata_FileWriter($outputDir);
           $writer->write($db->getTable($tblName));
           $this->success("output Schema 'Schema_" . convert_to_modelname($tblName) . "'");
+          
+          $tList->add($connectionName, $tblName);
         }
-        
-        $tList->add($connectionName, $tblName);
+      } else {
+        foreach ($tables as $tblName) {
+          if (!in_array($tblName, $dbTables, true)) {
+            $this->error("no such table: {$tblName}");
+          } else {
+            $writer = new Sabel_Db_Metadata_FileWriter($outputDir);
+            $writer->write($db->getTable($tblName));
+            $this->success("output Schema 'Schema_" . convert_to_modelname($tblName) . "'");
+            
+            $tList->add($connectionName, $tblName);
+          }
+        }
       }
       
       if (Sabel_Console::hasOption("l", $this->arguments)) {
