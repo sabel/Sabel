@@ -5,24 +5,24 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @author     Ebine Yutaka <yutaka@ebine.org>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Db_Migration_Create
 {
-  private
-    $mcolumns = array(),
-    $columns  = array(),
-    $pkeys    = array(),
-    $fkeys    = array(),
-    $uniques  = array(),
-    $indexes  = array(),
-    $options  = array();
-    
+  private $mcolumns = array();
+  private $columns  = array();
+  private $pkeys    = array();
+  private $fkeys    = array();
+  private $uniques  = array();
+  private $indexes  = array();
+  private $options  = array();
+  
   public function column($name)
   {
     $mcolumn = new Sabel_Db_Migration_Column($name);
+    
     return $this->mcolumns[$name] = $mcolumn;
   }
   

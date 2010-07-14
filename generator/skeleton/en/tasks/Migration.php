@@ -70,8 +70,9 @@ class Migration extends Sabel_Sakle_Task
     }
     
     if ($this->toVersionNumber($this->arguments[1]) !== false) {
-      $doNext = $this->_execMigration();
-      if ($doNext) $this->execNextMigration();
+      if ($this->_execMigration()) {
+        $this->execNextMigration();
+      }
     }
   }
   
@@ -147,7 +148,7 @@ class Migration extends Sabel_Sakle_Task
     
     Sabel_Db_Migration_Manager::setApplyMode($mode);
     
-    $instance  = Sabel_Db::createMigration($this->connectionName);
+    $instance  = Sabel_Db::createMigrator($this->connectionName);
     $directory = Sabel_Db_Migration_Manager::getDirectory();
     $instance->execute($directory . DS . $this->files[$num]);
     $this->updateVersionNumber($next);
