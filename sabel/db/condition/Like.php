@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @author     Ebine Yutaka <yutaka@ebine.org>
+ * @copyright  2004-2010 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Db_Condition_Like extends Sabel_Db_Abstract_Condition
@@ -66,12 +66,12 @@ class Sabel_Db_Condition_Like extends Sabel_Db_Abstract_Condition
         $esc = $escapeChars{$i};
         if (strpos($value, $esc) === false) {
           $value = preg_replace("/([%_])/", $esc . '$1', $value);
-          $like  = "LIKE @__h%d@ escape '{$esc}'";
+          $like  = "LIKE @ph%d@ escape '{$esc}'";
           break;
         }
       }
     } else {
-      $like = "LIKE @__h%d@";
+      $like = "LIKE @ph%d@";
     }
     
     return $this->createQuery($stmt, $value, $like);
@@ -81,7 +81,7 @@ class Sabel_Db_Condition_Like extends Sabel_Db_Abstract_Condition
   {
     $value = $this->addSpecialCharacter($value);
     $num = ++self::$counter;
-    $stmt->bind("__h{$num}", $value);
+    $stmt->bind("ph{$num}", $value);
     
     $column = $this->getQuotedColumn($stmt);
     if ($this->isNot) $column = "NOT " . $column;

@@ -6,8 +6,8 @@
  * @abstract
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @author     Ebine Yutaka <yutaka@ebine.org>
+ * @copyright  2004-2010 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_Db_Abstract_Condition extends Sabel_Object
@@ -111,7 +111,8 @@ abstract class Sabel_Db_Abstract_Condition extends Sabel_Object
     } elseif (is_bool($bool)) {
       $this->isNot = $bool;
     } else {
-      throw new Sabel_Db_Exception("argument must be a string.");
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
