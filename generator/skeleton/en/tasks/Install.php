@@ -58,6 +58,11 @@ class Install extends Sabel_Sakle_Task
     
     $addon = Sabel_Xml_Document::create()->loadXML($response);
     
+    if ($addon->tagName !== "addon") {
+      $this->error("addon '{$name}' not found.");
+      exit;
+    }
+    
     $name = $addon->at("name");
     $version = $addon->at("version");
     
