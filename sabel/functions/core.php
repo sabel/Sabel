@@ -23,7 +23,9 @@ function unshift_include_paths($paths, $prefix = "")
 if (extension_loaded("mbstring")) {
   function htmlescape($str, $charset = null)
   {
-    if ($charset === null && !defined("APP_ENCODING")) {
+    if (defined("APP_ENCODING")) {
+      $charset = APP_ENCODING;
+    } elseif (empty($charset)) {
       $charset = mb_internal_encoding();
     }
     
@@ -32,7 +34,9 @@ if (extension_loaded("mbstring")) {
   
   function xmlescape($str, $charset = null)
   {
-    if ($charset === null && !defined("APP_ENCODING")) {
+    if (defined("APP_ENCODING")) {
+      $charset = APP_ENCODING;
+    } elseif (empty($charset)) {
       $charset = mb_internal_encoding();
     }
     
