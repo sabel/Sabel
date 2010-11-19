@@ -1401,8 +1401,16 @@ Sabel.Element.append = function(element, child, text, attributes) {
 	return child;
 };
 
+Sabel.Element.getDefaultDisplay = function(element) {
+	var el = document.createElement(Sabel.get(element).nodeName);
+	document.body.appendChild(el);
+	var display = Sabel.Element.getStyle(el, "display");
+	Sabel.Element.remove(el);
+	return display;
+};
+
 Sabel.Element.show = function(element, value) {
-	Sabel.get(element, false).style.display = value || "";
+	Sabel.get(element, false).style.display = value || Sabel.Element.getDefaultDisplay(element);
 };
 
 Sabel.Element.hide = function(element) {
