@@ -234,7 +234,8 @@ Sabel.UserAgent = new function() {
 		this.isMozilla = /Mozilla/.test(ua);
 	}
 	if (this.version === undefined) {
-		this.version = /(MSIE |Firefox\/|Version\/|Chrome\/)([0-9.]+)/.exec(ua)[2];
+		var matches = /(MSIE |Firefox\/|Version\/|Chrome\/)([0-9.]+)/.exec(ua);
+		this.version = matches ? matches[2] : "";
 	}
 
 	this.isWindows = /Win/.test(ua);
