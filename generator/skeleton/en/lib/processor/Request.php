@@ -60,7 +60,7 @@ class Processor_Request extends Sabel_Bus_Processor
     if (!is_cli() && isset($_SERVER["SCRIPT_NAME"]) && $_SERVER["SCRIPT_NAME"] !== "/index.php") {
       $bus->set("NO_VIRTUAL_HOST", true);
       
-      $pubdir = substr(RUN_BASE . DS . "public", strlen($_SERVER["DOCUMENT_ROOT"]));
+      $pubdir = substr(RUN_BASE . DS . "public", strlen(realpath($_SERVER["DOCUMENT_ROOT"])));
       define("URI_PREFIX", $pubdir);
       
       $uri = substr(str_replace("/index.php", "", $uri), strlen($pubdir));
