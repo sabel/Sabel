@@ -2087,6 +2087,18 @@ Sabel.Elements.stopObserve = function(elements, eventName, handler) {
 	});
 };
 
+Sabel.Elements.addClass = function(elements, className) {
+	Sabel.Array.each(elements, function(elm) {
+		Sabel.Element.addClass(elm, className);
+	});
+}
+
+Sabel.Elements.removeClass = function(elements, className) {
+	Sabel.Array.each(elements, function(elm) {
+		Sabel.Element.removeClass(elm, className);
+	});
+}
+
 Sabel.Elements.each = function(elements, callback) {
 	var i = 0, el;
 	while((el = elements.item(i))) callback(el, i++);
@@ -3453,10 +3465,12 @@ Sabel.Widget.Overlay.prototype = {
 
 	show: function() {
 		this.setStyle();
+		Sabel.find("select").addClass("sbl_hide");
 		this.div.show();
 	},
 
 	hide: function() {
+		Sabel.find("select").removeClass("sbl_hide");
 		this.div.hide();
 	},
 

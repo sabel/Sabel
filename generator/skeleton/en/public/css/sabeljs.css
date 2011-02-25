@@ -206,3 +206,7 @@ ul.sbl_dropdown_list li ul li.icon {
 * html ul.sbl_dropdown_list li span {
   display: inline-block;
 }
+
+select.sbl_hide {
+  visibility: hidden;
+}
