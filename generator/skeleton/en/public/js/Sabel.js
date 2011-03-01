@@ -3724,8 +3724,8 @@ Sabel.Widget.Dropdown = new Sabel.Class({
 	moveTimer: null,
 	leaveTimer: null,
 
-	init: function() {
-		var root = Sabel.find("div.sbl_dropdown > ul.sbl_dropdown_list").item(0);
+	init: function(selector) {
+		var root = Sabel.find(selector || "div.sbl_dropdown > ul.sbl_dropdown_list").item(0);
 		var elms = root.find("> li");
 
 		this.setup();
