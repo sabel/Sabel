@@ -124,14 +124,8 @@ class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
   
   public function moveTo($dest)
   {
-    if (!$this->isAbsolutePath($dest)) {
-      $dest = dirname($this->path) . DS . $dest;
-    }
-    
-    $this->copyTo($dest);
+    $file = $this->copyTo($dest);
     $this->remove();
-    $this->path = $dest;
-    
-    return new self($dest);
+    return $file;
   }
 }
