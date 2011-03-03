@@ -77,11 +77,11 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
       if ($item === "." || $item === "..") continue;
       if ($ignoreDotFiles && $item{0} === ".") continue;
       
-      $path = $this->path . DS . $item;
-      if (is_file($path)) {
-        $items[] = new Sabel_Util_FileSystem_File($path);
+      $item_path = $path . DS . $item;
+      if (is_file($item_path)) {
+        $items[] = new Sabel_Util_FileSystem_File($item_path);
       } else {
-        $items[] = new self($path);
+        $items[] = new self($item_path);
       }
     }
     

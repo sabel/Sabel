@@ -103,6 +103,28 @@ class Test_Util_FileSystem extends SabelTestCase
     $this->assertTrue($fs->isFile($this->basedir . DS . "test" . DS . "hoge.txt"));
     $this->assertTrue(is_file($this->basedir . DS . "test" . DS . "hoge.txt"));
   }
+
+  public function testGetList()
+  {
+    $fs = new Sabel_Util_FileSystem($this->basedir);
+    $list_fs = $fs->mkdir("testGetList");
+
+    $list_fs->mkfile("1.txt");
+    $list_fs->mkfile("2.txt");
+    $list_fs->mkfile("3.txt");
+    $list_fs->mkfile("4.txt");
+    $list_fs->mkfile("5.txt");
+
+    foreach ($list_fs->getList() as $file) {
+      $this->assertTrue($file->isFile());
+    }
+
+    foreach ($fs->getList("testGetList") as $file) {
+      $this->assertTrue($file->isFile());
+    }
+
+    $list_fs->remove();
+  }
   
   public function testRecursiveMakeFile()
   {
