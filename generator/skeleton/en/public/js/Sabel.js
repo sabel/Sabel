@@ -191,19 +191,11 @@ Sabel.Window = {
 	},
 
 	getScrollLeft: function() {
-		if (document.compatMode === "CSS1Compat") {
-			return document.documentElement.scrollLeft;
-		} else {
-			return document.body.scrollLeft;
-		}
+		return document.documentElement.scrollLeft || document.body.scrollLeft;
 	},
 
 	getScrollTop: function() {
-		if (document.compatMode === "CSS1Compat") {
-			return document.documentElement.scrollTop;
-		} else {
-			return document.body.scrollTop;
-		}
+		return document.documentElement.scrollTop || document.body.scrollTop;
 	}
 };
 
