@@ -97,7 +97,7 @@ final class Sabel
       $path = $exp[0] . ".php";
     } else {
       $class = array_pop($exp);
-      $prePath = implode("/", array_map("lcfirst", $exp));
+      $prePath = implode(DIRECTORY_SEPARATOR, array_map("lcfirst", $exp));
       $path = $prePath . DIRECTORY_SEPARATOR . $class . ".php";
     }
     
