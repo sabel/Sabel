@@ -1450,6 +1450,18 @@ Sabel.Element.hasAttribute = function(element, attribute) {
 	return node && node.specified;
 };
 
+Sabel.Element.getDataAttribute = function(element, attribute) {
+	element = Sabel.get(element, false);
+	var attr = element.getAttribute("data-" + attribute);
+	return attr;
+}
+
+Sabel.Element.setDataAttribute = function(element, attribute, value) {
+	element = Sabel.get(element, false);
+	element.setAttribute("data-" + attribute, value);
+	return element;
+}
+
 if (Sabel.UserAgent.isIE) {
 	Sabel.Element.getStyle = function(element, property) {
 		element = Sabel.get(element, false);
