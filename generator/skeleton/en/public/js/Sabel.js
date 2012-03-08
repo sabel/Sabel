@@ -191,11 +191,11 @@ Sabel.Window = {
 	},
 
 	getScrollLeft: function() {
-		return document.documentElement.scrollLeft || document.body.scrollLeft || window.pageXOffset;
+		return document.documentElement.scrollLeft || document.body.scrollLeft || window.pageXOffset || 0;
 	},
 
 	getScrollTop: function() {
-		return document.documentElement.scrollTop || document.body.scrollTop || window.pageYOffset;
+		return document.documentElement.scrollTop || document.body.scrollTop || window.pageYOffset || 0;
 	}
 };
 
