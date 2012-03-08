@@ -3461,7 +3461,6 @@ Sabel.Widget.Overlay = function(option) {
 
 	this.div = Sabel.Element(div);;
 	document.body.appendChild(div);
-	this.show();
 };
 
 Sabel.Widget.Overlay.prototype = {
