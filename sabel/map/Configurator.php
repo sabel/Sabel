@@ -24,8 +24,8 @@ abstract class Sabel_Map_Configurator implements Sabel_Config
   public function getValidCandidate($requestUri)
   {
     foreach (self::$routes as $route) {
-      if ($parmas = $this->createUriParameter($route, $requestUri)) {
-        return new Sabel_Map_Candidate($route->getName(), $parmas);
+      if ($params = $this->createUriParameter($route, $requestUri)) {
+        return new Sabel_Map_Candidate($route->getName(), $params);
       }
     }
     
