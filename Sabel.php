@@ -123,6 +123,8 @@ final class Sabel
   public static function main()
   {
     $SABEL = "sabel" . DIRECTORY_SEPARATOR;
+
+    require ($SABEL . "SplClassLoader.php");
     
     require ($SABEL . "Object.php");
     require ($SABEL . "Logger.php");
