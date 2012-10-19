@@ -2609,11 +2609,17 @@ Sabel.Event.getTarget = function(evt) {
 };
 
 Sabel.Event.stopPropagation = function(evt) {
-	evt.stopPropagation();
+  if (evt.stopPropagation) {
+	  evt.stopPropagation();
+  }
+  (evt || window.event).cancelBubble = true;
 };
 
 Sabel.Event.preventDefault = function(evt) {
-	evt.preventDefault();
+  if (evt.preventDefault) {
+	  evt.preventDefault();
+  }
+	(evt || window.event).returnValue = false;
 };
 
 Sabel.Event._isChildEvent = function(event, el) {
@@ -2651,15 +2657,6 @@ Sabel.Event._events = {
 	}
 };
 
-if (Sabel.UserAgent.isIE) {
-	Sabel.Event.stopPropagation = function(evt) {
-		(evt || window.event).cancelBubble = true;
-	};
-
-	Sabel.Event.preventDefault = function(evt) {
-		(evt || window.event).returnValue = false;
-	};
-}
 Sabel.Events = {
 
 	_events: new Array(),
