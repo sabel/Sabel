@@ -34,7 +34,7 @@ define("MODULES_DIR_PATH",  RUN_BASE . DS  . MODULES_DIR_NAME);
 define("MODELS_DIR_PATH",   MODULES_DIR_PATH . DS . "models");
 define("LOG_DIR_PATH",      RUN_BASE . DS  . "logs");
 define("CACHE_DIR_PATH",    RUN_BASE . DS  . "cache");
-define("COMPILED_DIR_PATH", CACHE_DIR_PATH . DS . "templates");
+define("COMPILE_DIR_PATH",  CACHE_DIR_PATH . DS . "templates");
 
 define("APP_ENCODING", mb_internal_encoding());
 define("DEFAULT_LAYOUT_NAME", "layout");
