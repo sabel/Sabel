@@ -2637,23 +2637,39 @@ Sabel.Event._isChildEvent = function(event, el) {
 
 Sabel.Event._events = {
 	mouseenter: function(handler, el) {
-		if (Sabel.UserAgent.isIE) return handler;
+		if (Sabel.UserAgent.isIE) {
+			return {
+				eventName: "mouseenter",
+				handler: handler
+			};
+		}
 
-		return {eventName: "mouseover", handler: function(event) {
-			if (Sabel.Event._isChildEvent(event, el)) return false;
+		return {
+			eventName: "mouseover",
+			handler: function(event) {
+				if (Sabel.Event._isChildEvent(event, el)) return false;
 
-			return handler(event);
-		}};
+				return handler(event);
+			}
+		};
 	},
 
 	mouseleave: function(handler, el) {
-		if (Sabel.UserAgent.isIE) return handler;
+		if (Sabel.UserAgent.isIE) {
+			return {
+				eventName: "mouseleave",
+				handler: handler
+			};
+		}
 
-		return {eventName: "mouseout", handler: function(event) {
-			if (Sabel.Event._isChildEvent(event, el)) return false;
+		return {
+			eventName: "mouseout",
+			handler: function(event) {
+				if (Sabel.Event._isChildEvent(event, el)) return false;
 
-			return handler(event);
-		}};
+				return handler(event);
+			}
+		};
 	}
 };
 
