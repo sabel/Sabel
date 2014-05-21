@@ -3034,7 +3034,7 @@ Sabel.Cookie = {
 			cookie += "; expires=" + date.toGMTString();
 		}
 		if (option.domain) cookie += "; domain=" + option.domain;
-		if (option.path)   cookie += "; path="   + options.path;
+		if (option.path)   cookie += "; path="   + option.path;
 		if (option.secure) cookie += "; secure";
 
 		document.cookie = cookie;
